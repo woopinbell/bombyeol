@@ -1,0 +1,100 @@
+# Bombyeol — 클라우드 세션 운영 가이드
+
+실제 개발은 GitHub 리포를 clone하는 **클라우드 세션**(claude.ai/code 등)에서 시작한다. 로컬 세션과 다른 점과 절차를 정리한다. 사실 근거는 공식 문서(`code.claude.com/docs/en/claude-code-on-the-web`, `.../cloud-environments`, 2026-10-01 확인)이고, 확인하지 못한 것은 **V-번호(검증 필요)** 로 표시했다.
+
+## 1. docs 브랜치 부트스트랩
+
+`main`에는 CLAUDE.md·docs·image-asset이 없다. 세션이 시작되면 아래를 실행해 `docs` 브랜치를 `.docs/` 워크트리로 붙이고 루트에 링크한다.
+
+```bash
+# scripts가 main에 없으므로 환경 setup 스크립트(리포 밖)에 넣거나 세션 첫 프롬프트로 실행한다
+git fetch origin docs
+[ -d .docs ] || git worktree add -B docs .docs origin/docs
+git -C .docs pull --ff-only origin docs || true
+for p in CLAUDE.md docs image-asset; do ln -sfn ".docs/$p" "$p"; done
+printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
+```
+
+- 링크와 워크트리는 `.git/info/exclude`로 무시하므로 `main`에 섞이지 않는다.
+- 문서 수정은 링크를 통해 `.docs/`(= `docs` 브랜치 작업 트리)에 반영된다. 커밋은 **지시가 있을 때** `git -C .docs commit` + `git -C .docs push origin docs`.
+- **환경 setup 스크립트 사용 시 주의**: setup 스크립트 결과는 파일시스템 스냅샷으로 **약 7일 캐시**되고 세션을 다시 열어도 재실행되지 않는다. 그러면 `.docs/`가 낡을 수 있으므로 **세션 첫 프롬프트에 항상 `git -C .docs pull --ff-only origin docs`를 포함**한다(§4 템플릿).
+- 대안: 리포에 `.claude/settings.json`의 SessionStart 훅을 두고 위 스크립트를 실행(hook 파일 하나는 main에 들어간다 — 개발 도구 설정이라 허용할지는 사용자 결정, `OPEN_QUESTIONS.md` Q-HOOK).
+
+**검증 필요(첫 클라우드 세션의 첫 작업)**
+
+| ID | 확인 내용 | 실패 시 |
+|---|---|---|
+| V-1 | 클라우드 clone에서 `git fetch origin docs`가 되는가(단일 브랜치 clone 여부) | 프롬프트로 `git fetch origin docs:docs` 또는 별도 리포 `bombyeol-docs` |
+| V-2 | 세션 VM에서 `docs` 브랜치로 **push**가 되는가(브랜치 이름 제한 여부) | 별도 private 리포 `bombyeol-docs`로 전환(사용자 승인 후) |
+| V-3 | 루트 `CLAUDE.md` 심볼릭 링크가 세션 시작 시 자동 로드되는가 | 첫 프롬프트로 `CLAUDE.md`를 직접 읽게 지시 |
+| V-4 | 한 세션에서 두 번째 리포를 붙일 수 있는가(별도 docs 리포 대안용) | — |
+| V-5 | 환경변수를 바꾼 뒤 기존 세션을 "다시 열면" 새 값이 반영되는가(문서상 실행 중 세션은 재읽기 없음) | 항상 **새 세션**으로 재개 |
+
+## 2. 로컬 vs 클라우드 차이 (hamkke 경험 포함)
+
+- `.env`는 gitignore 대상이라 **클라우드에 없다**(로컬 번들 업로드 시에도 `.env`류 파일은 제외됨). 값은 환경 설정의 환경변수로 들어간다.
+- 세션 VM은 유휴 후 회수된다. 커밋·푸시하지 않은 것은 사라진다(개발 커밋은 즉시 커밋, 문서는 §5 규칙).
+- 네이티브 다이얼로그(브라우저 권한, 결제 호스티드 화면)와 실기기 검증은 자동화할 수 없다 → `PROGRESS.md` "미완료 검증"에 남기고 사용자가 확인.
+- 네트워크: 기본 **Trusted** 수준은 허용 목록(패키지 레지스트리, GitHub, 일부 클라우드 SDK 등)만 도달한다. 우리 서비스 호스트는 **Custom 허용 도메인**에 추가해야 한다 — 스파이크 S-8에서 실측(예상 호스트: DB 공급자, `*.r2.cloudflarestorage.com`(기본 허용에 포함으로 확인), 카카오 인증 서버, Google OAuth, FCM, 결제 공급자, `api.cloudflare.com`). 허용 도메인을 바꾸면 환경 캐시가 재구성된다.
+- hamkke의 교훈: 클라우드 환경변수 `DATABASE_URL`이 **실제 DB**를 가리키면 로컬 테스트·마이그레이션이 실수로 실DB에 닿는다. 봄별은 클라우드 환경에 **개발/테스트용 값만** 넣고, 테스트·e2e는 로컬 Docker Postgres를 쓰며 원격 DB면 스스로 거부하는 가드를 둔다.
+- Docker는 클라우드 VM에서 사용 가능(문서 확인). 로컬 Postgres는 `docker compose`로 띄운다.
+
+## 3. API 키·환경변수 절차 (질문 7의 답)
+
+### 3.1 짧은 답
+
+- **클라우드에서도 "필요한 시점에 정확히 요구 → 사용자가 추가 → 재개"가 가능하다.** 단 `.env` 파일을 직접 고치는 방식이 아니라 **클라우드 환경 설정의 환경변수**를 쓰고, 값은 **새 세션 시작 시** 반영된다(문서: "editing or adding variables affects sessions you start afterward; sessions already running keep the values they started with").
+- **키를 대화(채팅)에 붙여넣는 것은 하지 않는다 — 맞는 판단이다.** 세션 대화는 기록·공유될 수 있고(공유 시 "Sessions may contain code and credentials"라는 경고가 문서에 있다), hamkke는 devlog에 대화 기록을 커밋했다가 `.gitignore`에 키 유출 경고를 남긴 전례가 있다.
+- **환경변수에 넣는 것이 정답이지만 만능은 아니다.** 환경변수는 그 환경을 쓰는 사람과 세션 안의 명령이 읽을 수 있다(개인 환경이면 본인만 사용). 프롬프트 인젝션·로그 출력으로 새어 나갈 수 있으므로 **아래 §3.3 등급 규칙**을 지킨다.
+
+### 3.2 절차 (요청 → 등록 → 재개)
+
+1. **선제 방식(권장)**: 각 Phase 시작 전에 `ENV_MANIFEST.md`의 그 Phase 항목을 사용자가 **한 번에** 환경에 넣고 새 세션을 시작한다. 중간에 멈출 일이 거의 없어진다.
+2. **누락 시(로컬 방식과 동일한 요청)**:
+   1. Claude가 필요한 키가 처음 필요해지는 지점에서 **이름·형식·발급처·필요 이유**를 `ENV_MANIFEST.md`와 `.env.example`에 먼저 채우고(값은 비움) 사용자에게 알린다.
+   2. Claude는 그 키 없이 진행 가능한 작업을 끝내고 커밋 가능한 상태로 정리, `PROGRESS.md`에 "대기 중인 키와 재개 지점"을 기록.
+   3. 사용자가 claude.ai/code의 **환경 편집** 대화상자 "Environment variables"(`KEY=value` 한 줄씩, `#`이 든 값·여러 줄 값은 따옴표)에 추가.
+   4. **새 세션**을 시작해 재개한다(문서상 실행 중 세션은 값을 다시 읽지 않음, 다시 열기 동작은 V-5).
+   5. 세션을 옮기므로 사용자가 **docs 커밋을 지시**해야 인수인계 기록이 남는다(`WORKFLOW.md` §4). 지시가 없으면 새 세션은 `PROGRESS.md`를 못 본다 — Claude는 세션 종료 전 이를 반드시 상기시킨다.
+3. **`.env.example`은 main의 개발 산출물**(Phase 0의 `chore(env)`)이라 개발 커밋으로 남고, 이름·형식은 거기에도 있어 새 세션이 알 수 있다.
+4. 사용자가 키를 넣은 뒤 Claude는 **값을 출력·기록하지 않고** 존재 여부만 확인한다(예: 변수가 비어 있지 않은지 길이만). 로그에 값이 찍히는 명령(`env`, `printenv`, `set -x`)을 쓰지 않는다.
+
+### 3.3 키 등급 규칙
+
+| 등급 | 예 | 클라우드 환경에 넣나 |
+|---|---|---|
+| A. 개발/테스트 전용 | 개발용 DB URL, 테스트 R2 버킷 토큰, 카카오/Google 개발 앱 키, FCM 개발 프로젝트, 결제 **테스트 모드** 키 | **넣는다**(권한 최소화, 별도 dev 리소스 사용) |
+| B. 프로덕션 | 프로덕션 DB URL, 프로덕션 R2 토큰, 라이브 결제 키·웹훅 시크릿 | **넣지 않는다.** 호스팅(Cloudflare) 대시보드에만 사용자가 직접 |
+| C. 계정 전권 | Cloudflare 전역 API 키 | 쓰지 않는다. 필요하면 **범위가 제한된 API 토큰**만(배포 권한 등) |
+
+- **API credential 기능**(Pro/Max, 사용자 플랜 확인됨): 키를 Claude·세션 명령이 볼 수 없게 프록시가 요청에 붙여준다. 그러나 *특정 호스트로 나가는 Bearer 형식 요청*에만 해당한다. 봄별의 대부분 키는 (a) 앱 코드가 환경변수로 읽는 값(DB URL, OAuth 시크릿, R2 SigV4 키)이거나 (b) 서버 SDK가 서명하는 값이라 **일반 환경변수가 될 수밖에 없다**. Bearer 방식으로 호출하는 외부 API(예: 결제 공급자 테스트 API 조회)에만 검토한다. 등록은 이미 존재하는 환경의 편집 화면에서 하나씩, 저장 후 값은 다시 볼 수 없고 수정은 삭제 후 재추가.
+- 다중 줄 값(예: Firebase 서비스 계정 `private_key`)은 큰따옴표로 감싸고 `\n` 이스케이프 유지(hamkke `.env.example` 규칙).
+- Claude는 **키 값을 파일에 쓰지 않는다**(로컬 `.env` 생성이 필요한 랜덤 시크릿 제외). 로컬 개발 세션에서만 `.env`를 만든다.
+
+## 4. 세션 시작 프롬프트 템플릿
+
+새 클라우드 세션 첫 메시지에 붙여넣는다(사용자용):
+
+```
+봄별 클라우드 세션 시작.
+1) 부트스트랩: git fetch origin docs && git -C .docs pull --ff-only origin docs (필요 시 docs/CLOUD_SESSION.md §1 스크립트)
+2) CLAUDE.md → docs/PROGRESS.md 순서로 읽고, docs/COMMIT_PLAN.md에서 다음 항목을 확인.
+3) 필요한 키가 있으면 docs/ENV_MANIFEST.md 기준으로 정확한 이름을 먼저 알려주고 멈춰. 값은 대화에 붙여넣지 않을 거야.
+4) 문서는 자유롭게 수정하되 docs 커밋은 내가 지시할 때만. 세션을 옮겨야 하면 미리 알려줘.
+오늘 할 일: <예: Phase 1 카카오 로그인>
+```
+
+## 5. 세션 인수인계 체크리스트 (Claude가 세션 종료 전 수행)
+
+- [ ] `docs/PROGRESS.md` 갱신: 완료한 커밋, 다음 항목, 막힌 것(키·결정), 미완료 검증, 임시 완화한 게이트(`TODO(G-xx)`)
+- [ ] `COMMIT_PLAN.md` 체크박스 갱신
+- [ ] 설계가 바뀌었으면 해당 문서 갱신(작업 트리)
+- [ ] 개발 코드는 모두 커밋·푸시했는가(개발 커밋은 지시 없이 수행)
+- [ ] **사용자에게 알림**: "docs 커밋이 필요합니다(변경된 파일 목록)" — 지시가 오면 `docs` 브랜치에만 커밋·푸시
+- [ ] 다음 세션에 필요한 키·환경 변경(새 세션 필요 여부)을 명시
+- [ ] dev 서버를 띄우는 작업(폴리시)이면 켜둔 채 보고
+
+## 6. 비용·계정 메모
+
+- 클라우드 세션은 별도 VM 컴퓨트 요금이 없고 계정의 사용 한도를 공유한다(문서 확인). 병렬 세션이 많으면 한도를 더 빨리 쓴다.
+- GitHub 연동: 새 private 리포 생성과 첫 푸시는 사용자 승인 후에만(`CLAUDE.md` 하지 말 것). 클라우드 세션은 GitHub 앱/`/web-setup` 중 하나로 리포 접근이 필요하다.

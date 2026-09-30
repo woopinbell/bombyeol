@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#F7F1E6"/>
+  <circle cx="1070" cy="88" r="180" fill="#A8D8E8" opacity=".25"/>
+  <circle cx="110" cy="560" r="180" fill="#F2A7B3" opacity=".22"/>
+  <g transform="translate(90 150) scale(.92)">
+    <circle cx="84" cy="92" r="46" fill="#F2A7B3"/>
+    <circle cx="142" cy="66" r="40" fill="#A9C88C"/>
+    <circle cx="154" cy="126" r="43" fill="#A8D8E8"/>
+    <circle cx="90" cy="150" r="40" fill="#F4CB6E"/>
+    <circle cx="120" cy="109" r="33" fill="#F7F1E6"/>
+    <path d="M178 72 190 98 218 104 198 124 203 152 178 138 153 152 158 124 138 104 166 98Z" fill="#232B4D"/>
+    <path d="M216 42 222 57 238 63 222 69 216 85 210 69 194 63 210 57Z" fill="#A9C88C"/>
+  </g>
+  <text x="390" y="300" fill="#232B4D" font-family="NanumSquareRound, 'Noto Sans KR', sans-serif" font-size="126" font-weight="700" letter-spacing="-10">봄별</text>
+  <text x="398" y="350" fill="#232B4D" font-family="Noto Sans, sans-serif" font-size="27" letter-spacing="12">BOMBYEOL</text>
+  <path d="M395 390 C520 425 700 416 835 382" fill="none" stroke="#E8C77A" stroke-width="8" stroke-linecap="round"/>
+  <text x="395" y="465" fill="#34406B" font-family="NanumSquare, 'Noto Sans KR', sans-serif" font-size="28">봄의 오늘과, 별의 기억이 언제나 함께.</text>
+  <path d="M1020 470 1028 490 1050 498 1028 506 1020 528 1012 506 990 498 1012 490Z" fill="#E8C77A"/>
+</svg>

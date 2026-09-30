@@ -1,0 +1,19 @@
+:root {
+  /* 봄 · 성장 · 오늘 */
+  --bombyeol-spring-pink: #F2A7B3;
+  --bombyeol-spring-green: #A9C88C;
+  --bombyeol-spring-yellow: #F4CB6E;
+  --bombyeol-spring-sky: #A8D8E8;
+
+  /* 별 · 기억 · 밤 */
+  --bombyeol-night-navy: #232B4D;
+  --bombyeol-night-indigo: #34406B;
+  --bombyeol-starlight-gold: #E8C77A;
+  --bombyeol-night-silver: #C7CEDD;
+
+  /* 공통 베이스 */
+  --bombyeol-paper: #F7F1E6;
+  --bombyeol-ink: #2C2621;
+  --bombyeol-muted-ink: #6F6860;
+  --bombyeol-border: rgba(44, 38, 33, 0.14);
+}

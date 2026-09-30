@@ -1,0 +1,19 @@
+:root {
+  /* Brand */
+  --brand-primary: var(--bombyeol-night-navy, #232B4D);
+  --brand-accent: var(--bombyeol-starlight-gold, #E8C77A);
+  --brand-surface: var(--bombyeol-paper, #F7F1E6);
+  --brand-ink: var(--bombyeol-ink, #2C2621);
+
+  /* Spring */
+  --spring-pink: var(--bombyeol-spring-pink, #F2A7B3);
+  --spring-green: var(--bombyeol-spring-green, #A9C88C);
+  --spring-yellow: var(--bombyeol-spring-yellow, #F4CB6E);
+  --spring-sky: var(--bombyeol-spring-sky, #A8D8E8);
+
+  /* Star */
+  --star-navy: var(--bombyeol-night-navy, #232B4D);
+  --star-indigo: var(--bombyeol-night-indigo, #34406B);
+  --star-gold: var(--bombyeol-starlight-gold, #E8C77A);
+  --star-silver: var(--bombyeol-night-silver, #C7CEDD);
+}

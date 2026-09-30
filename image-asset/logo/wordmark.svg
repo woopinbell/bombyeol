@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 180" role="img" aria-labelledby="title desc">
+  <title id="title">봄별 wordmark</title>
+  <desc id="desc">Korean 봄별 wordmark with a restrained handmade touch.</desc>
+  <g fill="#232B4D">
+    <text x="24" y="96" font-family="NanumSquareRound, 'Noto Sans KR', sans-serif" font-size="92" font-weight="700" letter-spacing="-10">봄별</text>
+    <text x="28" y="143" font-family="Noto Sans, sans-serif" font-size="19" letter-spacing="8">BOMBYEOL</text>
+  </g>
+  <path d="M28 162 C120 176 220 172 302 156" fill="none" stroke="#E8C77A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M365 34 371 48 386 54 371 60 365 75 359 60 344 54 359 48Z" fill="#E8C77A"/>
+</svg>

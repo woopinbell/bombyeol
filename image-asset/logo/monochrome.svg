@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" role="img" aria-labelledby="title desc">
+  <title id="title">봄별 monochrome logo</title>
+  <desc id="desc">Single-color black logo for constrained printing.</desc>
+  <g fill="#2C2621" stroke="#2C2621">
+    <circle cx="101" cy="98" r="37"/>
+    <circle cx="148" cy="78" r="31"/>
+    <circle cx="157" cy="124" r="32"/>
+    <circle cx="105" cy="142" r="30"/>
+    <circle cx="126" cy="111" r="24" fill="#F7F1E6" stroke="none"/>
+    <path d="M214 73 224 96 249 101 231 119 235 144 214 132 192 144 196 119 178 101 203 96Z"/>
+  </g>
+  <g fill="#2C2621">
+    <text x="330" y="158" font-family="NanumSquareRound, 'Noto Sans KR', sans-serif" font-size="86" font-weight="700" letter-spacing="-8">봄별</text>
+    <text x="334" y="206" font-family="Noto Sans, sans-serif" font-size="20" letter-spacing="8">BOMBYEOL</text>
+  </g>
+</svg>

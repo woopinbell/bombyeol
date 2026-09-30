@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" role="img" aria-labelledby="title desc">
+  <title id="title">봄별 primary logo dark</title>
+  <desc id="desc">The 봄별 logo on a deep navy background.</desc>
+  <rect width="760" height="300" rx="36" fill="#232B4D"/>
+  <g transform="translate(36 30)">
+    <circle cx="65" cy="68" r="38" fill="#F2A7B3"/>
+    <circle cx="112" cy="48" r="33" fill="#A9C88C"/>
+    <circle cx="121" cy="94" r="34" fill="#A8D8E8"/>
+    <circle cx="70" cy="112" r="32" fill="#F4CB6E"/>
+    <circle cx="92" cy="80" r="27" fill="#F7F1E6"/>
+    <path d="M178 43 189 67 215 72 196 90 200 116 178 103 155 116 160 90 141 72 167 67Z" fill="#F7F1E6"/>
+    <path d="M227 34 233 48 248 54 233 60 227 75 221 60 206 54 221 48Z" fill="#F4CB6E"/>
+  </g>
+  <g fill="#F7F1E6" text-anchor="start">
+    <text x="330" y="158" font-family="NanumSquareRound, 'Noto Sans KR', sans-serif" font-size="86" font-weight="700" letter-spacing="-8">봄별</text>
+    <text x="334" y="206" font-family="Noto Sans, sans-serif" font-size="20" letter-spacing="8">BOMBYEOL</text>
+  </g>
+  <path d="M332 226 C390 247 470 246 530 222" fill="none" stroke="#E8C77A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M550 115 556 129 570 135 556 141 550 155 544 141 530 135 544 129Z" fill="#E8C77A"/>
+</svg>
