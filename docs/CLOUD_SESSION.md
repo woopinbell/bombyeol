@@ -76,12 +76,18 @@ printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
 새 클라우드 세션 첫 메시지에 붙여넣는다(사용자용):
 
 ```
-봄별 클라우드 세션 시작.
-1) 부트스트랩: git fetch origin docs && git -C .docs pull --ff-only origin docs (필요 시 docs/CLOUD_SESSION.md §1 스크립트)
-2) CLAUDE.md → docs/PROGRESS.md 순서로 읽고, docs/COMMIT_PLAN.md에서 다음 항목을 확인.
-3) 필요한 키가 있으면 docs/ENV_MANIFEST.md 기준으로 정확한 이름을 먼저 알려주고 멈춰. 값은 대화에 붙여넣지 않을 거야.
+봄별 클라우드 세션 시작. 이 리포의 main에는 문서가 없고 docs 브랜치에 있어.
+1) 먼저 아래 부트스트랩을 그대로 실행해줘 (docs를 .docs/에 붙이고 루트에 링크):
+   git fetch origin docs
+   [ -d .docs ] || git worktree add -B docs .docs origin/docs
+   git -C .docs pull --ff-only origin docs || true
+   for p in CLAUDE.md docs image-asset; do ln -sfn ".docs/$p" "$p"; done
+   printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
+   (주의: 링크 docs와 브랜치 docs가 이름이 같으니 브랜치는 refs/heads/docs 또는 git -C .docs 로 다뤄)
+2) CLAUDE.md → docs/PROGRESS.md → docs/CLOUD_SESSION.md §1의 검증 V-1~V-5를 순서대로 읽고 수행해. 특히 docs 브랜치 push 가능 여부(V-2)를 실제로 시험하되, 시험용 커밋은 남기지 말고 결과만 알려줘.
+3) 그다음 docs/ARCHITECTURE.md §9 스택 스파이크 S-1~S-8을 spike/* 브랜치에서 진행 (main에 머지 금지). 필요한 키가 생기면 docs/ENV_MANIFEST.md 기준 정확한 이름을 먼저 알려주고 멈춰. 키 값은 대화에 붙여넣지 않을 거야.
 4) 문서는 자유롭게 수정하되 docs 커밋은 내가 지시할 때만. 세션을 옮겨야 하면 미리 알려줘.
-오늘 할 일: <예: Phase 1 카카오 로그인>
+오늘 할 일: 부트스트랩 검증(V-1~V-5) 결과 보고 후 스파이크 S-1 착수 여부를 나에게 확인.
 ```
 
 ## 5. 세션 인수인계 체크리스트 (Claude가 세션 종료 전 수행)
