@@ -16,7 +16,7 @@
 - [docs/ENV_MANIFEST.md](docs/ENV_MANIFEST.md) — Phase별 필요한 키 목록(이름·형식·발급처)
 - [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) — 아직 결정되지 않은 것, 검증이 필요한 가정
 - [docs/PROGRESS.md](docs/PROGRESS.md) — 세션 인수인계 로그(현재 상태·다음 할 일·막힌 것)
-- [docs/REPO_BOOTSTRAP.md](docs/REPO_BOOTSTRAP.md) — git 리포·`docs` 고아 브랜치·GitHub 리포 생성 절차(사용자 지시 후 1회)
+- [docs/REPO_BOOTSTRAP.md](docs/REPO_BOOTSTRAP.md) — git 리포·`docs` 고아 브랜치·GitHub 리포 생성 절차(2026-10-01 수행 완료, 재현 참고용)
 - `image-asset/` — 대화 중 생성한 로고·아이콘·토큰 **임시 후보**(확정 아님, DESIGN.md §1 참고)
 
 ## 현재 상태
@@ -27,8 +27,8 @@
 
 - `main` — **개발 커밋만**. 문서·에셋·세션 로그·devlog는 여기에 커밋하지 않는다.
 - `docs` — 고아(orphan) 브랜치. 이 파일, `docs/`, `image-asset/`, `devlog/`(있다면)가 여기 산다.
-- 작업 트리에는 `docs` 브랜치를 `.docs/` 워크트리로 붙여 쓴다(`docs/CLOUD_SESSION.md` §1). 작업 중 문서 수정은 자유롭게 하되 **커밋은 사용자가 지시할 때만** 한다. 지시받으면 `docs` 브랜치에만 커밋·푸시하고 `main`은 건드리지 않는다.
-- 세션이 끝나면 커밋하지 않은 문서 수정은 클라우드 VM과 함께 사라진다. 세션을 옮기기 전에 사용자에게 "docs 커밋이 필요합니다"라고 먼저 알린다.
+- 작업 트리에는 `docs` 브랜치를 `.docs/` 워크트리로 붙여 쓴다(`docs/CLOUD_SESSION.md` §1). 문서 수정은 **지시 없이 수시로 `docs` 브랜치에 커밋·푸시**한다(의미 단위, 세션 종료·전환 전 필수). `main`에는 절대 문서를 커밋하지 않는다.
+- 세션을 끝내거나 옮기기 전에 `docs/PROGRESS.md`를 갱신하고 커밋·푸시한다(커밋하지 않은 수정은 클라우드 VM과 함께 사라진다). 푸시가 막히면 사용자에게 알린다.
 
 ## 절대 원칙 (재작업 방지용 고정 결정)
 
@@ -46,7 +46,7 @@
 
 ## 하지 말 것
 
-- 사용자 지시 없이 커밋하지 않는다(개발 커밋은 COMMIT_PLAN 단위로 하되, **문서/에셋 커밋은 지시가 있을 때만**). 원격에 푸시하거나 GitHub 리포·클라우드 리소스를 만드는 것도 지시가 있을 때만.
+- 개발 커밋은 COMMIT_PLAN 단위로, 문서·에셋 커밋은 `docs` 브랜치에 **자율적으로** 한다. 단 GitHub 리포·계정·도메인·클라우드 리소스를 **새로 만드는 것**은 지시가 있을 때만.
 - `main`에 문서·에셋·세션 기록을 섞지 않는다.
 - 결제 공급자·호스팅 같은 미확정 항목을 `OPEN_QUESTIONS.md`를 확인하지 않고 구현하지 않는다.
 - 대화에서 나온 레퍼런스 이름을 검증 없이 인용하지 않는다(일부는 사실과 달라 정정했다 — `docs/design-research/2026-10-01-successor-research.md`).

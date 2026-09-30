@@ -1,6 +1,6 @@
 # Bombyeol — 진행 상황 (세션 인수인계 로그)
 
-새 세션은 `CLAUDE.md` 다음으로 이 파일을 읽는다. 세션을 옮기기 전 Claude가 갱신하고, **커밋은 사용자가 지시할 때만** 한다(`WORKFLOW.md` §4).
+새 세션은 `CLAUDE.md` 다음으로 이 파일을 읽는다. 세션을 끝내거나 옮기기 전 Claude가 갱신하고 `docs` 브랜치에 커밋·푸시한다(자율, `WORKFLOW.md` §4).
 
 ## 현재 상태 (2026-10-01)
 
@@ -40,3 +40,4 @@
 
 - 2026-10-01(추가 결정): 반려동물을 V1부터 가족 구성원(Pet)으로 포함. PRD §2·§4.2.1·§4.5·§5·§6, COMMIT_PLAN Phase 3·4·5, COST_GUARDS G-11, PRIVACY §1, CLAUDE.md 스코프 갱신. 의료 기록 관리(투약 알림 등)는 후속으로 분리.
 - 2026-10-01(추가 결정): 봄별 디자인은 Kaddie 이후. COMMIT_PLAN에 Phase DS와 진행 순서 메모 추가.
+- 2026-10-01(정책 변경): 문서 브랜치가 분리되어 있으므로 docs 커밋은 지시 없이 수시로 자율 수행(main 금지). WORKFLOW §4, CLAUDE.md, CLOUD_SESSION 개정.

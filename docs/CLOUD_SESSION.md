@@ -16,7 +16,7 @@ printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
 ```
 
 - 링크와 워크트리는 `.git/info/exclude`로 무시하므로 `main`에 섞이지 않는다.
-- 문서 수정은 링크를 통해 `.docs/`(= `docs` 브랜치 작업 트리)에 반영된다. 커밋은 **지시가 있을 때** `git -C .docs commit` + `git -C .docs push origin docs`.
+- 문서 수정은 링크를 통해 `.docs/`(= `docs` 브랜치 작업 트리)에 반영된다. 커밋은 **수시로 자율 수행**: `git -C .docs commit` + `git -C .docs push origin docs`(`WORKFLOW.md` §4).
 - **환경 setup 스크립트 사용 시 주의**: setup 스크립트 결과는 파일시스템 스냅샷으로 **약 7일 캐시**되고 세션을 다시 열어도 재실행되지 않는다. 그러면 `.docs/`가 낡을 수 있으므로 **세션 첫 프롬프트에 항상 `git -C .docs pull --ff-only origin docs`를 포함**한다(§4 템플릿).
 - 대안: 리포에 `.claude/settings.json`의 SessionStart 훅을 두고 위 스크립트를 실행(hook 파일 하나는 main에 들어간다 — 개발 도구 설정이라 허용할지는 사용자 결정, `OPEN_QUESTIONS.md` Q-HOOK).
 
@@ -33,7 +33,7 @@ printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
 ## 2. 로컬 vs 클라우드 차이 (hamkke 경험 포함)
 
 - `.env`는 gitignore 대상이라 **클라우드에 없다**(로컬 번들 업로드 시에도 `.env`류 파일은 제외됨). 값은 환경 설정의 환경변수로 들어간다.
-- 세션 VM은 유휴 후 회수된다. 커밋·푸시하지 않은 것은 사라진다(개발 커밋은 즉시 커밋, 문서는 §5 규칙).
+- 세션 VM은 유휴 후 회수된다. 커밋·푸시하지 않은 것은 사라진다(개발·문서 모두 수시로 커밋·푸시, 문서는 §5 규칙).
 - 네이티브 다이얼로그(브라우저 권한, 결제 호스티드 화면)와 실기기 검증은 자동화할 수 없다 → `PROGRESS.md` "미완료 검증"에 남기고 사용자가 확인.
 - 네트워크: 기본 **Trusted** 수준은 허용 목록(패키지 레지스트리, GitHub, 일부 클라우드 SDK 등)만 도달한다. 우리 서비스 호스트는 **Custom 허용 도메인**에 추가해야 한다 — 스파이크 S-8에서 실측(예상 호스트: DB 공급자, `*.r2.cloudflarestorage.com`(기본 허용에 포함으로 확인), 카카오 인증 서버, Google OAuth, FCM, 결제 공급자, `api.cloudflare.com`). 허용 도메인을 바꾸면 환경 캐시가 재구성된다.
 - hamkke의 교훈: 클라우드 환경변수 `DATABASE_URL`이 **실제 DB**를 가리키면 로컬 테스트·마이그레이션이 실수로 실DB에 닿는다. 봄별은 클라우드 환경에 **개발/테스트용 값만** 넣고, 테스트·e2e는 로컬 Docker Postgres를 쓰며 원격 DB면 스스로 거부하는 가드를 둔다.
@@ -55,7 +55,7 @@ printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
    2. Claude는 그 키 없이 진행 가능한 작업을 끝내고 커밋 가능한 상태로 정리, `PROGRESS.md`에 "대기 중인 키와 재개 지점"을 기록.
    3. 사용자가 claude.ai/code의 **환경 편집** 대화상자 "Environment variables"(`KEY=value` 한 줄씩, `#`이 든 값·여러 줄 값은 따옴표)에 추가.
    4. **새 세션**을 시작해 재개한다(문서상 실행 중 세션은 값을 다시 읽지 않음, 다시 열기 동작은 V-5).
-   5. 세션을 옮기므로 사용자가 **docs 커밋을 지시**해야 인수인계 기록이 남는다(`WORKFLOW.md` §4). 지시가 없으면 새 세션은 `PROGRESS.md`를 못 본다 — Claude는 세션 종료 전 이를 반드시 상기시킨다.
+   5. 세션을 옮기기 전에 Claude가 `PROGRESS.md`(대기 중인 키·재개 지점)를 **직접 커밋·푸시**한다. 새 세션은 첫 프롬프트의 `git pull`로 이를 받는다.
 3. **`.env.example`은 main의 개발 산출물**(Phase 0의 `chore(env)`)이라 개발 커밋으로 남고, 이름·형식은 거기에도 있어 새 세션이 알 수 있다.
 4. 사용자가 키를 넣은 뒤 Claude는 **값을 출력·기록하지 않고** 존재 여부만 확인한다(예: 변수가 비어 있지 않은지 길이만). 로그에 값이 찍히는 명령(`env`, `printenv`, `set -x`)을 쓰지 않는다.
 
@@ -86,7 +86,7 @@ printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
    (주의: 링크 docs와 브랜치 docs가 이름이 같으니 브랜치는 refs/heads/docs 또는 git -C .docs 로 다뤄)
 2) CLAUDE.md → docs/PROGRESS.md → docs/CLOUD_SESSION.md §1의 검증 V-1~V-5를 순서대로 읽고 수행해. 특히 docs 브랜치 push 가능 여부(V-2)를 실제로 시험하되, 시험용 커밋은 남기지 말고 결과만 알려줘.
 3) 그다음 docs/ARCHITECTURE.md §9 스택 스파이크 S-1~S-8을 spike/* 브랜치에서 진행 (main에 머지 금지). 필요한 키가 생기면 docs/ENV_MANIFEST.md 기준 정확한 이름을 먼저 알려주고 멈춰. 키 값은 대화에 붙여넣지 않을 거야.
-4) 문서는 자유롭게 수정하되 docs 커밋은 내가 지시할 때만. 세션을 옮겨야 하면 미리 알려줘.
+4) 문서는 자유롭게 수정하고 docs 브랜치에 수시로 커밋·푸시해줘(main에는 금지). 세션을 끝내거나 옮기기 전에는 PROGRESS.md를 갱신해 커밋·푸시하고 알려줘.
 오늘 할 일: 부트스트랩 검증(V-1~V-5) 결과 보고 후 스파이크 S-1 착수 여부를 나에게 확인.
 ```
 
@@ -96,7 +96,7 @@ printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
 - [ ] `COMMIT_PLAN.md` 체크박스 갱신
 - [ ] 설계가 바뀌었으면 해당 문서 갱신(작업 트리)
 - [ ] 개발 코드는 모두 커밋·푸시했는가(개발 커밋은 지시 없이 수행)
-- [ ] **사용자에게 알림**: "docs 커밋이 필요합니다(변경된 파일 목록)" — 지시가 오면 `docs` 브랜치에만 커밋·푸시
+- [ ] 문서 변경을 `docs` 브랜치에 커밋·푸시했는가(`main` 금지), 푸시 실패 시 사용자에게 알림
 - [ ] 다음 세션에 필요한 키·환경 변경(새 세션 필요 여부)을 명시
 - [ ] dev 서버를 띄우는 작업(폴리시)이면 켜둔 채 보고
 
