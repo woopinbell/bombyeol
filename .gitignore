@@ -1,0 +1,5 @@
+# .git/info/exclude는 워크트리 간 공유된다. main 쪽 부트스트랩이 넣은 패턴(docs, CLAUDE.md, image-asset)이
+# 이 docs 브랜치 워크트리의 실제 파일까지 무시하지 않도록 되살린다(.gitignore가 info/exclude보다 우선).
+!/CLAUDE.md
+!/docs/
+!/image-asset/

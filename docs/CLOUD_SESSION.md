@@ -16,11 +16,12 @@ printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
 ```
 
 - 링크와 워크트리는 `.git/info/exclude`로 무시하므로 `main`에 섞이지 않는다.
+- **주의(첫 클라우드 세션에서 발견)**: `.git/info/exclude`는 모든 워크트리가 공유한다. 그래서 `docs`·`CLAUDE.md`·`image-asset` 패턴이 `.docs/` 워크트리의 실제 문서까지 무시해 새 파일이 `git add`되지 않았다. `docs` 브랜치 루트 `.gitignore`의 `!/docs/` 등 부정 패턴으로 되살린다(`.gitignore`가 info/exclude보다 우선). 이 파일을 지우지 않는다.
 - 문서 수정은 링크를 통해 `.docs/`(= `docs` 브랜치 작업 트리)에 반영된다. 커밋은 **수시로 자율 수행**: `git -C .docs commit` + `git -C .docs push origin docs`(`WORKFLOW.md` §4).
 - **환경 setup 스크립트 사용 시 주의**: setup 스크립트 결과는 파일시스템 스냅샷으로 **약 7일 캐시**되고 세션을 다시 열어도 재실행되지 않는다. 그러면 `.docs/`가 낡을 수 있으므로 **세션 첫 프롬프트에 항상 `git -C .docs pull --ff-only origin docs`를 포함**한다(§4 템플릿).
 - 대안: 리포에 `.claude/settings.json`의 SessionStart 훅을 두고 위 스크립트를 실행(hook 파일 하나는 main에 들어간다 — 개발 도구 설정이라 허용할지는 사용자 결정, `OPEN_QUESTIONS.md` Q-HOOK).
 
-**검증 필요(첫 클라우드 세션의 첫 작업)**
+**검증 필요(첫 클라우드 세션의 첫 작업)** — 결과는 `PROGRESS.md` "부트스트랩 검증 결과"(2026-10-01: V-1·V-2 통과, V-3 자동 로드 안 됨, V-4 `add_repo`로 가능, V-5 새 세션 필요)
 
 | ID | 확인 내용 | 실패 시 |
 |---|---|---|
