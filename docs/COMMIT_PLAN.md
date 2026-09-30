@@ -4,6 +4,8 @@
 
 **이 문서의 위상**: 뼈대이지 불변 목록이 아니다. 더 원자적으로 쪼개는 것은 언제나 허용, 통째로 건너뛰거나 뭉치는 것은 하지 않는다. 벗어나야 하면 커밋 전에 이 문서를 먼저 갱신한다(작업 트리 수정, docs 커밋은 지시 시에만 — `WORKFLOW.md` §4).
 
+**진행 순서 메모 (2026-10-01 결정)**: Kaddie(`products/kaddie`)와 병행할 때 **기술 스파이크(Phase S)는 먼저·병행 진행**하고, **디자인 작업은 Kaddie의 디자인 스프린트가 자리 잡은 뒤로 미룬다**(사용자의 디자인 결정이 두 프로젝트에서 겹치지 않게). 따라서 아래 Phase 0의 `chore(design-system): 확정 토큰 이식`은 **Phase DS 완료 전에는 착수하지 않는다**(나머지 Phase 0 항목과 Phase 1~2의 비UI 작업은 진행 가능, UI 화면 구현은 토큰 확정 후).
+
 체크박스는 진행 표시. 완료한 항목은 `- [x]`. 항목 끝의 `[G-xx]`는 그 커밋(또는 직후 test 커밋)이 함께 만족해야 하는 비용 게이트.
 
 ---
@@ -21,12 +23,19 @@
 - [ ] S-7 클라이언트 PDF(한글 폰트) 가능성
 - [ ] S-8 클라우드 세션 외부 호스트 도달성·`CLOUD_SESSION.md` V-1~V-5 검증
 
+## Phase DS — 봄별 디자인 스프린트 (Kaddie 디자인이 자리 잡은 뒤, 코드 UI 전)
+
+- [ ] 레퍼런스 1차 자료 정독(`design-research` §7) → `DESIGN.md` 화면 규칙화
+- [ ] 로고 확정(Q-LOGO: 기존 SVG 재제작 여부)과 손글씨 폰트 확정(Q-FONT, 라이선스 확인)
+- [ ] 오늘·이야기·우리 3탭, 어르신 온보딩의 **정적 HTML 목업 2~3안** → 스크린샷으로 사용자 확인·선택
+- [ ] 토큰 확정(색·서체·간격·모션 곡선), 대비 검증 테스트표
+
 ## Phase 0 — 부트스트랩 (스파이크 통과 후)
 
 - [ ] `chore(repo): Next.js(App Router) + TypeScript 프로젝트 초기화` — 착수 전 `node_modules/next/dist/docs/` 확인
 - [ ] `chore(tooling): ESLint/Prettier 설정`
 - [ ] `chore(tooling): Tailwind CSS 및 shadcn/ui(Radix) 초기화`
-- [ ] `chore(design-system): DESIGN.md 확정 토큰 이식` — 색·간격·모션 곡선 이름 정의, 대비 검증 단위 테스트, 손글씨 폰트는 확정 시에만
+- [ ] `chore(design-system): DESIGN.md 확정 토큰 이식` — **Phase DS 완료 후에만 착수**. 색·간격·모션 곡선 이름 정의, 대비 검증 단위 테스트, 손글씨 폰트는 확정 시에만
 - [ ] `chore(infra): Cloudflare Workers(OpenNext) 배포 구성` — wrangler 설정, 바인딩(Hyperdrive/R2), 비프로덕션·프로덕션 환경 분리
 - [ ] `chore(prisma): Prisma 초기화 및 서버리스 Postgres 연결` — 요청 단위 클라이언트 생성 패턴
 - [ ] `chore(i18n): next-intl 구조 및 문구 파일 초기화(ko)` — 하드코딩 검사 테스트 포함
