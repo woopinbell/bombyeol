@@ -59,10 +59,11 @@
 
 ## Phase 3 — 오늘(봄)
 
-- [ ] `chore(prisma): Child·Moment·Milestone 스키마 정의`
+- [ ] `chore(prisma): Child·Pet·Moment·Milestone 스키마 정의` — Moment·Milestone은 child/pet 중 하나만 참조(체크 제약)
 - [ ] `feat(child): 아이 프로필 관리(태명→출생 전환 포함) 구현`
-- [ ] `feat(moment): 사진·영상 피드 구현(썸네일 클라이언트 생성)` [G-01~04 재사용]
-- [ ] `feat(milestone): 마일스톤 기록 구현`
+- [ ] `feat(pet): 반려동물 프로필 관리(입양일·생일 추정·종) 구현` [G-11: 아이·반려동물 수 상한]
+- [ ] `feat(moment): 사진·영상 피드 구현(아이·반려동물·가족 전체 대상, 썸네일 클라이언트 생성)` [G-01~04 재사용]
+- [ ] `feat(milestone): 마일스톤 기록 구현(아이·반려동물 프리셋)`
 - [ ] `feat(moment): 부모 일기 구현`
 - [ ] `chore(prisma): Reaction 스키마 정의`
 - [ ] `feat(reaction): 좋아요·댓글 구현` [G-07]
@@ -76,7 +77,7 @@
 - [ ] `feat(story): 사진에 얽힌 이야기 구현` [G-01~04]
 - [ ] `feat(story): 부모의 질문 보내기(물어보기) 구현`
 - [ ] `feat(story): 세대 교차 반응(별 하나·댓글) 구현`
-- [ ] `feat(memorial): 기념 상태 전환과 영구 보존 정책 구현` — 구독 만료와 무관 보존, `PRIVACY_AND_LEGAL.md` §5
+- [ ] `feat(memorial): 기념 상태 전환(사람·반려동물)과 영구 보존 정책 구현` — 구독 만료와 무관 보존, `PRIVACY_AND_LEGAL.md` §5
 - [ ] `feat(story): 이야기 탭 화면 구성`
 
 ## Phase 5 — 우리·임신 기록
@@ -87,7 +88,7 @@
 - [ ] `test(pregnancy): parents_only 비노출 통합 테스트`
 - [ ] `feat(calendar): 가족 캘린더 CRUD 구현(UTC 저장·로컬 표시)`
 - [ ] `feat(family): 멤버·역할·관계 표시명 관리 구현`
-- [ ] `feat(family): 다음 가족 모임 D-day 구현`
+- [ ] `feat(family): 다음 가족 모임 D-day 및 생일·입양기념일 카드 구현`
 - [ ] `feat(us): 우리 탭 화면 구성`
 
 ## Phase 6 — 알림

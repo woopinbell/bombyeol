@@ -14,7 +14,7 @@ hamkke가 "시차 있는 두 연인이 한 화면에서 만난다"였다면, 봄
 
 ## 2. 핵심 컨셉 — Space(가족)
 
-- **한 가족 = 한 Space**. 그 안에 **여러 아이(Child)** 가 있고, 조부모는 한 번 초대되어 모든 손주에 접근한다.
+- **한 가족 = 한 Space**. 그 안에 **여러 아이(Child)와 반려동물(Pet)** 이 가족 구성원으로 있고, 조부모는 한 번 초대되어 모든 손주·반려동물에 접근한다. 반려동물은 계정이 없는 '가족 구성원'이며 사람이 대신 기록한다.
 - 구독은 **Space 단위**(User 아님). 한 명이 결제하면 가족 전체가 혜택.
 - 오픈 가입/검색/추천 없음. 초대코드(6자리, TTL) 또는 초대 링크로만 합류. 링크는 카카오톡 공유하기로 보낸다.
 - 역할(Member.role): `parent`(관리자 권한: 초대·아이 관리·결제·삭제), `grandparent`(어르신: 열람·댓글·이야기 작성), `relative`(삼촌·이모 등: 열람·댓글). 관계 표시명(할머니/외할아버지 등)은 Member.relationLabel로 자유 입력.
@@ -25,7 +25,7 @@ hamkke가 "시차 있는 두 연인이 한 화면에서 만난다"였다면, 봄
 
 | 탭 | 역할 | 주요 내용 |
 |---|---|---|
-| **오늘 (봄)** | 아이의 성장 | 사진·영상 피드, 마일스톤(키·몸무게·첫 걸음 등), 부모의 짧은 일기, 임신 기록(태명 시절) |
+| **오늘 (봄)** | 아이·반려동물의 오늘 | 사진·영상 피드, 마일스톤(키·몸무게·첫 걸음 등), 부모의 짧은 일기, 임신 기록(태명 시절), 반려동물의 일상·성장 기록 |
 | **이야기 (별)** | 어르신의 기억 | 인터뷰 질문 카드 → 텍스트 답변(음성은 후속), 사진에 얽힌 이야기, 고인의 이야기 보존 |
 | **우리** | 가족 전체 조망 | 생일·기념일 캘린더, 세대별 프로필, 다음 가족 모임 D-day, 초대·설정 진입 |
 
@@ -48,6 +48,14 @@ hamkke가 "시차 있는 두 연인이 한 화면에서 만난다"였다면, 봄
 - **임신 기록(태명 시절)**: 태명 프로필, 출생 예정일, 주차 자동 계산, 초음파 사진, 짧은 메모, 태동·검진 일정. **건강 관련 민감 정보** — 열람 범위를 Space 멤버 중 부모가 고른 대상으로 한정하는 옵션과 명시적 동의가 필요(`PRIVACY_AND_LEGAL.md` §3). 출생 후 프로필이 "임신 중 → 출생"으로 전환되며 기록은 유지.
 - 아이별 좋아요·댓글(가족 멤버만).
 
+### 4.2.1 반려동물 (2026-10-01 결정 — V1부터 가족 구성원)
+- **Pet 프로필**: 이름, 종(강아지·고양이·기타 자유 입력), 품종(선택), 생일(모르면 추정일), **입양일(우리 가족이 된 날)**, 사진. 계정이 없으므로 `parent`/가족 멤버가 대신 기록한다.
+- 사진·영상 피드와 일기는 아이와 같은 `Moment`를 쓰고 대상만 고른다(아이 / 반려동물 / 가족 전체).
+- **마일스톤(반려동물용 프리셋)**: 입양일, 첫 산책, 체중 변화, 예방접종·병원 방문 메모 등. **의료 기록 관리(투약 알림·진료 연동)는 V1 범위 밖의 후속**이며, V1에서는 자유 메모와 체중 수치까지만 둔다(건강 앱 경계·의료 규제를 피하기 위한 제약).
+- 기념일: 입양기념일·생일을 가족 캘린더에 자동 등록(조회 시점 계산).
+- 이야기(별) 탭과 연결: 어르신이 "옛날에 우리 집 강아지" 같은 이야기를 반려동물 프로필에 붙일 수 있다.
+- **무지개다리 기념 상태**: 반려동물이 세상을 떠나면 프로필을 기념 상태로 전환(§4.5)한다.
+
 ### 4.3 이야기 (별)
 - **질문 카드**: 큐레이션된 인터뷰 질문(예: "어린 시절 살던 동네는 어땠어요?", "손주가 태어난 날 기억나세요?"). 카테고리(어린 시절/일/가족/음식/명절…). 부모가 어르신께 특정 질문을 골라 "물어보기"(푸시·공유 링크).
 - **답변 입력: 텍스트 우선**. 어르신 부담을 줄이기 위해 (a) 어르신 본인 입력, (b) 가족이 대필·받아쓰기해 "○○ 어르신 말씀"으로 기록(작성자·대필자 병기)을 모두 지원. 음성 답변·전사는 **프리미엄/후속**(`ARCHITECTURE.md` §8, 비용 게이트 G-14 선결).
@@ -61,9 +69,10 @@ hamkke가 "시차 있는 두 연인이 한 화면에서 만난다"였다면, 봄
 - **다음 가족 모임 D-day**.
 - 설정 시트: 알림, 글자 크기, 언어(구조만), 계정·Space 삭제(G-06).
 
-### 4.5 별이 되신 가족 (고인 처리 — V1 포함)
+### 4.5 별이 되신 가족 (고인·반려동물 — V1 포함)
 - 어르신 프로필을 **"기념" 상태**로 전환(부모/관리자가 유가족 동의 하에). 기념 상태의 프로필: 이야기·사진 **영구 보존**, 새 이야기 작성 불가, 가족의 추모 반응만 가능, 기일 카드(조회 시점 계산).
 - **구독이 만료되어도 이야기는 삭제하지 않는다**(읽기 전용·다운로드 가능 상태로 유지). 이 원칙은 §5 게이팅 설계의 상위 제약.
+- **반려동물의 기념 상태("별이 된" 반려동물)**: 사람과 같은 규칙. 프로필을 기념으로 전환하면 기록은 영구 보존되고 새 일상 기록은 막되 추모 반응·사진 추가(추억)는 허용한다. 기일은 조회 시점 카드로 보여준다. 전환은 `parent`가 하고 되돌릴 수 있다.
 - 계정 승계(고인의 로그인 계정)는 다루지 않는다 — 콘텐츠는 Space 소유이고 계정은 별개(`PRIVACY_AND_LEGAL.md` §5).
 
 ### 4.6 알림
@@ -88,6 +97,7 @@ hamkke가 "시차 있는 두 연인이 한 화면에서 만난다"였다면, 봄
 | 사진 원본 상한 | 10MB/장 | 20MB/장 | G-01 |
 | 영상 | 30초·50MB, 월 N개 | 2분·200MB | 전송·저장비 급증 요소 |
 | 초대 인원 | 부모2 + 조부모4 | 삼촌·이모 등 최대 20명 | 인원 확장 게이팅 |
+| 아이·반려동물 수 | 아이 3 + 반려동물 3 | 각 10 | G-11 남용 방지(수치 초안) |
 | 이야기 PDF | 미리보기만 | 전체 다운로드 | 생성 CPU·저장 |
 | 음성 답변 | 없음 | 후속 | STT 비용 |
 
@@ -103,15 +113,16 @@ Member(id, spaceId, userId, role, relationLabel, joinedAt)    // unique(spaceId,
 Invite(id, spaceId, code, role, expiresAt, usedAt?, createdById)
 InviteCodeAttempt(id, userId, ip, createdAt)                  // 실패 기록만
 Child(id, spaceId, name?, nickname?, dueDate?, birthDate?, status) // expecting|born
+Pet(id, spaceId, name, species, breed?, birthDate?, birthDateEstimated, adoptedAt?, passedAt?, status, coverMediaId?) // living|memorial
 PregnancyRecord(id, childId, weekAt, kind, note?, mediaId?, visibility, createdById)
-Moment(id, spaceId, childId?, kind(photo|video|text), body?, takenAt, createdById)
+Moment(id, spaceId, childId?, petId?, kind(photo|video|text), body?, takenAt, createdById) // childId·petId는 동시에 채우지 않는다(둘 다 비면 가족 전체)
 MediaAsset(id, spaceId, key, kind, bytes, contentType, status(pending|confirmed|deleted), createdAt, confirmedAt?) // G-02·G-05
-Milestone(id, childId, kind, valueJson, recordedAt, createdById)
+Milestone(id, childId?, petId?, kind, valueJson, recordedAt, createdById) // 정확히 하나만 채운다
 StoryPrompt(id, category, textKey, ageHint?)                  // 큐레이션(코드/JSON), 번역은 키
 StoryEntry(id, spaceId, authorMemberId, scribeMemberId?, promptId?, mediaId?, body, storyDate?, createdAt)
 Reaction(id, spaceId, targetType, targetId, memberId, kind, body?, createdAt) // 별 하나·댓글
 FamilyEvent(id, spaceId, title, startsAt, allDay, recurring, kind)
-MemorialProfile(id, spaceId, memberId?, name, relationLabel, passedAt?, note?)  // 기념 상태
+MemorialProfile(id, spaceId, memberId?, petId?, name, relationLabel, passedAt?, note?)  // 기념 상태(사람 또는 반려동물)
 Subscription(id, spaceId UNIQUE, provider, providerSubscriptionId, status, currentPeriodEnd, ...) // G-09: spaceId 기준 upsert
 UsageCounter(spaceId, periodKey, uploadUrlsIssued, bytesStored, pdfExports, ...)                 // G-03·G-04
 PushToken(id, userId, token, platform, createdAt)
