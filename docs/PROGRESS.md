@@ -17,12 +17,12 @@
 - Phase 2 서버 커밋 완료(작업 브랜치 `claude/cloud-session-phase-0-72a2lc`, main 미머지, PR 미생성). 테스트 93건 통과. 스테이징 배포됨(번들 13.3 MiB, Startup 19ms, Cron `17 * * * *`), 스테이징 DB에 `media` 마이그레이션 적용(작업 브랜치 기준 수동 실행).
 - 스테이징 R2(사용자 승인): 버킷 `bombyeol-staging-media`(APAC), 수명주기 `pending/` 1일 만료, CORS(스테이징·localhost 출처의 PUT·content-type만). 재현 스크립트 `scripts/r2-bucket-setup.sh`. **사고(즉시 복구)**: 처음에 수명주기 접두사를 `spaces/`로 걸어 "모든 객체 1일 삭제" 규칙이 됐다 — 버킷이 비어 있을 때 바로 지우고 `pending/`으로 다시 걸었다. 그래서 업로드 키를 `pending/{spaceId}/{id}` → 확정 시 `spaces/{spaceId}/{id}`(S3 CopyObject)로 바꿨다(ARCHITECTURE §5 갱신).
 - 설계 요약: 저장소는 S3 API 하나(aws4fetch)로 presign PUT(길이·타입 서명)·Head·Copy·Delete·presign GET. 판정은 confirmed + 진행 중(pendingTtl 1h 안) 합계(G-03), 미확정 20개·발급 120/h·500/일(G-04), 확정은 올린 사람만·Head로 크기·타입 일치(G-02), 삭제는 R2 먼저 → DB(G-05), Cron은 버려진 업로드·오래된 카운터 정리와 급증 경고(G-05·G-15·G-17). 수치는 `plan.ts` 초안.
-- 내부 경로(`/api/internal/cleanup`·`/smoke`)는 AUTH_SECRET에서 용도별 HMAC 토큰을 유도해 인증(없으면 404). 스모크: `node scripts/smoke-staging.mjs`(AUTH_SECRET 필요) — 현재 db ok, **R2는 토큰 대기로 실패**.
+- 내부 경로(`/api/internal/cleanup`·`/smoke`)는 AUTH_SECRET에서 용도별 HMAC 토큰을 유도해 인증(없으면 404). 스모크: `node scripts/smoke-staging.mjs`(AUTH_SECRET 필요) — **스테이징 R2 왕복 통과(2026-10-01, 사용자가 토큰을 Worker Secret으로 등록 후)**: 길이 위반 PUT 403, 타입 위반 PUT 403, 정확한 PUT 200, Head 1000 image/jpeg, Copy·정리 ok, DB ok.
 - R2_ACCOUNT_ID는 리포에 넣지 않고 Worker Secret으로 등록(클라우드 환경 값을 stdin으로).
 
 ### 다음 할 일 (Phase 2 이후)
 
-1. **(사용자) R2 S3 토큰 발급·등록** → `R2_ACCESS_KEY_ID`·`R2_SECRET_ACCESS_KEY`를 Worker `bombyeol-staging`의 Secret으로(대시보드). 후 `node scripts/smoke-staging.mjs`로 putWrongSize/WrongType 403, putExact 200, head·copy·cleanup ok 확인.
+1. ~~R2 S3 토큰 발급·등록~~ 완료(사용자, Worker Secret만 — 클라우드 환경에는 넣지 않음), 스모크 통과.
 2. 브라우저 직접 업로드(CORS)는 UI가 생길 때(Phase 3 이후) 사용자 기기에서 확인 — 미완료 검증.
 3. Phase 2 PR·머지(사용자 확인). 이후 Phase 3(오늘: Pet·Moment·Milestone) 서버부터.
 
@@ -206,7 +206,7 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 
 ## 미완료 검증 항목
 
-- 스테이징 R2 실제 왕복(토큰 등록 후 스모크), 브라우저 직접 업로드 CORS(UI 이후)
+- 브라우저 직접 업로드 CORS(UI 이후 사용자 기기). (스테이징 R2 서버 측 왕복은 2026-10-01 통과)
 
 - 계정 플랜이 Free인지 대시보드 확인(사용자)
 - S-6 DB 카운터 원격 동작(Supabase 마이그레이션 경로 확정 후)
@@ -246,3 +246,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: Phase 1 PR woopinbell/bombyeol#3 생성(13커밋), CI 대기. Phase 2는 PR 머지 후 같은 작업 브랜치를 main에서 다시 따서 진행. 필요: 스테이징 R2 버킷 생성 승인, R2 S3 토큰(Worker 시크릿으로 사용자가 직접 등록).
 - 2026-10-01: PR woopinbell/bombyeol#3 CI 통과 후 사용자 머지(a2a1145). 작업 브랜치를 main에서 다시 땀. Phase 2는 스테이징 R2 버킷 생성 승인 대기.
 - 2026-10-01: 사용자 승인으로 R2 스테이징 버킷 생성(수명주기 접두사 실수 즉시 복구). Phase 2 커밋 10개, 스테이징 배포·마이그레이션, 스모크 경로. 대기: R2 S3 토큰.
+- 2026-10-01: R2 토큰 등록(사용자) → 스테이징 스모크 R2 왕복 통과. 다음: Phase 2 PR.
