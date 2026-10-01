@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import type { Prisma } from "@/generated/prisma/client";
-import { RATE_LIMITS, STORY_POLICY } from "@/lib/plan";
+import { MEDIA_POLICY, RATE_LIMITS, STORY_POLICY } from "@/lib/plan";
 import {
   STORY_CATEGORIES,
   STORY_PROMPTS,
@@ -9,7 +9,9 @@ import {
   type StoryPromptKey,
 } from "@/lib/story-prompts";
 import { inputError, limitError, notFound } from "@/server/errors";
+import { removeAsset, requireAttachableAssets, withAttachConflict } from "@/server/media/assets";
 import { hitRateLimit } from "@/server/rate-limit";
+import { mediaKeys } from "@/server/storage/types";
 import type { Context } from "@/server/trpc/context";
 import { spaceProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
@@ -32,6 +34,7 @@ const storySelect = {
   category: true,
   storyYear: true,
   petId: true,
+  photo: { select: { id: true, status: true } },
   narratorMemberId: true,
   narratorName: true,
   narratorLabel: true,
@@ -44,21 +47,44 @@ const storySelect = {
 
 type StoryRow = Prisma.StoryEntryGetPayload<{ select: typeof storySelect }>;
 
-/** 응답 모양: 화자·대필자는 작성 시점 스냅샷(멤버가 사라져도 표시된다, PRIVACY §5) */
-function toStory(row: StoryRow) {
-  const { narratorMemberId, narratorName, narratorLabel, scribeMemberId, scribeName, ...rest } =
-    row;
-  return {
-    ...rest,
-    narrator: { memberId: narratorMemberId, name: narratorName, label: narratorLabel },
-    scribe: scribeMemberId || scribeName ? { memberId: scribeMemberId, name: scribeName } : null,
-  };
-}
-
 type SpaceCtx = Context & {
   userId: string;
   member: { id: string; role: string; spaceId: string };
 };
+
+/**
+ * 응답 모양: 화자·대필자는 작성 시점 스냅샷(멤버가 사라져도 표시된다, PRIVACY §5).
+ * 사진은 파일 키 대신 짧은 TTL 읽기 URL(ARCHITECTURE §4). 삭제 도중 실패한 사진은 숨긴다.
+ */
+async function toStory(ctx: SpaceCtx, row: StoryRow) {
+  const {
+    narratorMemberId,
+    narratorName,
+    narratorLabel,
+    scribeMemberId,
+    scribeName,
+    photo,
+    ...rest
+  } = row;
+  const shown = photo?.status === "confirmed" ? photo : null;
+  return {
+    ...rest,
+    narrator: { memberId: narratorMemberId, name: narratorName, label: narratorLabel },
+    scribe: scribeMemberId || scribeName ? { memberId: scribeMemberId, name: scribeName } : null,
+    photo: shown && {
+      assetId: shown.id,
+      url: await ctx.storage.presignGet(
+        mediaKeys.final(ctx.member.spaceId, shown.id),
+        MEDIA_POLICY.readUrlTtlSec,
+      ),
+    },
+  };
+}
+
+/** 사진에 얽힌 이야기: 자기 Space의 confirmed 이미지이고 아직 다른 곳에 붙지 않은 자산(G-02) */
+async function checkPhoto(ctx: SpaceCtx, assetId: string | null | undefined) {
+  if (assetId) await requireAttachableAssets(ctx.prisma, ctx.member.spaceId, [assetId], ["image"]);
+}
 
 /**
  * 누가 누구의 이야기를 쓸 수 있나(PRD §4.3):
@@ -91,7 +117,13 @@ async function resolvePet(ctx: SpaceCtx, petId: string | null | undefined) {
 async function findStory(ctx: SpaceCtx, storyId: string) {
   const story = await ctx.prisma.storyEntry.findFirst({
     where: { id: storyId, spaceId: ctx.member.spaceId },
-    select: { id: true, createdById: true, narratorMemberId: true, promptKey: true },
+    select: {
+      id: true,
+      createdById: true,
+      narratorMemberId: true,
+      promptKey: true,
+      photo: { select: { id: true, bytes: true, status: true } },
+    },
   });
   if (!story) throw notFound("ITEM_NOT_FOUND");
   const owner = story.createdById === ctx.userId || story.narratorMemberId === ctx.member.id;
@@ -139,6 +171,8 @@ export const storyRouter = router({
         body,
         storyYear: storyYear.optional(),
         petId: entityId.optional(),
+        /** 사진에 얽힌 이야기(옛날 사진 한 장) */
+        photoAssetId: entityId.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -147,6 +181,7 @@ export const storyRouter = router({
         throw inputError("PROMPT_INVALID");
       }
       const petId = await resolvePet(ctx, input.petId);
+      await checkPhoto(ctx, input.photoAssetId);
       const ok = await hitRateLimit(
         ctx.prisma,
         `story-write:${ctx.userId}`,
@@ -160,27 +195,30 @@ export const storyRouter = router({
             select: { name: true },
           })
         : null;
-      const row = await ctx.prisma.storyEntry.create({
-        data: {
-          spaceId: ctx.member.spaceId,
-          narratorMemberId: narrator.id,
-          narratorName: narrator.user.name,
-          narratorLabel: narrator.relationLabel,
-          scribeMemberId: scribing ? ctx.member.id : null,
-          scribeName: scribe?.name ?? null,
-          promptKey: input.promptKey ?? null,
-          category: input.promptKey
-            ? STORY_PROMPTS[input.promptKey as StoryPromptKey]
-            : (input.category ?? null),
-          title: input.title,
-          body: input.body,
-          storyYear: input.storyYear,
-          petId,
-          createdById: ctx.userId,
-        },
-        select: storySelect,
-      });
-      return toStory(row);
+      const row = await withAttachConflict(() =>
+        ctx.prisma.storyEntry.create({
+          data: {
+            spaceId: ctx.member.spaceId,
+            narratorMemberId: narrator.id,
+            narratorName: narrator.user.name,
+            narratorLabel: narrator.relationLabel,
+            scribeMemberId: scribing ? ctx.member.id : null,
+            scribeName: scribe?.name ?? null,
+            promptKey: input.promptKey ?? null,
+            category: input.promptKey
+              ? STORY_PROMPTS[input.promptKey as StoryPromptKey]
+              : (input.category ?? null),
+            title: input.title,
+            body: input.body,
+            storyYear: input.storyYear,
+            petId,
+            photoAssetId: input.photoAssetId,
+            createdById: ctx.userId,
+          },
+          select: storySelect,
+        }),
+      );
+      return toStory(ctx, row);
     }),
 
   /** 고치기: 쓴 사람(대필자 포함) 또는 화자 본인. 카드에 답한 이야기의 카테고리는 카드를 따른다 */
@@ -193,30 +231,46 @@ export const storyRouter = router({
         storyYear: storyYear.nullable().optional(),
         category: categoryInput.nullable().optional(),
         petId: entityId.nullable().optional(),
+        /** 사진 바꾸기·빼기 — 이전 사진 파일은 지운다(G-05) */
+        photoAssetId: entityId.nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { story, owner } = await findStory(ctx, input.storyId);
       if (!owner) throw new TRPCError({ code: "FORBIDDEN" });
       if (story.promptKey && input.category !== undefined) throw inputError("PROMPT_INVALID");
-      const row = await ctx.prisma.storyEntry.update({
-        where: { id: story.id },
-        data: {
-          title: input.title,
-          body: input.body,
-          storyYear: input.storyYear,
-          category: input.category,
-          petId: await resolvePet(ctx, input.petId),
-        },
-        select: storySelect,
-      });
-      return toStory(row);
+      const photoChanged =
+        input.photoAssetId !== undefined && input.photoAssetId !== (story.photo?.id ?? null);
+      if (photoChanged) await checkPhoto(ctx, input.photoAssetId);
+      const petId = await resolvePet(ctx, input.petId);
+      const row = await withAttachConflict(() =>
+        ctx.prisma.storyEntry.update({
+          where: { id: story.id },
+          data: {
+            title: input.title,
+            body: input.body,
+            storyYear: input.storyYear,
+            category: input.category,
+            petId,
+            photoAssetId: photoChanged ? input.photoAssetId : undefined,
+          },
+          select: storySelect,
+        }),
+      );
+      if (photoChanged && story.photo) {
+        await removeAsset(ctx.prisma, ctx.storage, ctx.member.spaceId, story.photo);
+      }
+      return toStory(ctx, row);
     }),
 
-  /** 지우기: 쓴 사람, 화자 본인 또는 parent */
+  /**
+   * 지우기: 쓴 사람, 화자 본인 또는 parent. 사진을 R2에서 먼저 지우고(G-05) 이야기를 지운다.
+   * 중간에 실패하면 이야기가 남아 다시 시도할 수 있다.
+   */
   delete: spaceProcedure.input(z.object({ storyId: entityId })).mutation(async ({ ctx, input }) => {
     const { story, owner } = await findStory(ctx, input.storyId);
     if (!owner && ctx.member.role !== "parent") throw new TRPCError({ code: "FORBIDDEN" });
+    if (story.photo) await removeAsset(ctx.prisma, ctx.storage, ctx.member.spaceId, story.photo);
     await ctx.prisma.storyEntry.deleteMany({ where: { id: story.id } });
     return { ok: true };
   }),
@@ -253,7 +307,7 @@ export const storyRouter = router({
       const page = rows.slice(0, STORY_POLICY.pageSize);
       const last = page.at(-1);
       return {
-        items: page.map(toStory),
+        items: await Promise.all(page.map((row) => toStory(ctx, row))),
         nextCursor:
           rows.length > STORY_POLICY.pageSize && last
             ? { createdAt: last.createdAt, id: last.id }
@@ -268,6 +322,6 @@ export const storyRouter = router({
       select: storySelect,
     });
     if (!row) throw notFound("ITEM_NOT_FOUND");
-    return toStory(row);
+    return toStory(ctx, row);
   }),
 });
