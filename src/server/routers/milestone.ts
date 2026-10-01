@@ -77,6 +77,13 @@ export const milestoneRouter = router({
       if (!isNotFuture(input.recordedAt)) throw inputError("DATE_IN_FUTURE");
       const { preset, value } = parseValue(input.subject.type, input.kind, input.value);
       const subject = await resolveSubject(ctx.prisma, spaceId, input.subject);
+      // 별이 된 반려동물에는 새 일상 기록(마일스톤)을 더하지 않는다. 추억 사진(Moment)은 열려 있다(PRD §4.5)
+      if (subject.petId) {
+        const memorial = await ctx.prisma.memorialProfile.count({
+          where: { petId: subject.petId },
+        });
+        if (memorial) throw inputError("MEMORIAL_READ_ONLY");
+      }
       const ok = await hitRateLimit(
         ctx.prisma,
         `record-write:${ctx.userId}`,

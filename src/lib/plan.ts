@@ -19,8 +19,14 @@ export const RATE_LIMITS = {
   recordWritePerUser: { limit: 300, windowSec: 24 * 60 * 60 },
   /** G-07: 좋아요 토글(사용자당) */
   likePerUser: { limit: 300, windowSec: 60 * 60 },
+  /** G-07: 별 하나 토글(사용자당) */
+  starPerUser: { limit: 300, windowSec: 60 * 60 },
   /** G-07: 댓글 작성(사용자당) */
   commentPerUser: { limit: 60, windowSec: 60 * 60 },
+  /** G-07: 이야기 작성(사용자당, 대필 포함) */
+  storyWritePerUser: { limit: 100, windowSec: 24 * 60 * 60 },
+  /** G-07: 물어보기(사용자당) */
+  storyAskPerUser: { limit: 30, windowSec: 24 * 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 /** G-11: 계정 단위 상한(요금제와 무관) */
@@ -84,6 +90,31 @@ export const REACTION_POLICY = {
   commentMaxChars: 500,
   /** 댓글 한 번에 가져오는 수 */
   pageSize: 50,
+} as const;
+
+/** 이야기(별) 정책(요금제 무관) */
+export const STORY_POLICY = {
+  /** 본문 최대 글자 수(옛 기억은 길다) */
+  bodyMaxChars: 5000,
+  /** 제목 최대 글자 수 */
+  titleMaxChars: 60,
+  /** 이야기 속 시기(연) 하한 — DB 체크 제약(1850)과 맞춘다 */
+  minYear: 1850,
+  /** 직접 쓴 질문 최대 글자 수 */
+  questionMaxChars: 200,
+  /** G-07: 어르신 한 분께 동시에 열려 있는(답 없는) 물어보기 수 */
+  openAsksPerMember: 30,
+  /** 목록 한 번에 가져오는 수 */
+  pageSize: 20,
+} as const;
+
+/**
+ * 기념(별이 되신 가족·반려동물) 정책(PRD §4.5, PRIVACY §5). 요금제와 무관하다 —
+ * 구독이 만료돼도 기념 대상의 이야기·사진은 지우지 않고 읽기·내려받기를 유지한다(Phase 8 게이팅의 상위 제약).
+ */
+export const MEMORIAL_POLICY = {
+  /** 기억 메모 최대 글자 수 */
+  noteMaxChars: 500,
 } as const;
 
 type TierLimits = {

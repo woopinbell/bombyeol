@@ -2,11 +2,13 @@ import { publicProcedure, router } from "@/server/trpc/init";
 import { childRouter } from "./child";
 import { inviteRouter } from "./invite";
 import { mediaRouter } from "./media";
+import { memorialRouter } from "./memorial";
 import { milestoneRouter } from "./milestone";
 import { momentRouter } from "./moment";
 import { petRouter } from "./pet";
 import { reactionRouter } from "./reaction";
 import { spaceRouter } from "./space";
+import { storyRouter } from "./story";
 import { userRouter } from "./user";
 
 export const appRouter = router({
@@ -24,6 +26,8 @@ export const appRouter = router({
   moment: momentRouter,
   milestone: milestoneRouter,
   reaction: reactionRouter,
+  story: storyRouter,
+  memorial: memorialRouter,
 });
 
 export type AppRouter = typeof appRouter;
