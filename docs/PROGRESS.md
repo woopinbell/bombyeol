@@ -24,9 +24,18 @@
 | V-2 | **통과** | `.docs/`에서 `git push origin docs` 성공(이 PROGRESS 갱신 커밋 자체로 검증, 시험용 커밋 없음). 세션 지정 브랜치(`claude/*`) 외 이름도 푸시 가능 |
 | V-3 | **해당 없음/실패로 간주** | 링크는 부트스트랩(첫 프롬프트) 이후 생기므로 세션 시작 시 CLAUDE.md 자동 로드는 안 된다. 링크·`.docs/`는 exclude 대상이라 새 clone에 없음 → 첫 프롬프트로 직접 읽게 하는 현 방식 유지(또는 setup 스크립트/SessionStart 훅, Q-HOOK) |
 | V-4 | **가능(도구 확인)** | 세션에 `add_repo` 도구가 있어 두 번째 리포를 붙일 수 있다(실제 추가는 하지 않음). 별도 docs 리포 대안이 필요해지면 사용 |
-| V-5 | **문서 기준: 새 세션 필요** | 환경 문서: 변수 변경은 "새 세션이 반영". 세션 안에서 재열기 동작은 검증 불가 → 키 추가 후엔 항상 새 세션으로 재개 |
+| V-5 | **통과(재열기 반영됨)** | 2026-10-01 사용자가 환경변수 추가 후 같은 세션을 이어가자 새 값이 보였다(VM 파일 `.docs/` 등은 그대로 유지). 단 반영되지 않는 경우를 대비해 안 보이면 새 세션으로 재개 |
 
-부가 확인: Node 22.22, npm 10.9, Docker 29.3 사용 가능. 프록시 경유로 `api.cloudflare.com`, `kauth.kakao.com` 실제 응답 200 확인(S-8 사전 확인). 현재 환경변수 `CLOUDFLARE_API_TOKEN`·`CLOUDFLARE_ACCOUNT_ID`·`DATABASE_URL` 모두 **미설정**. 세션 VM 시계는 UTC(문서 날짜는 KST 기준).
+부가 확인: Node 22.22, npm 10.9, Docker 29.3 사용 가능. 프록시 경유로 `api.cloudflare.com`, `kauth.kakao.com` 실제 응답 200 확인(S-8 사전 확인). (최초엔 Phase S 키 미설정 → 아래 "Phase S 키 확인" 참고.) 세션 VM 시계는 UTC(문서 날짜는 KST 기준).
+
+## Phase S 키 확인 (2026-10-01, 값은 출력하지 않고 확인)
+
+- `CLOUDFLARE_API_TOKEN`: 설정됨, `/user/tokens/verify` → active(사용자 토큰; 계정 토큰 엔드포인트는 1000 오류로 해당 없음). 계정 범위 API 조회 성공: Workers 스크립트 0, **R2 버킷 1개(기존)**, Hyperdrive 설정 0.
+- `CLOUDFLARE_ACCOUNT_ID`: 설정됨, 32자 hex 형식 확인.
+- `DATABASE_URL`: 설정됨. 공급자 **Supabase**, **직결(direct) 연결 문자열**(`db.<ref>.supabase.co:5432`, 쿼리 파라미터 없음).
+  - 이 호스트는 **AAAA(IPv6)만** 응답한다(Supabase 직결의 기본 특성). 클라우드 VM은 IPv6 미지원, 프록시 밖 직접 TCP(5432)도 타임아웃 → **클라우드 VM에서 DB 직접 접속 불가**.
+  - 프록시 CONNECT 터널로 5432 도달은 가능했지만(200), 로컬 포워더로 psql을 붙이는 방식은 세션 권한 정책에서 거부됨. 우회 시도하지 않음.
+  - 결론: 클라우드 세션에서는 DB 왕복을 **로컬 Docker Postgres**로 검증하고(원래 테스트 방침과 동일), 실제 Supabase 왕복은 **배포된 Worker → Hyperdrive** 경로에서 검증한다(S-1 통과 기준이 바로 이것). Hyperdrive가 Supabase 직결(IPv6) 문자열을 받는지, 아니면 Supavisor 풀러(IPv4) 문자열이 필요한지는 S-1에서 확인(미검증).
 
 ## 스파이크 결과 (기록란)
 
@@ -54,3 +63,4 @@
 - 2026-10-01(추가 결정): 봄별 디자인은 Kaddie 이후. COMMIT_PLAN에 Phase DS와 진행 순서 메모 추가.
 - 2026-10-01(정책 변경): 문서 브랜치가 분리되어 있으므로 docs 커밋은 지시 없이 수시로 자율 수행(main 금지). WORKFLOW §4, CLAUDE.md, CLOUD_SESSION 개정.
 - 2026-10-01(첫 클라우드 세션): 부트스트랩 실행, V-1~V-5 검증(위 표). S-1 착수는 사용자 확인 대기(Phase S 키 미설정).
+- 2026-10-01: 사용자가 Phase S 키 주입 → 키 확인(위 표). Cloudflare 정상, Supabase DB는 VM에서 직접 도달 불가로 S-1 방식 조정 제안. S-1 착수 사용자 확인 대기.
