@@ -4,7 +4,8 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 4): **Phase 4 이야기(별) 서버 main 머지 완료(PR woopinbell/bombyeol#6, 머지 커밋 fc94348), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 4".
+- 단계(2026-10-01, Phase 5): **Phase 5 우리·임신 기록 서버 구현 완료(UI 제외), 작업 브랜치 푸시 — 설계 결정 ①~⑤ 사용자 확인 대기, main 미머지** — 아래 "현재 상태 — Phase 5".
+- (이전) 단계(2026-10-01, Phase 4): **Phase 4 이야기(별) 서버 main 머지 완료(PR woopinbell/bombyeol#6, 머지 커밋 fc94348), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 4".
 - (이전) 단계(2026-10-01, Phase 3): **Phase 3 오늘(봄) 서버 main 머지 완료(PR woopinbell/bombyeol#5, 머지 커밋 3b0d90d), 스테이징 마이그레이션·배포 완료, R2 Secret 3종 재등록 후 스모크 전부 통과** — 아래 "현재 상태 — Phase 3".
 - (이전) 단계(2026-10-01, Phase 2): **Phase 2 미디어 서버 커밋 완료, 스테이징 배포, R2 토큰 대기** — 아래 "현재 상태 — Phase 2".
 - (이전) 단계(2026-10-01, Phase 1): **Phase 1 서버 커밋 완료(온보딩 UI 제외), 스테이징 배포됨** — 아래 "현재 상태 — Phase 1".
@@ -13,6 +14,36 @@
 - (이전 기록) 기반 문서 작성 완료, 리포 부트스트랩 완료(2026-10-01). GitHub private 리포 `woopinbell/bombyeol` 생성, `main`(빈 초기 커밋 9744db2)·`docs`(고아, 8621748) 푸시 완료. 클라우드 환경은 사용자가 claude.ai/code에서 만든다(허용 도메인 Custom, 개발용 키만). 첫 세션 프롬프트는 `docs/CLOUD_SESSION.md` §4.
 - 결정 완료(사용자): 식별자 `bombyeol` / 서버리스 재선정 / 웹·PWA 우선 후 Android / 새 GitHub private 리포 + `docs` 고아 브랜치 / 비용 방어는 설계 제약 / 개인정보 초기 설계 / 텍스트 우선·음성 후속 / 가족 1 Space 안에 여러 아이 / 카카오+Google 로그인 / Cloudflare 검토 / next-intl(한국어만 출시) / 임신 기록·고인 처리 V1 포함 / PDF 다운로드 프리미엄 / 웹푸시 + 카카오톡 공유 / devlog는 docs 브랜치에만 / hamkke 절대 원칙 4종 계승.
 - 미해결: `OPEN_QUESTIONS.md` (특히 **Q-PAY 결제 공급자 재결정**).
+
+## 현재 상태 — Phase 5 (2026-10-01)
+
+- 작업 브랜치 `claude/compassionate-knuth-whf5li`(main fc94348에서 시작) 8커밋, 푸시 완료: prisma(Consent·PregnancyRecord·FamilyEvent) → consent → pregnancy → test(pregnancy) parents_only 비노출 → refactor(memorial) 공용 기념일 계산 → calendar → family 멤버 관리 → family 다가오는 카드. **PR·main 머지는 아직 — 사용자 확인 대기(COMMIT_PLAN Phase 5 메모의 ①~⑤).** 우리 탭 화면(`feat(us)`)은 Phase DS 이후.
+- 로컬 검증: format·lint·typecheck·Vitest **223건** 통과(181 → 223), OpenNext 빌드 통과, `wrangler deploy --dry-run --env staging` 13.46 MiB(gzip 3.62 MiB). visibility 필터를 빼면 비노출 테스트 8건 중 6건이 실패하는 것도 확인(테스트가 실제로 막는지 점검).
+- 새 마이그레이션 `20261001144552_us`: enum 4개, 테이블 3개, 체크 제약 4개(Consent 범위 — 약관·처리방침은 spaceId 없음/아이·임신은 있음, 초음파 ↔ 사진, 메모 글 필수, 일정 끝 ≥ 시작). main 머지 시 `Migrate staging DB`가 자동 적용.
+- 새 API(전부 서버, tRPC): `consent.status·grantAccount·grantSpace·withdraw`, `pregnancy.create·update·delete·list·get·progress`, `calendar.create·update·delete·list`, `family.members·upcoming·updateLabel·changeRole·remove·leave`.
+- 설계 요약은 COMMIT_PLAN Phase 5 설계 메모. 핵심:
+  - 임신 기록은 쓰는 parent의 유효한 `pregnancy` 동의(현재 버전·미철회)가 있어야 쓰고 고친다. 기본 `parents_only`, parent가 아니면 쿼리 조건에 `visibility = family` — 숨은 기록은 id로도 `NOT_FOUND`(없는 기록과 같은 오류), 페이지 커서에도 흔적 없음. 초음파 자산은 다른 곳에 붙일 수 없다(`unattachedAssetWhere`에 추가).
+  - 주차는 저장하지 않고 조회 시점에 아이의 현재 예정일로 계산(280일 기준).
+  - 동의 철회 시 내 기록 지우기(R2 먼저) 또는 가족 공개 거두기. 약관·처리방침·아이 정보 동의는 기록·조회만 — 전체 API 게이트는 온보딩 커밋과 함께(확인 요청 ①).
+  - 캘린더: 시각 있는 일정 = UTC 순간, 종일 = UTC 자정 날짜. 조회는 현지 날짜 범위 + UTC 차이(분). 매년 반복은 조회 시점에 펼침.
+  - 멤버 관리: 자기 자신·Space 만든 사람·기념 상태인 분은 역할 변경·내보내기 대상 아님. 역할 변경은 대기 초대 포함 정원(G-11) 재검사. 내보내면 그 사람이 낸 미사용 초대를 거둔다.
+  - 새 상한·리밋(`plan.ts` 초안): 임신 메모 1000자·검진 일정은 예정일+60일까지, 일정 쓰기 100/일(G-07)·Space당 일정 500(G-11)·제목 40자·메모 500자·일정 길이 31일·조회 범위 400일, 우리 탭 카드 기본 30일(최대 90일). 임신 기록은 기존 글 기록 리밋(300/일)을 마일스톤·일기와 함께 쓴다.
+- 남긴 것(의도적으로 범위 밖): 가입 동의 전체 게이트(온보딩), 아이 정보 동의 철회·아이 삭제(Phase 7), 임신 관련 알림 문구(Phase 6 — "새 소식이 있어요"), 임신 기록 반응(두지 않음 — 확인 요청 ③), 사람 생일 자동 카드(멤버 생일 필드 없음 — 캘린더에 `birthday`로 등록), DST 경계의 반복 일정 현지 시각 보정.
+- 환경 메모: 이 VM에서 Docker Hub가 `429 Too Many Requests`로 `postgres:17.11` pull을 거부했다 → `docker pull mirror.gcr.io/library/postgres:17.11 && docker tag mirror.gcr.io/library/postgres:17.11 postgres:17.11` 후 `npm run db:up`으로 해결. 마이그레이션 생성 후 `npx prisma generate`를 따로 돌려야 클라이언트가 갱신됐다.
+
+### 확인 요청 (Phase 5 머지 전)
+
+COMMIT_PLAN Phase 5 메모의 ①~⑤: ① 가입 동의 게이트를 온보딩 때 걸기 ② 철회 시 "지우기/공개 거두기" 선택 ③ 임신 기록 권한(쓴 사람만 고치기·공개, 다른 parent는 좁히기만, 반응 없음) ④ 아이 프로필(태명·예정일)은 가족에게 계속 보임 ⑤ 만든 사람 보호·나가기 불가. 승인되면 PR → CI → 머지 커밋 → 스테이징 마이그레이션·스모크(Phase 3·4와 같은 방식).
+
+### 세션 이동 권고 (2026-10-01, Phase 5 구현 시점)
+
+- **확인·PR·머지·스테이징 반영까지는 이 세션에서 계속**(구현 맥락이 있고, 환경 변경 필요 없음 — Phase 5에 새 키 없음). Phase 6(알림)부터는 새 세션 권장: FCM 키(ENV_MANIFEST Phase 6 항목)로 환경변수를 바꿔야 할 가능성이 높다.
+
+### 다음 할 일 (Phase 5 이후)
+
+1. 사용자 확인(①~⑤) → PR·CI·main 머지(머지 커밋) → 스테이징 마이그레이션 자동 적용 확인·배포·스모크(`pregnancy.list`·`calendar.list`·`family.upcoming` 비로그인 401 등).
+2. 다음 개발: Phase 6(알림) — 키 필요 여부는 ENV_MANIFEST 확인 후 이름부터 알리고 멈춘다.
+3. (Phase 3에서 이어짐) 브라우저 직접 업로드 CORS는 UI 이후 사용자 기기.
 
 ## 현재 상태 — Phase 4 (2026-10-01)
 

@@ -113,7 +113,7 @@
 
 ## Phase 5 — 우리·임신 기록
 
-> 2026-10-01 서버 설계(세션 제안 — **머지 전 사용자 확인 필요**. 수치는 `plan.ts` 초안):
+> 2026-10-01 서버 설계(세션 제안 — 구현 완료, 브랜치 `claude/compassionate-knuth-whf5li`. **머지 전 사용자 확인 대기**: 아래 ①~⑤. 수치는 `plan.ts` 초안):
 > - **동의(Consent)**: 추가 전용 기록 `Consent(userId, spaceId?, kind, version, grantedAt, withdrawnAt?)`. kind = `terms`·`privacy`(사용자 단위, spaceId 없음) / `child_data`(법정대리인 동의)·`pregnancy`(Space 단위). 현재 문구 버전은 코드 카탈로그 `src/lib/consents.ts` 한 곳 — 버전이 바뀌면 옛 동의는 "유효하지 않음"이 되어 다시 받는다. 유효 = 철회 안 됨 + 현재 버전. 같은 동의를 다시 누르면 기존 행을 돌려준다(advisory lock).
 > - **서버 강제 범위(이번)**: **임신 동의만 강제** — 임신 기록 쓰기·고치기는 쓰는 사람의 유효한 `pregnancy` 동의가 있어야 한다(`CONSENT_REQUIRED`). 동의는 parent만 할 수 있다(임신 기록을 쓰는 사람). `terms`·`privacy`·`child_data`는 이번엔 **기록·조회(`consent.status`로 빠진 동의 목록)만** 하고, 로그인 후 모든 API를 막는 게이트는 온보딩 화면 커밋(Phase 1 `feat(onboarding)`)에서 함께 건다(지금 걸면 화면 없이 모든 API가 막힌다). → **확인 요청 ①**
 > - **철회**: 이번엔 `pregnancy`만 철회 가능(약관·처리방침 철회 = 계정 삭제는 Phase 7, 아이 정보 철회 = 아이 삭제도 Phase 7). 철회 시 옵션 `deleteRecords`: 참이면 그 Space에서 **내가 쓴** 임신 기록과 초음파 파일을 지운다(R2 먼저, G-05). 거짓이면 기록은 남기되 **내가 쓴 기록을 전부 `parents_only`로 되돌린다**(동의를 거뒀으니 가족 공개도 거둔다 — 보수적). 철회 후에는 새 기록·수정 불가. → **확인 요청 ②**
@@ -125,14 +125,14 @@
 > - **멤버 관리**: 관계 표시명은 본인 또는 parent가 고친다. 역할 변경·내보내기는 parent만, **자기 자신과 Space를 만든 사람은 대상이 아니다**(마지막 관리자 소실·관리자끼리 서로 내보내기 방지). 역할 변경은 요금제 역할별 인원 상한(G-11, `MEMBER_ROLE_LIMIT`)을 다시 검사(advisory lock). 기념 상태인 분은 역할 변경·내보내기 불가(되돌린 뒤). 스스로 나가기(`leave`)는 만든 사람만 불가(Space 삭제는 Phase 7). 멤버가 빠지면 이야기는 스냅샷으로 남고 받은 물어보기는 사라진다(기존 FK 규칙). → **확인 요청 ⑤**
 > - **우리 탭 카드(`family.upcoming`)**: 다음 가족 모임 D-day(가장 가까운 `gathering`, 반복 포함)와 앞으로 N일(초안 30일) 안의 생일(태어난 아이·멤버 없음 — 사람 생일은 사용자가 캘린더에 `birthday`로 등록)·반려동물 생일·입양기념일·직접 등록한 기념일. 모두 조회 시점 계산, `today`는 클라이언트 현지 날짜(Phase 4 기일과 같은 방식). 기일 계산 함수는 `src/lib/anniversary.ts`로 옮겨 기일·생일이 함께 쓴다.
 
-- [ ] `chore(prisma): FamilyEvent·PregnancyRecord·Consent 스키마 정의`
-- [ ] `feat(consent): 동의 기록 및 임신 정보 별도 동의 구현`
-- [ ] `feat(pregnancy): 임신 기록(주차 계산·초음파·메모) 및 visibility 서버 강제 구현` [PRIVACY §3]
-- [ ] `test(pregnancy): parents_only 비노출 통합 테스트`
-- [ ] `feat(calendar): 가족 캘린더 CRUD 구현(UTC 저장·로컬 표시)` [G-07, G-11]
-- [ ] `feat(family): 멤버·역할·관계 표시명 관리 구현` [G-11]
-- [ ] (추가) `refactor(memorial): 기일 계산을 공용 기념일 계산으로 분리`
-- [ ] `feat(family): 다음 가족 모임 D-day 및 생일·입양기념일 카드 구현`
+- [x] `chore(prisma): FamilyEvent·PregnancyRecord·Consent 스키마 정의` — 체크 제약 4개(동의 범위, 초음파↔사진, 메모 글 필수, 일정 끝≥시작)
+- [x] `feat(consent): 동의 기록 및 임신 정보 별도 동의 구현` — `consent.status`·`grantAccount`·`grantSpace`·`withdraw`, 버전 카탈로그 `src/lib/consents.ts`
+- [x] `feat(pregnancy): 임신 기록(주차 계산·초음파·메모) 및 visibility 서버 강제 구현` [PRIVACY §3] — 철회 시 내 기록 삭제/공개 거두기 포함
+- [x] `test(pregnancy): parents_only 비노출 통합 테스트` — 필터를 빼면 8건 중 6건 실패하는 것 확인(뮤테이션 점검)
+- [x] (추가, 순서 앞당김) `refactor(memorial): 기일 계산을 공용 기념일 계산으로 분리` — `src/lib/anniversary.ts`(캘린더 반복 회차도 사용)
+- [x] `feat(calendar): 가족 캘린더 CRUD 구현(UTC 저장·로컬 표시)` [G-07, G-11]
+- [x] `feat(family): 멤버·역할·관계 표시명 관리 구현` [G-11]
+- [x] `feat(family): 다음 가족 모임 D-day 및 생일·입양기념일 카드 구현` — 기념 상태 반려동물은 생일·입양 카드 대신 기일 카드
 - [ ] `feat(us): 우리 탭 화면 구성` — **Phase DS 토큰 확정 후**
 
 ## Phase 6 — 알림
