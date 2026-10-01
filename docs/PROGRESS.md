@@ -29,6 +29,15 @@
   6. 상한 초안: 이야기 쓰기 100/일, 물어보기 30/일·어르신당 열린 물어보기 30, 별 하나 300/시간, 본문 5000자.
 - 남긴 것(의도적으로 범위 밖): 기념 상태 멤버의 계정 로그인·멤버 수 상한 처리(Phase 7 삭제 연쇄와 함께 검토), 물어보기 알림(Phase 6), 이야기 PDF(Phase 8), 반응 알림(Phase 6), 이야기 모음 통계(카테고리·시기별 개수 — 화면 만들 때 필요하면).
 
+### 세션 이동 권고 (2026-10-01, Phase 4 종료 시점)
+
+- **새 세션으로 옮긴다.** 이 세션은 Phase 4 구현·PR·머지·스테이징 반영까지 마쳐 컨텍스트가 크고, 진행 중 PR이 없다(PR woopinbell/bombyeol#6 머지·구독 해제 완료).
+- 환경 변경 필요 없음: Phase 5 서버는 새 키가 없다(ENV_MANIFEST에 Phase 5 항목 없음).
+- 코드 상태: 작업 브랜치 `claude/awesome-cannon-ac5isr` = main fc94348(미푸시 변경 없음). 새 세션은 main에서 자기 작업 브랜치를 딴다.
+- 새 세션 시작 시: Docker 데몬이 꺼져 있을 수 있음(`dockerd &` → `npm run db:up`), `npm ci`, 스키마 변경 후 `npx prisma generate`.
+- Phase 5는 임신(건강) 정보·동의 기록이 있어 `PRIVACY_AND_LEGAL.md`(특히 §3 임신 visibility 서버 강제)를 먼저 읽는다. 설계 결정은 COMMIT_PLAN Phase 5 설계 메모로 제안하고, main 머지 전에 사용자 확인을 받는다(Phase 3·4와 같은 방식).
+- 새 세션 첫 프롬프트(`CLOUD_SESSION.md` §4.1, 3번만 채움): "오늘 할 일: Phase 5(우리·임신 기록) 서버 먼저, UI 제외. PRIVACY_AND_LEGAL 기준으로 임신 visibility·동의를 서버에서 강제하고, 설계 결정은 COMMIT_PLAN 메모로 정리해 머지 전 확인받아."
+
 ### 다음 할 일 (Phase 4 이후)
 
 1. ~~사용자 확인·PR·머지·스테이징 반영~~ 완료(PR woopinbell/bombyeol#6, fc94348, 버전 38ef950d).
