@@ -1,12 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import type { Prisma } from "@/generated/prisma/client";
-import { MEDIA_POLICY, MOMENT_POLICY } from "@/lib/plan";
-import { inputError, mediaError, notFound } from "@/server/errors";
+import type { MomentKind, Prisma } from "@/generated/prisma/client";
+import { MEDIA_POLICY, MOMENT_POLICY, RATE_LIMITS } from "@/lib/plan";
+import { inputError, limitError, mediaError, notFound } from "@/server/errors";
 import { removeAsset, requireAttachableAssets, withAttachConflict } from "@/server/media/assets";
 import { mediaKeys, type MediaStorage } from "@/server/storage/types";
-import { canRecordFor, resolveSubject, subjectInput } from "@/server/subjects";
-import { spaceProcedure } from "@/server/trpc/procedures";
+import { hitRateLimit } from "@/server/rate-limit";
+import { canRecordFor, resolveSubject, subjectInput, type SubjectInput } from "@/server/subjects";
+import type { Context } from "@/server/trpc/context";
+import { parentProcedure, spaceProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
 import { entityId, isNotFuture } from "./inputs";
 
@@ -15,7 +17,6 @@ const takenAt = z.date().refine((d) => d.getUTCFullYear() >= 1900, { message: "D
 
 const mediaItems = z
   .array(z.object({ assetId: entityId, thumbnailAssetId: entityId.optional() }))
-  .min(1)
   .max(MOMENT_POLICY.maxMediaPerMoment);
 
 /** 첨부 검증(G-02): 원본은 사진·영상, 썸네일은 사진. 같은 자산을 두 번 쓸 수 없다 */
@@ -52,6 +53,8 @@ const momentSelect = {
   },
 } satisfies Prisma.MomentSelect;
 
+type SpaceCtx = Context & { userId: string; member: { spaceId: string } };
+
 type MomentRow = Prisma.MomentGetPayload<{ select: typeof momentSelect }>;
 
 /** 응답용: 파일 키 대신 짧은 TTL 읽기 URL(영구 public URL 금지, ARCHITECTURE §4) */
@@ -70,6 +73,44 @@ async function withReadUrls(storage: MediaStorage, spaceId: string, moment: Mome
   return { ...moment, media };
 }
 
+type CreateInput = {
+  subject: SubjectInput;
+  body?: string;
+  takenAt?: Date;
+  media: z.infer<typeof mediaItems>;
+};
+
+/** 사진·영상 기록과 일기가 함께 쓰는 생성 경로(대상 확인 → 첨부 검증 G-02 → 저장) */
+async function createMoment(ctx: SpaceCtx, kind: MomentKind, input: CreateInput) {
+  const spaceId = ctx.member.spaceId;
+  const when = input.takenAt ?? new Date();
+  if (!isNotFuture(when)) throw inputError("DATE_IN_FUTURE");
+  const subject = await resolveSubject(ctx.prisma, spaceId, input.subject);
+  await checkMedia(ctx.prisma, spaceId, input.media);
+
+  const moment = await withAttachConflict(() =>
+    ctx.prisma.moment.create({
+      data: {
+        spaceId,
+        ...subject,
+        kind,
+        body: input.body,
+        takenAt: when,
+        createdById: ctx.userId,
+        media: {
+          create: input.media.map((m, position) => ({
+            position,
+            assetId: m.assetId,
+            thumbnailAssetId: m.thumbnailAssetId,
+          })),
+        },
+      },
+      select: momentSelect,
+    }),
+  );
+  return withReadUrls(ctx.storage, spaceId, moment);
+}
+
 export const momentRouter = router({
   /**
    * 사진·영상 기록. 대상(아이·반려동물·가족 전체)에 따라 기록 권한이 다르다.
@@ -84,37 +125,64 @@ export const momentRouter = router({
         media: mediaItems,
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      const spaceId = ctx.member.spaceId;
+    .mutation(({ ctx, input }) => {
       if (!canRecordFor(ctx.member.role, input.subject.type)) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
-      const when = input.takenAt ?? new Date();
-      if (!isNotFuture(when)) throw inputError("DATE_IN_FUTURE");
-      const subject = await resolveSubject(ctx.prisma, spaceId, input.subject);
-      await checkMedia(ctx.prisma, spaceId, input.media);
+      if (input.media.length === 0) throw inputError("MEDIA_REQUIRED");
+      return createMoment(ctx, "media", input);
+    }),
 
-      const moment = await withAttachConflict(() =>
-        ctx.prisma.moment.create({
-          data: {
-            spaceId,
-            ...subject,
-            kind: "media",
-            body: input.body,
-            takenAt: when,
-            createdById: ctx.userId,
-            media: {
-              create: input.media.map((m, position) => ({
-                position,
-                assetId: m.assetId,
-                thumbnailAssetId: m.thumbnailAssetId,
-              })),
-            },
-          },
-          select: momentSelect,
-        }),
+  /**
+   * 부모 일기(PRD §4.2): 짧은 글이 필수, 사진·영상은 선택으로 묶는다. parent만 쓴다.
+   * 파일이 없을 수 있으므로 글 쓰기 리밋을 건다(G-07).
+   */
+  createDiary: parentProcedure
+    .input(
+      z.object({
+        subject: subjectInput,
+        body,
+        takenAt: takenAt.optional(),
+        media: mediaItems.default([]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const ok = await hitRateLimit(
+        ctx.prisma,
+        `record-write:${ctx.userId}`,
+        RATE_LIMITS.recordWritePerUser,
       );
-      return withReadUrls(ctx.storage, spaceId, moment);
+      if (!ok) throw limitError("RATE_LIMITED");
+      return createMoment(ctx, "diary", input);
+    }),
+
+  /**
+   * 글·날짜 수정: 작성자만(다른 사람의 글을 대신 고치지 않는다). 일기는 글을 비울 수 없다.
+   */
+  update: spaceProcedure
+    .input(
+      z.object({
+        momentId: entityId,
+        body: body.nullable().optional(),
+        takenAt: takenAt.optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const spaceId = ctx.member.spaceId;
+      const moment = await ctx.prisma.moment.findFirst({
+        where: { id: input.momentId, spaceId },
+        select: { id: true, kind: true, createdById: true },
+      });
+      if (!moment) throw notFound("ITEM_NOT_FOUND");
+      if (moment.createdById !== ctx.userId) throw new TRPCError({ code: "FORBIDDEN" });
+      if (moment.kind === "diary" && input.body === null) throw inputError("BODY_REQUIRED");
+      if (input.takenAt && !isNotFuture(input.takenAt)) throw inputError("DATE_IN_FUTURE");
+      const updated = await ctx.prisma.moment.update({
+        where: { id: moment.id },
+        data: { body: input.body, takenAt: input.takenAt },
+        select: momentSelect,
+      });
+      return withReadUrls(ctx.storage, spaceId, updated);
     }),
 
   /** 피드: 촬영일 최신순, 대상 필터(아이·반려동물·가족 전체만). 커서는 (takenAt, id) */

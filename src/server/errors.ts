@@ -55,7 +55,9 @@ export type InputFailure =
   | "CHILD_ALREADY_BORN"
   | "MILESTONE_KIND_INVALID"
   | "MILESTONE_VALUE_INVALID"
-  | "MILESTONE_EXISTS";
+  | "MILESTONE_EXISTS"
+  | "BODY_REQUIRED"
+  | "MEDIA_REQUIRED";
 
 const conflicts: readonly InputFailure[] = ["CHILD_ALREADY_BORN", "MILESTONE_EXISTS"];
 
