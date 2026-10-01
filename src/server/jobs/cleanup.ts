@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@/generated/prisma/client";
-import { MEDIA_POLICY } from "@/lib/plan";
+import { MEDIA_POLICY, PUSH_POLICY } from "@/lib/plan";
 import { periodKey } from "@/server/media/usage";
 import { mediaKeys, type MediaStorage } from "@/server/storage/types";
 
@@ -18,6 +18,7 @@ export const CLEANUP_POLICY = {
  * 정기 정리(Cron, G-05·G-15·G-17).
  * - pendingTtl이 지난 미확정 업로드: 객체를 지우고 deleted로(수명주기 규칙의 보조)
  * - 판정 창이 지난 레이트 리밋 카운터·초대 실패 기록 삭제
+ * - 오래 갱신되지 않은 푸시 토큰 삭제(G-17)
  * - 업로드 발급 급증 Space를 로그로 남긴다(개인정보 없이 spaceId만)
  */
 export async function runCleanup(prisma: PrismaClient, storage: MediaStorage, now = new Date()) {
@@ -43,9 +44,11 @@ export async function runCleanup(prisma: PrismaClient, storage: MediaStorage, no
   }
 
   const retentionBefore = new Date(now.getTime() - CLEANUP_POLICY.counterRetentionDays * DAY_MS);
-  const [counters, attempts] = await Promise.all([
+  const staleBefore = new Date(now.getTime() - PUSH_POLICY.tokenStaleDays * DAY_MS);
+  const [counters, attempts, tokens] = await Promise.all([
     prisma.rateCounter.deleteMany({ where: { windowStart: { lt: retentionBefore } } }),
     prisma.inviteCodeAttempt.deleteMany({ where: { createdAt: { lt: retentionBefore } } }),
+    prisma.pushToken.deleteMany({ where: { lastSeenAt: { lt: staleBefore } } }),
   ]);
 
   const surging = await prisma.usageCounter.findMany({
@@ -63,6 +66,7 @@ export async function runCleanup(prisma: PrismaClient, storage: MediaStorage, no
     abandonedCleaned,
     rateCountersDeleted: counters.count,
     inviteAttemptsDeleted: attempts.count,
+    pushTokensDeleted: tokens.count,
     surgingSpaces: surging.length,
   };
 }

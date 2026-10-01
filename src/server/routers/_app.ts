@@ -10,6 +10,7 @@ import { milestoneRouter } from "./milestone";
 import { momentRouter } from "./moment";
 import { petRouter } from "./pet";
 import { pregnancyRouter } from "./pregnancy";
+import { pushRouter } from "./push";
 import { reactionRouter } from "./reaction";
 import { spaceRouter } from "./space";
 import { storyRouter } from "./story";
@@ -36,6 +37,7 @@ export const appRouter = router({
   pregnancy: pregnancyRouter,
   calendar: calendarRouter,
   family: familyRouter,
+  push: pushRouter,
 });
 
 export type AppRouter = typeof appRouter;
