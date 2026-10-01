@@ -30,6 +30,8 @@ export async function requireConfirmedAssets(
 /** 자산이 어딘가(반려동물 커버·Moment 첨부 등)에 붙어 있지 않은 조건 */
 export const unattachedAssetWhere = {
   petCover: { is: null },
+  momentMedia: { is: null },
+  momentThumb: { is: null },
 } satisfies Prisma.MediaAssetWhereInput;
 
 /**

@@ -62,6 +62,16 @@ export const MEDIA_POLICY = {
   readUrlTtlSec: 60 * 60,
 } as const;
 
+/** 오늘(봄) 기록 정책(요금제 무관) */
+export const MOMENT_POLICY = {
+  /** Moment 하나에 붙일 수 있는 사진·영상 수 */
+  maxMediaPerMoment: 10,
+  /** 본문(설명·일기) 최대 글자 수 */
+  bodyMaxChars: 2000,
+  /** 피드 한 번에 가져오는 수 */
+  pageSize: 20,
+} as const;
+
 type TierLimits = {
   /** G-11: Space당 역할별 멤버 수 */
   membersByRole: Record<MemberRole, number>;

@@ -2,6 +2,7 @@ import { publicProcedure, router } from "@/server/trpc/init";
 import { childRouter } from "./child";
 import { inviteRouter } from "./invite";
 import { mediaRouter } from "./media";
+import { momentRouter } from "./moment";
 import { petRouter } from "./pet";
 import { spaceRouter } from "./space";
 import { userRouter } from "./user";
@@ -18,6 +19,7 @@ export const appRouter = router({
   invite: inviteRouter,
   media: mediaRouter,
   pet: petRouter,
+  moment: momentRouter,
 });
 
 export type AppRouter = typeof appRouter;
