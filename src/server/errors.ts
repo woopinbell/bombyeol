@@ -62,12 +62,17 @@ export type InputFailure =
   | "PROMPT_INVALID"
   | "NARRATOR_INVALID"
   | "QUESTION_REQUIRED"
-  | "ASK_ANSWERED";
+  | "ASK_ANSWERED"
+  | "MEMORIAL_SELF"
+  | "ALREADY_MEMORIAL"
+  | "MEMORIAL_READ_ONLY";
 
 const conflicts: readonly InputFailure[] = [
   "CHILD_ALREADY_BORN",
   "MILESTONE_EXISTS",
   "ASK_ANSWERED",
+  "ALREADY_MEMORIAL",
+  "MEMORIAL_READ_ONLY",
 ];
 
 /** 스키마로 표현하기 어려운 입력 규칙 위반 */

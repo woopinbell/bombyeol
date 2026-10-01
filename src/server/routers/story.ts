@@ -59,6 +59,7 @@ const storySelect = {
   photo: { select: { id: true, status: true } },
   ask: { select: { id: true, promptKey: true, question: true } },
   narratorMemberId: true,
+  narrator: { select: { memorial: { select: { id: true } } } },
   narratorName: true,
   narratorLabel: true,
   scribeMemberId: true,
@@ -82,6 +83,7 @@ type SpaceCtx = Context & {
 async function toStory(ctx: SpaceCtx, row: StoryRow) {
   const {
     narratorMemberId,
+    narrator,
     narratorName,
     narratorLabel,
     scribeMemberId,
@@ -92,7 +94,12 @@ async function toStory(ctx: SpaceCtx, row: StoryRow) {
   const shown = photo?.status === "confirmed" ? photo : null;
   return {
     ...rest,
-    narrator: { memberId: narratorMemberId, name: narratorName, label: narratorLabel },
+    narrator: {
+      memberId: narratorMemberId,
+      name: narratorName,
+      label: narratorLabel,
+      memorial: Boolean(narrator?.memorial),
+    },
     scribe: scribeMemberId || scribeName ? { memberId: scribeMemberId, name: scribeName } : null,
     photo: shown && {
       assetId: shown.id,
@@ -130,9 +137,17 @@ async function resolveNarrator(ctx: SpaceCtx, narratorMemberId: string | undefin
   if (ctx.member.role === "relative") throw new TRPCError({ code: "FORBIDDEN" });
   const narrator = await ctx.prisma.member.findFirst({
     where: { id: narratorMemberId ?? ctx.member.id, spaceId: ctx.member.spaceId },
-    select: { id: true, role: true, relationLabel: true, user: { select: { name: true } } },
+    select: {
+      id: true,
+      role: true,
+      relationLabel: true,
+      user: { select: { name: true } },
+      memorial: { select: { id: true } },
+    },
   });
   if (!narrator) throw notFound("SUBJECT_NOT_FOUND");
+  // 별이 되신 분의 이야기에는 새 이야기를 더하지 않는다(PRD §4.5)
+  if (narrator.memorial) throw inputError("MEMORIAL_READ_ONLY");
   const scribing = narrator.id !== ctx.member.id;
   if (scribing && narrator.role !== "grandparent") throw inputError("NARRATOR_INVALID");
   return { narrator, scribing };
@@ -159,7 +174,7 @@ async function findOpenAsk(ctx: SpaceCtx, askId: string) {
   return ask;
 }
 
-/** 수정: 쓴 사람 또는 화자 본인. 삭제는 여기에 parent를 더한다 */
+/** 수정: 쓴 사람 또는 화자 본인. 삭제는 여기에 parent를 더한다. 기념 상태인 분의 이야기는 둘 다 막는다 */
 async function findStory(ctx: SpaceCtx, storyId: string) {
   const story = await ctx.prisma.storyEntry.findFirst({
     where: { id: storyId, spaceId: ctx.member.spaceId },
@@ -167,11 +182,14 @@ async function findStory(ctx: SpaceCtx, storyId: string) {
       id: true,
       createdById: true,
       narratorMemberId: true,
+      narrator: { select: { memorial: { select: { id: true } } } },
       promptKey: true,
       photo: { select: { id: true, bytes: true, status: true } },
     },
   });
   if (!story) throw notFound("ITEM_NOT_FOUND");
+  // 기념 상태인 분의 이야기는 영구 보존 — 고치거나 지우려면 parent가 기념을 먼저 되돌린다
+  if (story.narrator?.memorial) throw inputError("MEMORIAL_READ_ONLY");
   const owner = story.createdById === ctx.userId || story.narratorMemberId === ctx.member.id;
   return { story, owner };
 }
@@ -402,10 +420,11 @@ export const storyRouter = router({
       }
       const to = await ctx.prisma.member.findFirst({
         where: { id: input.toMemberId, spaceId },
-        select: { id: true, role: true },
+        select: { id: true, role: true, memorial: { select: { id: true } } },
       });
       if (!to) throw notFound("SUBJECT_NOT_FOUND");
       if (to.role !== "grandparent") throw inputError("NARRATOR_INVALID");
+      if (to.memorial) throw inputError("MEMORIAL_READ_ONLY");
       const ok = await hitRateLimit(
         ctx.prisma,
         `story-ask:${ctx.userId}`,

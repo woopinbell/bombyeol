@@ -108,6 +108,15 @@ export const STORY_POLICY = {
   pageSize: 20,
 } as const;
 
+/**
+ * 기념(별이 되신 가족·반려동물) 정책(PRD §4.5, PRIVACY §5). 요금제와 무관하다 —
+ * 구독이 만료돼도 기념 대상의 이야기·사진은 지우지 않고 읽기·내려받기를 유지한다(Phase 8 게이팅의 상위 제약).
+ */
+export const MEMORIAL_POLICY = {
+  /** 기억 메모 최대 글자 수 */
+  noteMaxChars: 500,
+} as const;
+
 type TierLimits = {
   /** G-11: Space당 역할별 멤버 수 */
   membersByRole: Record<MemberRole, number>;
