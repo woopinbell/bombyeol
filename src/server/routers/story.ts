@@ -12,6 +12,7 @@ import { inputError, limitError, notFound } from "@/server/errors";
 import { lockKey } from "@/server/locks";
 import { removeAsset, requireAttachableAssets, withAttachConflict } from "@/server/media/assets";
 import { hitRateLimit } from "@/server/rate-limit";
+import { storyReactionSummaries } from "@/server/reactions";
 import { mediaKeys } from "@/server/storage/types";
 import type { Context } from "@/server/trpc/context";
 import { parentProcedure, spaceProcedure } from "@/server/trpc/procedures";
@@ -101,6 +102,18 @@ async function toStory(ctx: SpaceCtx, row: StoryRow) {
       ),
     },
   };
+}
+
+/** 목록·상세용: 응답 모양 + 별 하나·댓글 요약 */
+async function withReactions(ctx: SpaceCtx, rows: StoryRow[]) {
+  const reactions = await storyReactionSummaries(
+    ctx.prisma,
+    ctx.userId,
+    rows.map((r) => r.id),
+  );
+  return Promise.all(
+    rows.map(async (row) => ({ ...(await toStory(ctx, row)), reactions: reactions.get(row.id)! })),
+  );
 }
 
 /** 사진에 얽힌 이야기: 자기 Space의 confirmed 이미지이고 아직 다른 곳에 붙지 않은 자산(G-02) */
@@ -360,7 +373,7 @@ export const storyRouter = router({
       const page = rows.slice(0, STORY_POLICY.pageSize);
       const last = page.at(-1);
       return {
-        items: await Promise.all(page.map((row) => toStory(ctx, row))),
+        items: await withReactions(ctx, page),
         nextCursor:
           rows.length > STORY_POLICY.pageSize && last
             ? { createdAt: last.createdAt, id: last.id }
@@ -463,6 +476,7 @@ export const storyRouter = router({
       select: storySelect,
     });
     if (!row) throw notFound("ITEM_NOT_FOUND");
-    return toStory(ctx, row);
+    const [story] = await withReactions(ctx, [row]);
+    return story;
   }),
 });

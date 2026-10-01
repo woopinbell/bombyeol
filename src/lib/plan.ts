@@ -19,6 +19,8 @@ export const RATE_LIMITS = {
   recordWritePerUser: { limit: 300, windowSec: 24 * 60 * 60 },
   /** G-07: 좋아요 토글(사용자당) */
   likePerUser: { limit: 300, windowSec: 60 * 60 },
+  /** G-07: 별 하나 토글(사용자당) */
+  starPerUser: { limit: 300, windowSec: 60 * 60 },
   /** G-07: 댓글 작성(사용자당) */
   commentPerUser: { limit: 60, windowSec: 60 * 60 },
   /** G-07: 이야기 작성(사용자당, 대필 포함) */
