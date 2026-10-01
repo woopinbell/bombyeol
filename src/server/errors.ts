@@ -7,6 +7,7 @@ export type LimitReason =
   | "CHILD_LIMIT"
   | "PET_LIMIT"
   | "ASK_OPEN_LIMIT"
+  | "EVENT_LIMIT"
   | "MEMBER_ROLE_LIMIT"
   | "INVITE_ACTIVE_LIMIT"
   | "FILE_TOO_LARGE"
@@ -67,6 +68,7 @@ export type InputFailure =
   | "ALREADY_MEMORIAL"
   | "MEMORIAL_READ_ONLY"
   | "PHOTO_NOT_ALLOWED"
+  | "EVENT_RANGE_INVALID"
   | "CONSENT_REQUIRED"
   | "CONSENT_VERSION_STALE";
 

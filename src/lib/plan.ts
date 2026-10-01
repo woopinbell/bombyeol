@@ -27,6 +27,8 @@ export const RATE_LIMITS = {
   storyWritePerUser: { limit: 100, windowSec: 24 * 60 * 60 },
   /** G-07: 물어보기(사용자당) */
   storyAskPerUser: { limit: 30, windowSec: 24 * 60 * 60 },
+  /** G-07: 가족 캘린더 일정 쓰기·고치기(사용자당) */
+  eventWritePerUser: { limit: 100, windowSec: 24 * 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 /** G-11: 계정 단위 상한(요금제와 무관) */
@@ -116,6 +118,20 @@ export const PREGNANCY_POLICY = {
   checkupMaxDaysAhead: 60,
   /** 목록 한 번에 가져오는 수 */
   pageSize: 30,
+} as const;
+
+/** 가족 캘린더 정책(요금제 무관) */
+export const EVENT_POLICY = {
+  /** G-11: Space당 일정 수(반복 일정은 하나로 센다) */
+  maxPerSpace: 500,
+  /** 제목 최대 글자 수 */
+  titleMaxChars: 40,
+  /** 메모 최대 글자 수 */
+  noteMaxChars: 500,
+  /** 일정 하나의 최대 길이(일) — 여행 같은 며칠짜리 모임까지 */
+  maxSpanDays: 31,
+  /** 한 번에 조회하는 최대 범위(일) */
+  maxRangeDays: 400,
 } as const;
 
 /**
