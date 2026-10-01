@@ -160,6 +160,14 @@ export const PUSH_POLICY = {
   commentCooldownSec: 30 * 60,
 } as const;
 
+/** 삭제 정책(PRIVACY §2.5·§5, G-06). 유예 기간은 Q-EXPORT 초안 */
+export const DELETION_POLICY = {
+  /** Space 삭제 요청 후 파기까지(일). 이 동안 읽기·내보내기·취소만 된다 */
+  spaceGraceDays: 30,
+  /** 정리 Cron 한 번에 파기 단계를 진행하는 Space 수 */
+  spacesPerRun: 10,
+} as const;
+
 /**
  * 기념(별이 되신 가족·반려동물) 정책(PRD §4.5, PRIVACY §5). 요금제와 무관하다 —
  * 구독이 만료돼도 기념 대상의 이야기·사진은 지우지 않고 읽기·내려받기를 유지한다(Phase 8 게이팅의 상위 제약).

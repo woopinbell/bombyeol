@@ -2,6 +2,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import { MEDIA_POLICY, PUSH_POLICY } from "@/lib/plan";
 import { purgeAssets } from "@/server/media/purge";
 import { periodKey } from "@/server/media/usage";
+import { purgeDueSpaces } from "./space-purge";
 import { mediaKeys, type MediaStorage } from "@/server/storage/types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -21,6 +22,7 @@ export const CLEANUP_POLICY = {
 
 /**
  * 정기 정리(Cron, G-05·G-15·G-17).
+ * - 유예가 끝난 Space 삭제: 숨기고 파일을 purging으로, 파일이 다 지워지면 행 삭제(G-06)
  * - 지워진 기록에 붙어 있던 파일(purging): 객체를 지우고 deleted로(G-05)
  * - pendingTtl이 지난 미확정 업로드: 객체를 지우고 deleted로(수명주기 규칙의 보조)
  * - 판정 창이 지난 레이트 리밋 카운터·초대 실패 기록 삭제
@@ -28,6 +30,7 @@ export const CLEANUP_POLICY = {
  * - 업로드 발급 급증 Space를 로그로 남긴다(개인정보 없이 spaceId만)
  */
 export async function runCleanup(prisma: PrismaClient, storage: MediaStorage, now = new Date()) {
+  const spaces = await purgeDueSpaces(prisma, now);
   const purge = await purgeAssets(prisma, storage, CLEANUP_POLICY.r2DeletesPerRun, now);
   const budget = CLEANUP_POLICY.r2DeletesPerRun - purge.attempted;
   const abandonedBefore = new Date(now.getTime() - MEDIA_POLICY.pendingTtlSec * 1000);
@@ -74,6 +77,7 @@ export async function runCleanup(prisma: PrismaClient, storage: MediaStorage, no
   }
 
   return {
+    ...spaces,
     purged: purge.purged,
     abandonedCleaned,
     rateCountersDeleted: counters.count,

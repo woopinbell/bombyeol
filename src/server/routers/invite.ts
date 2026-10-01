@@ -8,7 +8,7 @@ import { generateInviteCode, normalizeInviteCode } from "@/server/invite-code";
 import { lockKey } from "@/server/locks";
 import { hitRateLimit } from "@/server/rate-limit";
 import type { Context } from "@/server/trpc/context";
-import { parentProcedure, protectedProcedure } from "@/server/trpc/procedures";
+import { openSpaceDeletion, parentProcedure, protectedProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
 import { relationLabel } from "./inputs";
 
@@ -51,7 +51,14 @@ async function findValidInvite(ctx: Context & { userId: string }, rawCode: strin
         },
       })
     : null;
-  if (!invite || invite.space.deletedAt) {
+  // 삭제 요청 시 초대를 거두지만, 같은 순간의 경합까지 막기 위해 삭제 진행 중인 Space도 무효로 본다
+  const deleting =
+    invite &&
+    (await ctx.prisma.deletionRequest.findFirst({
+      where: openSpaceDeletion(invite.spaceId),
+      select: { id: true },
+    }));
+  if (!invite || invite.space.deletedAt || deleting) {
     await recordInviteFailure(ctx.prisma, ctx.userId, ctx.ip);
     throw inviteError("INVITE_INVALID");
   }
