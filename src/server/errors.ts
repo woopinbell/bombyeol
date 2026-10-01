@@ -70,7 +70,9 @@ export type InputFailure =
   | "PHOTO_NOT_ALLOWED"
   | "EVENT_RANGE_INVALID"
   | "CONSENT_REQUIRED"
-  | "CONSENT_VERSION_STALE";
+  | "CONSENT_VERSION_STALE"
+  | "CONFIRM_MISMATCH"
+  | "LAST_PARENT";
 
 const conflicts: readonly InputFailure[] = [
   "CHILD_ALREADY_BORN",
@@ -82,7 +84,7 @@ const conflicts: readonly InputFailure[] = [
 ];
 
 /** 먼저 해야 할 일(동의 등)이 빠진 요청 */
-const preconditions: readonly InputFailure[] = ["CONSENT_REQUIRED"];
+const preconditions: readonly InputFailure[] = ["CONSENT_REQUIRED", "LAST_PARENT"];
 
 /** 스키마로 표현하기 어려운 입력 규칙 위반 */
 export function inputError(reason: InputFailure) {

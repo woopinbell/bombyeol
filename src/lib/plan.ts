@@ -29,6 +29,8 @@ export const RATE_LIMITS = {
   storyAskPerUser: { limit: 30, windowSec: 24 * 60 * 60 },
   /** G-07: 가족 캘린더 일정 쓰기·고치기(사용자당) */
   eventWritePerUser: { limit: 100, windowSec: 24 * 60 * 60 },
+  /** G-07: 내보내기 페이지 요청(사용자당) — 읽기 URL 서명이 몰리지 않게 */
+  archivePagePerUser: { limit: 500, windowSec: 24 * 60 * 60 },
   /** G-07: 푸시 토큰 등록(사용자당) — 앱을 열 때마다 갱신하므로 여유 있게 */
   pushRegisterPerUser: { limit: 30, windowSec: 24 * 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
@@ -158,6 +160,18 @@ export const PUSH_POLICY = {
   heartCooldownSec: 6 * 60 * 60,
   /** 댓글 알림: 같은 대상에 이 시간(초)에 한 번 */
   commentCooldownSec: 30 * 60,
+} as const;
+
+/** 삭제 정책(PRIVACY §2.5·§5, G-06). 유예 기간은 Q-EXPORT 초안 */
+export const DELETION_POLICY = {
+  /** Space 삭제 요청 후 파기까지(일). 이 동안 읽기·내보내기·취소만 된다 */
+  spaceGraceDays: 30,
+  /** 정리 Cron 한 번에 파기 단계를 진행하는 Space 수 */
+  spacesPerRun: 10,
+  /** 내보내기: 원본 목록 한 페이지(읽기 URL 수) */
+  archiveMediaPageSize: 100,
+  /** 내보내기: 글 기록 한 페이지 */
+  archiveRecordPageSize: 200,
 } as const;
 
 /**

@@ -309,8 +309,8 @@ export const familyRouter = router({
       return { ok: true };
     }),
 
-  /** 스스로 나가기. Space를 만든 사람은 나갈 수 없다(Space 삭제는 Phase 7) */
-  leave: spaceProcedure.mutation(async ({ ctx }) => {
+  /** 스스로 나가기(삭제 유예 중에도). Space를 만든 사람은 나갈 수 없다(대신 Space 삭제) */
+  leave: spaceProcedure.meta({ allowWhileDeleting: true }).mutation(async ({ ctx }) => {
     const space = await ctx.prisma.space.findUniqueOrThrow({
       where: { id: ctx.member.spaceId },
       select: { createdById: true },

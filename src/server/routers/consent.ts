@@ -108,9 +108,10 @@ export const consentRouter = router({
    * 임신 정보 동의 철회(본인 — 역할이 바뀌었어도 할 수 있다). 철회하면 새 임신 기록을 쓰거나 고칠 수 없다.
    * 내가 쓴 기록은 deleteRecords면 지우고, 아니면 가족 공개를 거둔다(PRIVACY §3 철회 시 삭제 옵션).
    * 기록 처리가 끝난 뒤 철회를 남긴다 — 중간에 실패하면 동의가 남아 다시 시도할 수 있다.
-   * 약관·처리방침 철회는 계정 삭제(Phase 7), 아이 정보 철회는 아이 삭제(Phase 7)로 다룬다.
+   * 약관·처리방침 철회는 계정 삭제, 아이 정보 철회는 아이 삭제(`child.delete`)로 다룬다. 삭제 유예 중에도 할 수 있다.
    */
   withdraw: spaceProcedure
+    .meta({ allowWhileDeleting: true })
     .input(z.object({ kind: z.literal("pregnancy"), deleteRecords: z.boolean().default(false) }))
     .mutation(async ({ ctx, input }) => {
       await retractPregnancyRecords(

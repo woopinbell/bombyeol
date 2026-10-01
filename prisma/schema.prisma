@@ -534,6 +534,34 @@ model PushToken {
 }
 
 // ---------------------------------------------------------------------------
+// 삭제 요청(PRIVACY §2.5, G-06) — 계정 삭제(즉시)와 Space 삭제(유예 후 파기)의 기록.
+// 대상이 사라진 뒤에도 남아야 하므로(재생성 쿨다운 G-11, 처리 확인) Space·User에 FK를 걸지 않는다.
+// 개인정보는 넣지 않는다(id만). Space당 진행 중 요청은 하나 — 마이그레이션의 부분 unique 인덱스.
+// ---------------------------------------------------------------------------
+
+enum DeletionKind {
+  account
+  space
+}
+
+model DeletionRequest {
+  id               String       @id @default(cuid())
+  kind             DeletionKind
+  spaceId          String? // space: 대상 Space
+  userId           String? // account: 대상 사용자, space: 요청한 parent
+  spaceCreatedById String? // space: Space를 만든 사람(재생성 쿨다운 계산용)
+  requestedAt      DateTime     @default(now())
+  purgeAfter       DateTime // 이 시각 이후 파기(account는 요청 시각과 같다)
+  canceledAt       DateTime?
+  canceledById     String?
+  completedAt      DateTime?
+
+  @@index([kind, completedAt, purgeAfter])
+  @@index([spaceId])
+  @@index([spaceCreatedById, completedAt])
+}
+
+// ---------------------------------------------------------------------------
 // 레이트 리밋 — DB 고정 창 카운터(S-6: 비용 게이트의 정확한 판정용). 정리 Cron 대상(G-17).
 // ---------------------------------------------------------------------------
 
@@ -556,9 +584,12 @@ enum MediaKind {
   video
 }
 
+// purging: 붙은 기록이 지워져(아이·반려동물·계정 삭제) R2 객체 삭제를 기다리는 자산. 사용량에서 빠지고,
+// 정리 Cron이 객체를 지운 뒤 deleted로 바꾼다 — 큰 삭제를 한 요청에서 하지 않기 위해(하위 요청 한도).
 enum MediaStatus {
   pending
   confirmed
+  purging
   deleted
 }
 
