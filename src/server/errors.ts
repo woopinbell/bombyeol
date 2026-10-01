@@ -27,3 +27,12 @@ export function inviteError(reason: InviteFailure) {
     message: reason,
   });
 }
+
+export type MediaFailure = "UPLOAD_NOT_FOUND" | "UPLOAD_MISMATCH" | "ASSET_INVALID";
+
+export function mediaError(reason: MediaFailure) {
+  return new TRPCError({
+    code: reason === "UPLOAD_MISMATCH" ? "BAD_REQUEST" : "NOT_FOUND",
+    message: reason,
+  });
+}
