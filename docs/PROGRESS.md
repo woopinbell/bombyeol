@@ -4,7 +4,7 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 4): **Phase 4 이야기(별) 서버 9커밋 작업 브랜치 `claude/awesome-cannon-ac5isr`에 푸시, main 머지는 사용자 확인 대기**(UI 제외) — 아래 "현재 상태 — Phase 4".
+- 단계(2026-10-01, Phase 4): **Phase 4 이야기(별) 서버 main 머지 완료(PR woopinbell/bombyeol#6, 머지 커밋 fc94348), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 4".
 - (이전) 단계(2026-10-01, Phase 3): **Phase 3 오늘(봄) 서버 main 머지 완료(PR woopinbell/bombyeol#5, 머지 커밋 3b0d90d), 스테이징 마이그레이션·배포 완료, R2 Secret 3종 재등록 후 스모크 전부 통과** — 아래 "현재 상태 — Phase 3".
 - (이전) 단계(2026-10-01, Phase 2): **Phase 2 미디어 서버 커밋 완료, 스테이징 배포, R2 토큰 대기** — 아래 "현재 상태 — Phase 2".
 - (이전) 단계(2026-10-01, Phase 1): **Phase 1 서버 커밋 완료(온보딩 UI 제외), 스테이징 배포됨** — 아래 "현재 상태 — Phase 1".
@@ -16,10 +16,11 @@
 
 ## 현재 상태 — Phase 4 (2026-10-01)
 
-- 작업 브랜치 `claude/awesome-cannon-ac5isr`(main 3b0d90d에서 시작) 9커밋, 원격 푸시 완료: fix(media) R2_ACCOUNT_ID 문구 → prisma(StoryEntry·StoryAsk·MemorialProfile + Reaction storyEntryId·star) → story 질문 카드 → 쓰기·대필 → 사진 → 물어보기 → 별 하나·댓글 → memorial. **PR·main 머지는 사용자 확인 후**(아직 PR 없음). 이야기 탭 화면은 Phase DS 이후.
+- 작업 브랜치 `claude/awesome-cannon-ac5isr`(main 3b0d90d에서 시작) 8커밋: fix(media) R2_ACCOUNT_ID 문구 → prisma(StoryEntry·StoryAsk·MemorialProfile + Reaction storyEntryId·star) → story 질문 카드 → 쓰기·대필 → 사진 → 물어보기 → 별 하나·댓글 → memorial. **사용자가 결정 6가지 승인 → PR woopinbell/bombyeol#6 CI 통과(3분) → 머지 커밋으로 main 머지(fc94348).** 작업 브랜치는 머지된 main으로 맞춤. 이야기 탭 화면은 Phase DS 이후.
 - 로컬 검증: format·lint·typecheck·Vitest **181건** 통과(133 → 181), OpenNext 빌드 통과, `wrangler deploy --dry-run --env staging` 13.40 MiB(gzip 3.6 MiB).
 - 새 마이그레이션 `20261001133248_story`: enum 값 추가(`ReactionKind.star`), 체크 제약 4개(Reaction 대상 3중 1 — 기존 제약 교체, StoryAsk 카드/질문 1, MemorialProfile 대상 ≤1, storyYear 1850~2200). main 머지 시 `Migrate staging DB`가 자동 적용.
-- 설계 요약은 COMMIT_PLAN Phase 4 설계 메모(사용자 확인 대기). 확인이 필요한 결정:
+- 스테이징: main push로 `Migrate staging DB` 자동 실행 성공(`story` 적용). Worker 배포(버전 38ef950d, 13.40 MiB, Startup 24ms, Cron 유지). 스모크: health 200, `story.prompts`·`memorial.list` 비로그인 401, 없는 경로 404, 내부 스모크 db ok·R2 PUT 크기/타입 위반 403·정확 PUT 200·head·copy·cleanup ok. 빌드 로그 `Failed to copy node_modules/...` 경고는 이전과 같은 CLI 의존성(exit 0).
+- 설계 요약은 COMMIT_PLAN Phase 4 설계 메모. **사용자 승인(2026-10-01)** 결정:
   1. 질문 카드를 DB 테이블(StoryPrompt) 대신 **코드 카탈로그**로(카드 27개 문구 초안 — `messages/ko.json` `story.prompts`, 문구 검토 환영).
   2. 이야기 시기는 날짜 대신 **연 단위(`storyYear`)**, 사진은 **한 장**.
   3. **좋아요 = 오늘 기록, 별 하나 = 이야기 전용**(둘 다 토글). 댓글은 공통.
@@ -30,7 +31,7 @@
 
 ### 다음 할 일 (Phase 4 이후)
 
-1. **사용자 확인**: 위 결정 1~6 → 승인되면 PR 생성·CI 통과 → main 머지 → 스테이징 마이그레이션 자동 적용·배포·스모크(내부 스모크 + 새 경로 비로그인 401).
+1. ~~사용자 확인·PR·머지·스테이징 반영~~ 완료(PR woopinbell/bombyeol#6, fc94348, 버전 38ef950d).
 2. 다음 개발: Phase 5(우리·임신 기록) 서버. 새 키 없음(ENV_MANIFEST 확인).
 3. (Phase 3에서 이어짐) 브라우저 직접 업로드 CORS는 UI 이후 사용자 기기.
 
@@ -313,4 +314,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01(Phase 3 세션): 부트스트랩 후 Phase 3 서버 9커밋(스키마 → child → refactor(media) → pet → moment 피드 → milestone → 일기 → Reaction 스키마 → reaction), 테스트 133건. COMMIT_PLAN 설계 메모·PRD §6 데이터 모델 갱신. 대기: PR·머지, 스테이징 반영 승인.
 - 2026-10-01(Phase 3 세션): 사용자 "전부 승인" → PR woopinbell/bombyeol#5 생성·CI 통과·머지(3b0d90d), 스테이징 마이그레이션 자동 적용·배포·스모크. R2_ACCESS_KEY_ID(평문 var)가 배포로 사라져 R2 스모크 실패 — 사용자 Secret 재등록 대기. 권한 정책·상한 수치 승인 기록.
 - 2026-10-01: 사용자가 스테이징 Worker에 R2_ACCESS_KEY_ID·R2_ACCOUNT_ID를 Secret으로 재등록 → R2 스모크 통과. 클라우드 세션 환경의 R2 변수 삭제와는 무관(원인은 Worker 평문 var + 배포 덮어쓰기).
-- 2026-10-01(Phase 4 세션): 부트스트랩 → Phase 4 이야기 서버 9커밋(질문 카드·쓰기·대필·사진·물어보기·별 하나·기념) + storageFromEnv 문구 수정. 테스트 181건·빌드 통과, 작업 브랜치 푸시. 새 키 없음. main 머지는 사용자 확인 대기.
+- 2026-10-01(Phase 4 세션): 부트스트랩 → Phase 4 이야기 서버 8커밋(질문 카드·쓰기·대필·사진·물어보기·별 하나·기념) + storageFromEnv 문구 수정. 테스트 181건·빌드 통과, 작업 브랜치 푸시. 새 키 없음. 사용자 승인 후 PR woopinbell/bombyeol#6 머지(fc94348), 스테이징 마이그레이션·배포·스모크 통과.

@@ -93,7 +93,7 @@
 
 ## Phase 4 — 이야기(별)
 
-> 2026-10-01 서버 설계(세션 제안 — **사용자 확인 대기**, main 머지 전 확인. 수치는 `plan.ts`):
+> 2026-10-01 서버 설계(세션 제안 → **사용자 승인**, PR woopinbell/bombyeol#6 머지. 수치는 `plan.ts` 결제 전 운영값):
 > - **질문 카드는 DB 테이블이 아니라 코드 카탈로그**(`src/lib/story-prompts.ts`, 카테고리 10·카드 27, 문구는 `messages/ko.json`의 `story.*`). DB에는 `promptKey`만 — 시드 마이그레이션·번역 동기화가 필요 없다. PRD의 `StoryPrompt` 모델과 `ageHint`는 두지 않음. 키는 바꾸거나 지우지 않는다(문구만 수정).
 > - **StoryEntry**: 화자(`narratorMemberId`)·대필자(`scribeMemberId`)는 Member FK(SetNull) + 이름·관계 **스냅샷**(PRIVACY §5 `authorNameSnapshot`). 시기는 날짜 대신 `storyYear`(연 단위, 1850~올해), `title`·`category`(카드 답이면 카드 카테고리 고정), 반려동물에 붙이기(`petId`, PRD §4.2.1), 사진 한 장(`photoAssetId` unique, 이미지만).
 > - **권한**: 자기 이야기 = parent·grandparent, 대필 = parent·grandparent가 **grandparent의** 이야기를. relative는 열람·반응만. 수정 = 쓴 사람 또는 화자 본인, 삭제 = 여기에 parent.
