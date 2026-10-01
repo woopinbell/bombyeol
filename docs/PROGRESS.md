@@ -4,7 +4,7 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 6): **Phase 6 알림 서버 4커밋, 작업 브랜치 `claude/clever-dijkstra-7qvhxv` 푸시 완료 — main 머지는 사용자 확인 대기**(UI·공유·PWA 제외) — 아래 "현재 상태 — Phase 6".
+- 단계(2026-10-01, Phase 6): **Phase 6 알림 서버 main 머지 완료(PR woopinbell/bombyeol#8, 머지 커밋 934c55d), 스테이징 마이그레이션·배포·스모크 통과**(UI·공유·PWA 제외) — 아래 "현재 상태 — Phase 6".
 - (이전) 단계(2026-10-01, Phase 5): **Phase 5 우리·임신 기록 서버 main 머지 완료(PR woopinbell/bombyeol#7, 머지 커밋 6c7b55b), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 5".
 - (이전) 단계(2026-10-01, Phase 4): **Phase 4 이야기(별) 서버 main 머지 완료(PR woopinbell/bombyeol#6, 머지 커밋 fc94348), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 4".
 - (이전) 단계(2026-10-01, Phase 3): **Phase 3 오늘(봄) 서버 main 머지 완료(PR woopinbell/bombyeol#5, 머지 커밋 3b0d90d), 스테이징 마이그레이션·배포 완료, R2 Secret 3종 재등록 후 스모크 전부 통과** — 아래 "현재 상태 — Phase 3".
@@ -18,7 +18,8 @@
 
 ## 현재 상태 — Phase 6 (2026-10-01)
 
-- 작업 브랜치 `claude/clever-dijkstra-7qvhxv`(main 6c7b55b에서 시작) 4커밋, 푸시 완료: `chore(prisma)` PushToken → `feat(push)` 토큰 등록·해제·오래된 토큰 정리 → `feat(push)` FCM 발송 유틸 → `feat(push)` 새 사진·이야기·반응·질문(+임신 기록) 알림 연결. **main 머지 전 사용자 확인 필요**(COMMIT_PLAN Phase 6 메모 ①~⑤). PR은 아직 만들지 않음.
+- 작업 브랜치 `claude/clever-dijkstra-7qvhxv`(main 6c7b55b에서 시작) 4커밋, 푸시 완료: `chore(prisma)` PushToken → `feat(push)` 토큰 등록·해제·오래된 토큰 정리 → `feat(push)` FCM 발송 유틸 → `feat(push)` 새 사진·이야기·반응·질문(+임신 기록) 알림 연결. **사용자가 ①~⑤ 전부 승인 → PR woopinbell/bombyeol#8 CI 통과(3분 40초) → 머지 커밋으로 main 머지(934c55d).** 작업 브랜치는 머지된 main으로 맞춤.
+- 스테이징: main push로 `Migrate staging DB` 자동 실행 성공(`push` 적용). Worker 배포(버전 15c56064, Startup 29ms, Cron 유지). 스모크: health 200, `push.register·unregister` 비로그인 401, 없는 경로 404, 내부 스모크 db ok·R2 PUT 크기/타입 위반 403·정확 PUT 200·head·copy·cleanup ok. Worker에 `FIREBASE_ADMIN_*` Secret이 없어 알림 발송은 건너뛰는 상태(의도대로).
 - 로컬 검증: format·lint·typecheck·Vitest **260건** 통과(223 → 260), OpenNext 빌드 통과, `wrangler deploy --dry-run --env staging` 13.48 MiB(gzip 3.63 MiB). 뮤테이션 점검: 임신 visibility → 역할 제한을 빼면 3건, 기념 멤버 제외를 빼면 1건 실패.
 - 실제 FCM 확인: 클라우드 환경의 개발 서비스 계정으로 JWT 교환 → FCM 호출까지 왕복, 가짜 토큰이 `invalid_token`으로 분류됨(실기기 수신은 S-5에서 확인, 이번엔 클라이언트가 없어 미확인).
 - 새 마이그레이션 `20261001153126_push`: PushToken(token unique, userId cascade, lastSeenAt 인덱스). main 머지 시 `Migrate staging DB`가 자동 적용.
@@ -30,13 +31,20 @@
   - 키가 없으면 발송만 건너뛴다(스테이징은 지금 이 상태).
 - 남긴 것: 마일스톤 알림(안 보냄 — 확인 ②), 알림 끄기·Space별 음소거(설정 UI 때), 나중에 가족 공개로 바꿀 때 알림, 카카오톡 공유·PWA 매니페스트·서비스 워커·토큰 발급 클라이언트(UI 단계 — 확인 ⑤).
 
-### 확인 요청 (사용자, main 머지 전)
+### 확인 결과 (2026-10-01)
 
-COMMIT_PLAN Phase 6 메모 ①~⑤: ① 알림 문구 6종(고정 문구) ② 수신자 규칙(마일스톤 제외, 이야기 대필 시 화자 포함, 반응은 쓴 사람·화자에게) ③ 소음·비용 상한 수치 ④ 알림 설정을 UI 때로 미루기 ⑤ 카카오톡 공유·PWA를 UI 단계로 미루기.
+COMMIT_PLAN Phase 6 메모 ①~⑤ **전부 사용자 승인**: ① 알림 문구 6종(고정 문구) ② 수신자 규칙(마일스톤 제외, 이야기 대필 시 화자 포함, 반응은 쓴 사람·화자에게) ③ 소음·비용 상한 수치 ④ 알림 설정을 UI 때로 미루기 ⑤ 카카오톡 공유·PWA를 UI 단계로 미루기.
+
+### 세션 이동 권고 (2026-10-01, Phase 6 종료 시점)
+
+- **새 세션으로 옮긴다.** 진행 중 PR 없음(PR woopinbell/bombyeol#8 머지·구독 해제 완료). Phase 7 서버는 새 키가 없다.
+- 코드 상태: 작업 브랜치 `claude/clever-dijkstra-7qvhxv` = main 934c55d. 새 세션은 main에서 자기 작업 브랜치를 딴다.
+- 새 세션 시작 시: `dockerd &` → `npm run db:up`, `npm ci`, 스키마 변경 후 `npx prisma generate`, 마이그레이션은 `npm run db:migrate -- --name <이름>`.
+- 새 세션 첫 프롬프트(`CLOUD_SESSION.md` §4.1, 3번만 채움): "오늘 할 일: Phase 7(삭제·개인정보) 서버 먼저, UI 제외. 계정·Space 삭제는 R2 먼저→DB→푸시 토큰 연쇄(G-06), 유예 기간 정책은 PRIVACY 확인 후 COMMIT_PLAN 메모로 제안하고 머지 전 확인받아."
 
 ### 다음 할 일 (Phase 6 이후)
 
-1. 사용자 확인 → PR(main, 머지 커밋) → CI → 머지 → `Migrate staging DB` 자동 적용 → 스테이징 배포·스모크(health, `push.register` 비로그인 401).
+1. ~~사용자 확인·PR·머지·스테이징 반영~~ 완료(PR woopinbell/bombyeol#8, 934c55d, 버전 15c56064).
 2. 스테이징에서 실제 발송까지 보려면 사용자가 Worker Secret 3종 등록: `FIREBASE_ADMIN_PROJECT_ID`·`FIREBASE_ADMIN_CLIENT_EMAIL`·`FIREBASE_ADMIN_PRIVATE_KEY`(`npx wrangler secret put <이름> --env staging`, Secret 유형). 없어도 기능은 동작하고 알림만 건너뛴다. 실기기 수신 확인은 UI(서비스 워커) 이후.
 3. 다음 개발: Phase 7(삭제·개인정보) 서버 — 계정 삭제 연쇄에 PushToken 포함(이미 cascade). 새 키 없음(ENV_MANIFEST).
 4. 환경 메모: 이 세션은 Docker Hub pull 문제 없이 `npm run db:up` 동작. `node scripts/with-local-db.mjs prisma ...`는 PATH 문제로 조용히 실패 — `npm run db:migrate -- --name <이름>`을 쓴다.
