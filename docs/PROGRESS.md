@@ -43,9 +43,9 @@
 |---|---|---|
 | S-1 | **통과(쿼리 왕복)** — 원격 쓰기·마이그레이션 경로는 미결 | 2026-10-01 |
 | S-2 | **통과(사용자 브라우저 실로그인 확인)** — Auth.js v5 beta 리스크 기록 | 2026-10-01 |
-| S-3 | **통과(Worker 프록시 방식)** — presign 방식은 R2 S3 키 대기 | 2026-10-01 |
-| S-4 | **기준선 측정, 유료 플랜 필요 판정** — S-2·S-3·S-5 후 재측정 | 2026-10-01 |
-| S-5 | 미수행 — Firebase 개발 프로젝트 키·실기기 대기 | — |
+| S-3 | **통과(Worker 프록시·presign 둘 다)** | 2026-10-01 |
+| S-4 | **재측정 완료**(전 기능 통합 12.2 MiB) — 출시 시 유료, 개발 중 무료 | 2026-10-01 |
+| S-5 | **서버 측 통과, 실기기 수신은 사용자 확인 대기** | 2026-10-01 |
 | S-6 | **통과(DB 카운터 주력 + 바인딩 보조)** | 2026-10-01 |
 | S-7 | **통과** | 2026-10-01 |
 | S-8 | **통과(HTTPS 전부)** — DB 직접 TCP만 불가(설계로 우회) | 2026-10-01 |
@@ -77,7 +77,9 @@
 - 방식: `PUT /api/spike/upload?bytes=N` → 서버가 Content-Type 화이트리스트·선언 크기 상한 검사 → 본문을 `FixedLengthStream(N)`에 통과시켜 R2 바인딩 `put` → `head`로 크기 재확인. 불일치면 삭제·400.
 - 원격 결과: 정확 1000B 200 / 본문 2000B(선언 1000) 400 / 본문 500B 400 / 선언 상한 초과 413 / 금지 타입 415 / 거부 후 잔존 객체 0 / 9MB 2.6s 200.
 - 차이: chunked 전송(Content-Length 없음)은 크기가 정확해도 **원격에서 거부**(로컬은 통과). 실패 쪽으로 닫히므로 안전하고, 브라우저 `fetch(File/Blob)`은 Content-Length를 보낸다. 앱은 Content-Length 필수로 명시.
-- 결론: G-01은 **Worker 프록시 방식으로 충족 확인.** presign(`Content-Length` 서명 강제) 방식은 `R2_ACCESS_KEY_ID/SECRET` 필요 — 키 받으면 비교(프록시는 업로드가 Worker 요청·CPU를 거치고 요청 본문 상한의 적용을 받음).
+- 결론: G-01은 **Worker 프록시 방식으로 충족 확인.**
+- **presign 비교(2026-10-01, `spikes/s3-presign/`)**: R2 S3 키는 `bombyeol-spike-s3` 한정(ListBuckets·타 버킷 403 확인). SigV4 쿼리 서명에 `content-length`·`content-type`을 포함하면 — 정확 1000B 200 / 5000B·500B 403 `SignatureDoesNotMatch` / 다른 타입 403. **대조군(길이 미서명)은 5000B도 200** = hamkke의 구멍 재현. 브라우저는 본문으로 Content-Length를 자동 설정하므로 클라이언트 직접 업로드에도 적용 가능.
+- 방식 선택(제안, Phase 2에서 확정): **presign + 서명된 Content-Length/Type + confirm 시 HeadObject 크기 재확인**을 기본으로(업로드 바이트가 Worker CPU·요청 수를 거치지 않음, 무료 플랜 친화), Worker 프록시는 대안. 어느 쪽이든 G-01·G-02 테스트로 고정.
 
 ### S-4 상세 — 번들·CPU 기준선
 
@@ -85,6 +87,19 @@
 - 최초 빌드 53.4 MiB(한도 근접) — 원인: Next 출력 추적이 next.config(`@opennextjs/cloudflare`→wrangler)·prisma.config 경유로 wrangler·workerd·Prisma CLI·PGlite까지 끌어오고 OpenNext가 모든 `.wasm`을 번들. `outputFileTracingExcludes`로 **11.5 MiB**(gzip 3.1 MiB), Startup 20ms. → Phase 0 `chore(infra)`에 이 제외 목록 포함.
 - CPU(`wrangler tail` 실측): 웜 `dbVersion` 8~20ms, **콜드 isolate 200~450ms**, SSR 페이지 30~340ms. → **무료 플랜(10ms) 불가, Workers Paid 필요**(ARCHITECTURE §10 추정과 일치). 비용 예: 평균 100ms × 100만 요청 ≈ 초과 CPU $1.4 + 기본 $5.
 - 계정 플랜 상태는 토큰 권한으로 조회 불가(구독 API 10000). 현재 요청은 모두 ok — 사용자 확인 필요.
+
+### S-5 상세 — FCM 웹푸시 (같은 스파이크 브랜치)
+
+- 키 10종 확인(값 미출력): 프로젝트 ID 일치·authDomain·appId(senderId 포함)·서비스 계정 이메일 도메인·PEM·VAPID(65바이트 P-256) 모두 정상. 서비스 계정 → OAuth 토큰 발급 200, FCM v1 `validate_only` 가짜 토큰 → `INVALID_ARGUMENT`(= API 활성·권한 정상). 주의: 환경 UI에 넣은 `FIREBASE_ADMIN_PRIVATE_KEY`는 `\n` 이스케이프가 아니라 **실제 줄바꿈**으로 들어왔다 → 코드가 두 형태 모두 처리.
+- 구현: `firebase-admin` 없이 WebCrypto(RS256)로 서비스 계정 JWT 서명 → 토큰 교환(모듈 스코프 캐시) → FCM HTTP v1 fetch. 발송 API는 로그인 필수(비로그인 401). 클라이언트는 firebase 12.19.0 + `firebase-messaging-sw.js`(공개 설정은 SW 등록 URL 쿼리로 전달, 파일에 키 없음).
+- 원격 진단: Worker에서 가짜 토큰 발송 → FCM 도달(`INVALID_ARGUMENT`) 확인.
+- 남은 것: **사용자 실기기(Android Chrome 권장) 수신** — 포그라운드(즉시)·백그라운드(10초 지연) 각각.
+
+### S-4 재측정 (2026-10-01, S-2·S-3·S-5 통합 후)
+
+- 번들 12.2 MiB(gzip 3.3 MiB) / 한도 64 MiB, Startup 21ms.
+- CPU(p50/최대): `dbVersion` 178/491ms, SSR `/` 102/328ms, `/api/auth/session` 9/238ms, FCM 진단 9/215ms. 모든 요청 ok(오류 0).
+- 판정 유지: 출시 기준 Workers Paid 필요, 개발 중은 Free(사용자 결정). 콜드 비용(Prisma wasm·Next 초기화) 절감은 Phase 0 이후 과제.
 
 ### S-6 상세 — 레이트 리밋
 
@@ -110,7 +125,8 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 
 ## 미완료 검증 항목
 
-- S-4 최종 번들·CPU 재측정(S-2·S-3 presign·S-5 반영 후), 계정의 Workers Paid 여부 확인(사용자)
+- S-5 실기기 수신(사용자) — 포그라운드·백그라운드
+- 계정 플랜이 Free인지 대시보드 확인(사용자)
 - S-6 DB 카운터 원격 동작(Supabase 마이그레이션 경로 확정 후)
 - S-7 실기기(저사양 Android·iPhone) PDF 생성 시간
 - Supabase 원격 마이그레이션 경로(CI) — Phase 0
@@ -137,3 +153,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: S-3(Worker 프록시)·S-4(기준선)·S-6·S-7·S-8 수행. R2 시험 버킷 생성(승인). 로컬 dockerd가 중간에 종료돼 재기동. 다음: S-2(카카오·Google 키), S-5(Firebase), S-3 presign(R2 키) 대기.
 - 2026-10-01: S-2 키 확인·구현·배포 → 사용자 실로그인 확인으로 통과. 다음: S-5(Firebase 키·실기기), S-3 presign(R2 키), 이후 S-4 재측정.
 - 2026-10-01(결정): 개발 중 완전 무료 유지. Workers Paid는 공개 베타 직전(또는 1102 관측 시) 재결정 — ARCHITECTURE §10. 계정 플랜은 사용자 대시보드 확인(API로는 usage_model=standard만 보여 구분 불가).
+- 2026-10-01: Firebase·R2 키 확인. S-3 presign 비교 통과, S-5 서버 측 통과·배포, S-4 재측정. 실기기 푸시 수신 확인 요청.

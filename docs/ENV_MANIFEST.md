@@ -30,6 +30,8 @@ Phase별로 필요한 키를 **이름·형식·발급처·등급**으로 미리 
 
 ## Phase 2 (미디어)
 
+> 2026-10-01: S-3용으로 R2 4종 등록됨(버킷 `bombyeol-spike-s3` 한정 토큰). 본 개발용 버킷·토큰은 Phase 2에서 별도 발급.
+
 | 변수 | 형식 | 발급처 | 등급 | 상태 |
 |---|---|---|---|---|
 | `R2_BUCKET_NAME` | 버킷 이름(개발용/프로덕션 분리) | Cloudflare R2 | A(개발 버킷) | 검증됨(hamkke 명명) |
@@ -37,6 +39,8 @@ Phase별로 필요한 키를 **이름·형식·발급처·등급**으로 미리 
 | `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | S3 호환 키(해당 버킷 스코프, Object Read & Write) | R2 → Manage API tokens (Secret은 발급 직후에만 보임) | A(개발 버킷 한정) | 검증됨. S-3에서 Worker 바인딩 방식으로 바뀌면 불필요해질 수 있음 |
 
 ## Phase 6 (알림)
+
+> 2026-10-01: S-5용으로 Firebase 10종 등록됨(개발 프로젝트). 클라우드 환경 UI는 `FIREBASE_ADMIN_PRIVATE_KEY`를 실제 줄바꿈으로 저장한다 — 코드는 `\n` 이스케이프와 실제 줄바꿈을 모두 처리할 것. Workers에서는 `firebase-admin` 대신 HTTP v1 + WebCrypto 서명(S-5).
 
 | 변수 | 형식 | 발급처 | 등급 | 상태 |
 |---|---|---|---|---|
