@@ -1,0 +1,17 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  runtime      = "workerd"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// S-1 스파이크 전용 테이블
+model SpikePing {
+  id        String   @id @default(cuid())
+  note      String
+  createdAt DateTime @default(now())
+}

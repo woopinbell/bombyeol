@@ -10,3 +10,8 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 .DS_Store
+
+/src/generated/prisma
+
+# prisma
+/src/generated/
