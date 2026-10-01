@@ -10,16 +10,24 @@ export type OAuthIdentity = {
 /** OAuth 계정으로 봄별 User를 찾고, 없으면 User + Account를 함께 만든다. */
 export async function findOrCreateUser(prisma: PrismaClient, identity: OAuthIdentity) {
   const { provider, providerAccountId } = identity;
+  const name = identity.name?.trim().slice(0, 50) || null;
   const existing = await prisma.account.findUnique({
     where: { provider_providerAccountId: { provider, providerAccountId } },
-    select: { user: { select: { id: true, deletedAt: true } } },
+    select: { user: { select: { id: true, deletedAt: true, name: true } } },
   });
-  if (existing) return existing.user;
+  if (existing) {
+    const { id, deletedAt } = existing.user;
+    // 가입 뒤 동의항목(닉네임)을 켠 경우: 비어 있는 이름만 채운다(사용자가 바꾼 이름은 덮어쓰지 않음).
+    if (!existing.user.name && name && !deletedAt) {
+      await prisma.user.updateMany({ where: { id, name: null }, data: { name } });
+    }
+    return { id, deletedAt };
+  }
 
   try {
     return await prisma.user.create({
       data: {
-        name: identity.name?.trim().slice(0, 50) || null,
+        name,
         accounts: { create: { provider, providerAccountId } },
       },
       select: { id: true, deletedAt: true },

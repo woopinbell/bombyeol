@@ -47,4 +47,13 @@ describe("findOrCreateUser", () => {
     expect(rows.find((u) => u.id === long.id)?.name).toHaveLength(50);
     expect(rows.find((u) => u.id === blank.id)?.name).toBeNull();
   });
+
+  it("이름 없이 가입한 사용자는 다음 로그인 때 이름을 채우고, 있는 이름은 덮어쓰지 않는다", async () => {
+    const id = { provider: "kakao", providerAccountId: "9" };
+    const user = await findOrCreateUser(prisma, id);
+    await findOrCreateUser(prisma, { ...id, name: "봄별할머니" });
+    await findOrCreateUser(prisma, { ...id, name: "바뀐닉네임" });
+    const row = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
+    expect(row.name).toBe("봄별할머니");
+  });
 });
