@@ -4,11 +4,36 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 0 세션): **Phase 0 코드 커밋 완료(디자인 토큰 이식 제외)** — 작업 브랜치 `claude/cloud-session-phase-0-72a2lc`에 9커밋 푸시, **main 머지 완료(PR woopinbell/bombyeol#2, 머지 커밋 06591ce)**. 스테이징 배포·Hyperdrive 생성·CI 마이그레이션 시크릿은 사용자 승인/등록 대기(아래 "다음 할 일").
+- 단계(2026-10-01, Phase 1): **Phase 1 서버 커밋 완료(온보딩 UI 제외), 스테이징 배포됨** — 아래 "현재 상태 — Phase 1".
+- (이전) 단계(2026-10-01, Phase 0 세션): **Phase 0 코드 커밋 완료(디자인 토큰 이식 제외)** — 작업 브랜치 `claude/cloud-session-phase-0-72a2lc`에 9커밋 푸시, **main 머지 완료(PR woopinbell/bombyeol#2, 머지 커밋 06591ce)**. 스테이징 배포·Hyperdrive 생성·CI 마이그레이션 시크릿은 사용자 승인/등록 대기(아래 "다음 할 일").
 - (이전) 단계(2026-10-01 갱신): **스택 확정 — 스파이크 S-1~S-8 전부 통과, ARCHITECTURE 확정(사용자 승인). 다음은 Phase 0.** 스파이크 Cloudflare 리소스(Worker·Hyperdrive·R2 버킷)는 삭제 완료. main은 여전히 초기 커밋뿐.
 - (이전 기록) 기반 문서 작성 완료, 리포 부트스트랩 완료(2026-10-01). GitHub private 리포 `woopinbell/bombyeol` 생성, `main`(빈 초기 커밋 9744db2)·`docs`(고아, 8621748) 푸시 완료. 클라우드 환경은 사용자가 claude.ai/code에서 만든다(허용 도메인 Custom, 개발용 키만). 첫 세션 프롬프트는 `docs/CLOUD_SESSION.md` §4.
 - 결정 완료(사용자): 식별자 `bombyeol` / 서버리스 재선정 / 웹·PWA 우선 후 Android / 새 GitHub private 리포 + `docs` 고아 브랜치 / 비용 방어는 설계 제약 / 개인정보 초기 설계 / 텍스트 우선·음성 후속 / 가족 1 Space 안에 여러 아이 / 카카오+Google 로그인 / Cloudflare 검토 / next-intl(한국어만 출시) / 임신 기록·고인 처리 V1 포함 / PDF 다운로드 프리미엄 / 웹푸시 + 카카오톡 공유 / devlog는 docs 브랜치에만 / hamkke 절대 원칙 4종 계승.
 - 미해결: `OPEN_QUESTIONS.md` (특히 **Q-PAY 결제 공급자 재결정**).
+
+## 현재 상태 — Phase 1 (2026-10-01)
+
+- 스테이징 생성(사용자 승인): Hyperdrive `bombyeol-staging`(id `610ad8cefd3f49268ca0a581b488d80d`, Supabase 직결) + Worker `bombyeol-staging` → https://bombyeol-staging.seungwoo7050.workers.dev . 스모크 `GET /api/trpc/health` 200(Worker → Hyperdrive → Supabase 왕복). 배포 직후 몇 초는 이전 버전이 응답할 수 있음(404를 한 번 봄).
+- Phase 1 서버 커밋 9개 완료(브랜치 `claude/cloud-session-phase-0-72a2lc` — PR woopinbell/bombyeol#2 머지 후 main에서 같은 이름으로 다시 땀). 테스트 54건 통과. **main 미머지, PR 미생성.** 온보딩 화면 2커밋은 Phase DS 이후.
+- 결정·구현 요약:
+  - 인증: Auth.js v5 beta.32, JWT 세션. 로그인 시 `Account(provider, providerAccountId)`로 `User`를 찾거나 만든다(`src/server/auth/users.ts`). **이메일·프로필 사진은 저장·토큰 보관하지 않음**(PRIVACY 최소 수집), 이름만 50자. 로그인 signin/callback에 IP당 30회/시간(G-07, DB 카운터).
+  - 접근 통제: `protectedProcedure` → `spaceProcedure`(멤버 아니거나 삭제된 Space면 NOT_FOUND) → `parentProcedure`/`spaceRoleProcedure(...)`(FORBIDDEN).
+  - 상한(`src/lib/plan.ts`, 모두 **초안**): 사용자당 Space 생성 2(쿨다운 30일 안에 삭제한 것 포함), 소속 6 / 무료 역할 정원 parent 2·grandparent 4·**relative 0**(PRD §5 초안대로 친척은 프리미엄) / 아이 3 / 활성 초대 10, TTL 72h, 발급 20회/일 / 코드 실패 사용자 5회/15분·IP 20회/시간.
+  - 동시성: 개수 확인→생성은 `pg_advisory_xact_lock`(트랜잭션 범위)으로 직렬화. 드라이버 어댑터가 void 반환을 못 읽으므로 `$executeRaw` 사용.
+  - 초대코드: 31자 알파벳(0/O/1/I/L 제외) 6자, 거부 샘플링. 링크도 같은 코드(`/invite/{code}`). 실패 사유는 구분하지 않음(INVITE_INVALID).
+  - 에러 메시지는 사유 코드(`SPACE_CREATE_LIMIT` 등, `src/server/errors.ts`) → UI에서 문구 키로 변환 예정.
+
+### 다음 할 일 (Phase 1 이후)
+
+1. **(사용자) GitHub 시크릿 `STAGING_DATABASE_URL` 등록** → `Migrate staging DB` 워크플로 수동 실행(또는 main 머지 시 자동). 이것이 되기 전엔 Supabase에 테이블이 없어 **스테이징 로그인 시작이 500**(레이트 리밋 카운터 쓰기 실패)이다.
+2. **(사용자) 카카오·Google 콘솔 redirect URI 등록**: `https://bombyeol-staging.seungwoo7050.workers.dev/api/auth/callback/kakao`, `.../api/auth/callback/google`(카카오는 플랫폼 Web 도메인도). 1·2 후 브라우저에서 `/api/auth/signin` → 로그인 → `/api/trpc/space.list` 200 확인(기본 Auth.js 화면, UI 없음).
+3. Phase 1 PR 생성·머지(사용자 확인). 이후 Phase 2(미디어) — R2 버킷·토큰 신규 발급 필요(ENV_MANIFEST Phase 2), 버킷 생성은 승인 후.
+4. 결정 필요(사용자, 급하지 않음): 무료 relative 0명 유지 여부, 위 상한 수치(Q-PRICE). 카카오 이메일 미수집 확정.
+5. 정리 Cron(InviteCodeAttempt·RateCounter 보관 기간, G-17)은 Phase 2 Cron 커밋에서 함께.
+
+주의(이번 세션):
+- Prisma 7은 `migrate dev` 후 클라이언트를 자동 생성하지 않는다 → 스키마 변경 후 `npx prisma generate`(postinstall에도 있음).
+- 인터랙티브 트랜잭션 안에서 unique 위반이 나면 트랜잭션 전체가 중단된다 → 재시도 대신 미리 조회(초대코드).
 
 ## 다음 할 일 (2026-10-01, Phase 0 세션 종료 시점)
 
@@ -198,3 +223,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: PR woopinbell/bombyeol#1(spike→main)이 실수로 머지됐으나, 사용자가 로컬에서 main을 9744db2로 되돌림(확인 완료). 원격 브랜치는 `main`(9744db2), `docs`, `spike/s1-opennext-prisma`(참고용, 머지 금지) 3개. Phase 0은 새 세션에서 main 기준 작업 브랜치로 시작.
 - 2026-10-01(Phase 0 세션): 부트스트랩·V-1~V-5 재검증(위 "재검증"), 스파이크는 이미 통과라 재실행 안 함. Phase 0 9커밋(디자인 토큰 제외 + CI 추가)을 `claude/cloud-session-phase-0-72a2lc`에 푸시. COMMIT_PLAN·ENV_MANIFEST 갱신. 대기: main 머지, `STAGING_DATABASE_URL` 시크릿, 스테이징 리소스 생성 승인, `tmp-v2-pushtest` 삭제.
 - 2026-10-01: PR woopinbell/bombyeol#2 CI 통과 후 사용자가 머지 커밋으로 머지(06591ce).
+- 2026-10-01: 사용자 승인으로 스테이징 Hyperdrive·Worker 생성·배포, 인증 시크릿 등록. Phase 1 서버 9커밋(스키마 → tRPC → 카카오 → Google → 프로시저 → Space·아이 → 초대 발급 → 수락·brute-force → 통합 테스트). 대기: `STAGING_DATABASE_URL`, redirect URI 등록, PR.

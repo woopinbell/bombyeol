@@ -47,16 +47,16 @@
 
 ## Phase 1 — 인증·Space·초대 (모든 기능의 전제)
 
-- [ ] `chore(prisma): User/Space/Member/Invite 스키마 및 초기 마이그레이션`
-- [ ] `chore(trpc): tRPC 초기화 및 Route Handler 연동`
-- [ ] `feat(auth): Auth.js 카카오 로그인 구현` — 비즈 앱·이메일 동의 여부 결정 반영(S-2)
-- [ ] `feat(auth): Google 로그인 연동`
-- [ ] `feat(trpc): 로그인·Space 멤버십·역할 기반 프로시저 구현` (`protectedProcedure`/`spaceProcedure`/역할 검사)
-- [ ] `feat(space): 가족 Space 생성 및 아이 프로필 등록 구현` [G-11: 사용자당 Space·Space당 멤버 상한]
-- [ ] `feat(space): 초대코드·링크 발급과 TTL 처리 구현`
-- [ ] `feat(space): 초대 수락 트랜잭션 및 brute-force 방지 구현` [G-07, G-11: InviteCodeAttempt]
-- [ ] `test(space): 가족 생성·초대·역할 통합 테스트`
-- [ ] `feat(onboarding): 로그인·가족 만들기·초대 합류 화면 구현` — 어르신 온보딩 경로 포함
+- [x] `chore(prisma): User/Space/Member/Invite 스키마 및 초기 마이그레이션` — Account·InviteCodeAttempt·RateCounter 포함, **Child도 여기서 정의**(아이 등록이 Phase 1이라 Phase 3에서 이동)
+- [x] `chore(trpc): tRPC 초기화 및 Route Handler 연동` — superjson, 배포 스모크용 `health`
+- [x] `feat(auth): Auth.js 카카오 로그인 구현` — 비즈 앱·이메일 동의 여부 결정 반영(S-2)
+- [x] `feat(auth): Google 로그인 연동`
+- [x] `feat(trpc): 로그인·Space 멤버십·역할 기반 프로시저 구현` (`protectedProcedure`/`spaceProcedure`/역할 검사)
+- [x] `feat(space): 가족 Space 생성 및 아이 프로필 등록 구현` [G-11: 사용자당 Space·Space당 멤버 상한]
+- [x] `feat(space): 초대코드·링크 발급과 TTL 처리 구현`
+- [x] `feat(space): 초대 수락 트랜잭션 및 brute-force 방지 구현` [G-07, G-11: InviteCodeAttempt]
+- [x] `test(space): 가족 생성·초대·역할 통합 테스트`
+- [ ] `feat(onboarding): 로그인·가족 만들기·초대 합류 화면 구현` — **Phase DS 토큰 확정 후**(서버 API는 준비됨) — 어르신 온보딩 경로 포함
 - [ ] `feat(onboarding): 온보딩 완료 후 홈 라우팅 구현`
 
 ## Phase 2 — 미디어 파이프라인 (비용·보안 핵심, 여기서 게이트를 먼저 만든다)
@@ -71,7 +71,7 @@
 
 ## Phase 3 — 오늘(봄)
 
-- [ ] `chore(prisma): Child·Pet·Moment·Milestone 스키마 정의` — Moment·Milestone은 child/pet 중 하나만 참조(체크 제약)
+- [ ] `chore(prisma): Pet·Moment·Milestone 스키마 정의`(Child는 Phase 1에서 정의) — Moment·Milestone은 child/pet 중 하나만 참조(체크 제약)
 - [ ] `feat(child): 아이 프로필 관리(태명→출생 전환 포함) 구현`
 - [ ] `feat(pet): 반려동물 프로필 관리(입양일·생일 추정·종) 구현` [G-11: 아이·반려동물 수 상한]
 - [ ] `feat(moment): 사진·영상 피드 구현(아이·반려동물·가족 전체 대상, 썸네일 클라이언트 생성)` [G-01~04 재사용]

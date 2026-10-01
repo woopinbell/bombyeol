@@ -25,6 +25,7 @@ Phase별로 필요한 키를 **이름·형식·발급처·등급**으로 미리 
 ## Phase 0~1 (부트스트랩·인증)
 
 > 2026-10-01: S-2용으로 아래 5개 키가 클라우드 환경에 등록됨(개발 앱, 등급 A). 배포 Worker에는 `wrangler secret put`으로 별도 등록해야 한다.
+> 2026-10-01(Phase 1): 스테이징 Worker `bombyeol-staging`에 `AUTH_SECRET`·`AUTH_KAKAO_ID/SECRET`·`AUTH_GOOGLE_ID/SECRET` 등록 완료(클라우드 환경값을 stdin으로 전달, 출력 없음). 콘솔 redirect URI: `https://bombyeol-staging.seungwoo7050.workers.dev/api/auth/callback/kakao`, `.../callback/google`.
 
 | 변수 | 형식 | 발급처 | 등급 | 상태 |
 |---|---|---|---|---|
