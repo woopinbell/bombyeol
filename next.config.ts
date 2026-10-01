@@ -27,6 +27,10 @@ const nextConfig: NextConfig = {
       "node_modules/typescript/**",
     ],
   },
+  // Next는 @prisma/client를 기본 외부 패키지로 빼고 Turbopack이 해시 이름(@prisma/client-<hash>)으로 참조한다.
+  // OpenNext(1.20.7)는 스코프 패키지의 해시 이름을 매핑하지 못해 배포 Worker에서
+  // "No such module ... wasm-compiler-edge"로 실패하므로 번들에 포함시킨다(2026-10-01 스테이징에서 발견).
+  transpilePackages: ["@prisma/client"],
   images: {
     // 이미지 변환 과금 회피: 썸네일은 업로드 전 클라이언트가 만든다(ARCHITECTURE §1).
     unoptimized: true,
