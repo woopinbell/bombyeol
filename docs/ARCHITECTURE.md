@@ -58,11 +58,12 @@
 
 hamkke에서 R2 남용이 가능했던 다섯 구멍을 처음부터 닫는 경로:
 
-1. 클라이언트 → `media.requestUpload({kind, bytes, contentType})` 요청. 서버가 상한·한도·요청 횟수를 검사(G-01, G-03, G-04)하고 `MediaAsset(status=pending, bytes)`를 만든 뒤 **서명에 `Content-Length`(정확한 bytes)와 `Content-Type`을 포함한** 업로드 URL을 발급. 키는 `spaces/{spaceId}/pending/{assetId}`.
+1. 클라이언트 → `media.requestUpload({kind, bytes, contentType})` 요청. 서버가 상한·한도·요청 횟수를 검사(G-01, G-03, G-04)하고 `MediaAsset(status=pending, bytes)`를 만든 뒤 **서명에 `Content-Length`(정확한 bytes)와 `Content-Type`을 포함한** 업로드 URL을 발급. 업로드 키는 `pending/{spaceId}/{assetId}`(2026-10-01 변경: R2 수명주기 규칙은 **키 접두사로만** 걸리므로 `pending/`을 맨 앞에 둔다).
 2. 클라이언트가 R2로 직접 PUT.
-3. 클라이언트 → `media.confirm(assetId)`. 서버가 `HeadObject`로 **실존·크기 일치·자기 Space 경로**를 확인하고 `confirmed`로 전환(G-02). 콘텐츠를 참조하는 모든 mutation(`moment.create`, `story.create` 등)은 **confirmed 상태의 자기 Space 자산만** 받는다(키 문자열 신뢰 금지).
+3. 클라이언트 → `media.confirm(assetId)`. 서버가 `HeadObject`로 **실존·크기·타입 일치**를 확인하고, S3 `CopyObject`(서버 측 복사, 바이트가 Worker를 거치지 않음)로 `spaces/{spaceId}/{assetId}`에 옮긴 뒤 pending 객체를 지우고 `confirmed`로 전환(G-02). 콘텐츠를 참조하는 모든 mutation(`moment.create`, `story.create` 등)은 **confirmed 상태의 자기 Space 자산만** 받는다(키 문자열 신뢰 금지).
 4. 사용량 한도는 **confirmed 바이트 합계**로 센다(업로드 URL만 받고 안 쓰는 우회 차단).
-5. 삭제 시 DB와 R2 객체를 함께 삭제. `pending` 접두사에는 R2 수명주기 규칙(1일)과 Cron 정리를 둔다(G-05).
+5. 삭제 시 DB와 R2 객체를 함께 삭제. `pending/` 접두사에는 R2 수명주기 규칙(1일, 스테이징 버킷에 2026-10-01 설정)과 Cron 정리(오래된 pending 행 정리)를 둔다(G-05).
+6. R2 접근은 S3 호환 API(aws4fetch, SigV4) 하나로 통일한다(presign·Head·Copy·Delete·읽기용 presign GET). 버킷 CORS는 해당 환경 출처의 `PUT`·`content-type`만 허용.
 
 서명 URL이 R2에서 `Content-Length` 서명 헤더를 실제로 강제하는지, 아니면 Worker가 본문 스트림을 프록시하며 바이트를 세는 방식이 필요한지는 스파이크 S-3에서 확인한다(둘 다 G-01을 만족하는 방식이면 됨).
 
