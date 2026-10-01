@@ -1,10 +1,12 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createPrisma } from "@/server/db";
 import { isInternalRequest } from "@/server/internal-auth";
+import { fcmSenderFromEnv } from "@/server/push/fcm";
 import { storageFromEnv } from "@/server/storage/from-env";
 
 /**
- * 배포 스모크(CLOUD_SESSION §2.1): Worker → Hyperdrive → DB, Worker → R2(presign 서명 강제·Head·Copy·Delete).
+ * 배포 스모크(CLOUD_SESSION §2.1): Worker → Hyperdrive → DB, Worker → R2(presign 서명 강제·Head·Copy·Delete),
+ * Worker → FCM(서비스 계정 토큰 교환·발송 호출).
  * 내부 토큰 없이는 404. 시험 객체는 `pending/_smoke/`에만 만들고 끝나면 지운다.
  */
 export async function POST(req: Request) {
@@ -51,6 +53,24 @@ export async function POST(req: Request) {
       (await storage.head(finalKey)) || (await storage.head(pendingKey)) ? "left" : "ok";
   } catch (error) {
     checks.r2 = `fail: ${(error as Error).message.slice(0, 120)}`;
+  }
+
+  // 가짜 등록 토큰으로 보낸다 — 실제 알림은 나가지 않고, 키·토큰 교환·FCM 호출이 정상이면
+  // FCM이 토큰을 무효로 판정해 invalid_token(기대값)이 된다. error는 키·교환·호출 중 어딘가의 실패.
+  const sender = fcmSenderFromEnv(env);
+  if (!sender) {
+    checks.fcm = "not configured";
+  } else {
+    try {
+      checks.fcm = await sender.send("bombyeol-smoke-invalid-token", {
+        title: "smoke",
+        body: "smoke",
+        link: new URL("/", req.url).toString(),
+        data: { type: "smoke" },
+      });
+    } catch (error) {
+      checks.fcm = `fail: ${(error as Error).name}`;
+    }
   }
   return Response.json(checks);
 }
