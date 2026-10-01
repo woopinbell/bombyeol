@@ -2,5 +2,48 @@
   "app": {
     "name": "봄별",
     "description": "세대를 잇는 우리 가족 아카이브"
+  },
+  "story": {
+    "categories": {
+      "childhood": "어린 시절",
+      "youth": "젊은 시절",
+      "work": "일",
+      "love": "사랑·결혼",
+      "parenting": "자녀 키우기",
+      "food": "음식",
+      "holidays": "명절",
+      "places": "살던 곳",
+      "grandchildren": "손주",
+      "wisdom": "전하고 싶은 말"
+    },
+    "prompts": {
+      "childhood_home": "어린 시절 살던 집과 동네는 어땠어요?",
+      "childhood_play": "어릴 때 친구들과 무엇을 하고 놀았어요?",
+      "childhood_school": "학교 다니던 시절, 가장 기억에 남는 일은요?",
+      "childhood_parents": "부모님은 어떤 분이셨어요?",
+      "youth_dream": "젊었을 때 꿈은 무엇이었어요?",
+      "youth_friend": "젊은 시절 가장 가까웠던 친구 이야기를 들려주세요.",
+      "youth_first_trip": "처음으로 멀리 떠났던 여행은 어디였어요?",
+      "work_first_job": "처음 했던 일은 무엇이었어요?",
+      "work_proud": "일하면서 가장 뿌듯했던 순간은요?",
+      "work_hardest": "일하면서 가장 힘들었던 때는 언제였어요?",
+      "love_first_meet": "평생의 짝은 어떻게 처음 만나셨어요?",
+      "love_wedding": "결혼식 날은 어땠어요?",
+      "parenting_first_child": "첫 아이가 태어난 날을 기억하세요?",
+      "parenting_hard_times": "아이들을 키우면서 가장 어려웠던 때는요?",
+      "parenting_child_memory": "우리 엄마·아빠는 어릴 때 어떤 아이였어요?",
+      "food_mothers_dish": "어머니가 해 주시던 음식 중 생각나는 게 있어요?",
+      "food_signature": "가족에게 꼭 물려주고 싶은 음식 솜씨가 있어요?",
+      "food_hungry_days": "먹을 것이 귀하던 시절 이야기를 들려주세요.",
+      "holidays_chuseok": "옛날 추석은 어떻게 보냈어요?",
+      "holidays_new_year": "설날에 가장 기다려지던 것은 무엇이었어요?",
+      "places_hometown": "고향은 어떤 곳이에요?",
+      "places_moved": "살면서 이사했던 곳 중 가장 기억에 남는 곳은요?",
+      "grandchildren_birth": "손주가 태어났다는 소식을 들었을 때 어땠어요?",
+      "grandchildren_wish": "손주가 어떤 사람으로 자랐으면 좋겠어요?",
+      "wisdom_life_lesson": "살면서 배운 가장 소중한 것은 무엇이에요?",
+      "wisdom_happiest": "살면서 가장 행복했던 때는 언제였어요?",
+      "wisdom_to_family": "가족에게 꼭 남기고 싶은 말이 있어요?"
+    }
   }
 }

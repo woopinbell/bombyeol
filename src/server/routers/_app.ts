@@ -7,6 +7,7 @@ import { momentRouter } from "./moment";
 import { petRouter } from "./pet";
 import { reactionRouter } from "./reaction";
 import { spaceRouter } from "./space";
+import { storyRouter } from "./story";
 import { userRouter } from "./user";
 
 export const appRouter = router({
@@ -24,6 +25,7 @@ export const appRouter = router({
   moment: momentRouter,
   milestone: milestoneRouter,
   reaction: reactionRouter,
+  story: storyRouter,
 });
 
 export type AppRouter = typeof appRouter;
