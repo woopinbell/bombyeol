@@ -4,7 +4,8 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 7): **Phase 7 삭제·개인정보 서버 main 머지 완료(PR woopinbell/bombyeol#10, 머지 커밋 ea6a25e), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외). 그 전에 FCM 스모크 점검 추가(PR woopinbell/bombyeol#9 머지) — 아래 "현재 상태 — Phase 7".
+- 단계(2026-10-01, Phase DS 세션): **Phase DS 1차 — 1차 자료 정독·DESIGN §9 화면 규칙 초안·정적 목업 3안 작성, 사용자 선택 대기**. 병행: Q-PAY 결정 자료, Phase 9 e2e 서버 부분(작업 브랜치, main 미머지) — 아래 "현재 상태 — Phase DS".
+- (이전) 단계(2026-10-01, Phase 7): **Phase 7 삭제·개인정보 서버 main 머지 완료(PR woopinbell/bombyeol#10, 머지 커밋 ea6a25e), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외). 그 전에 FCM 스모크 점검 추가(PR woopinbell/bombyeol#9 머지) — 아래 "현재 상태 — Phase 7".
 - (이전) 단계(2026-10-01, Phase 6): **Phase 6 알림 서버 main 머지 완료(PR woopinbell/bombyeol#8, 머지 커밋 934c55d), 스테이징 마이그레이션·배포·스모크 통과**(UI·공유·PWA 제외) — 아래 "현재 상태 — Phase 6".
 - (이전) 단계(2026-10-01, Phase 5): **Phase 5 우리·임신 기록 서버 main 머지 완료(PR woopinbell/bombyeol#7, 머지 커밋 6c7b55b), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 5".
 - (이전) 단계(2026-10-01, Phase 4): **Phase 4 이야기(별) 서버 main 머지 완료(PR woopinbell/bombyeol#6, 머지 커밋 fc94348), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 4".
@@ -16,6 +17,26 @@
 - (이전 기록) 기반 문서 작성 완료, 리포 부트스트랩 완료(2026-10-01). GitHub private 리포 `woopinbell/bombyeol` 생성, `main`(빈 초기 커밋 9744db2)·`docs`(고아, 8621748) 푸시 완료. 클라우드 환경은 사용자가 claude.ai/code에서 만든다(허용 도메인 Custom, 개발용 키만). 첫 세션 프롬프트는 `docs/CLOUD_SESSION.md` §4.
 - 결정 완료(사용자): 식별자 `bombyeol` / 서버리스 재선정 / 웹·PWA 우선 후 Android / 새 GitHub private 리포 + `docs` 고아 브랜치 / 비용 방어는 설계 제약 / 개인정보 초기 설계 / 텍스트 우선·음성 후속 / 가족 1 Space 안에 여러 아이 / 카카오+Google 로그인 / Cloudflare 검토 / next-intl(한국어만 출시) / 임신 기록·고인 처리 V1 포함 / PDF 다운로드 프리미엄 / 웹푸시 + 카카오톡 공유 / devlog는 docs 브랜치에만 / hamkke 절대 원칙 4종 계승.
 - 미해결: `OPEN_QUESTIONS.md` (특히 **Q-PAY 결제 공급자 재결정**).
+
+## 현재 상태 — Phase DS (2026-10-01)
+
+- 세션 작업 브랜치 `claude/jolly-shannon-0ae5z1`(main ea6a25e에서 시작). 진행 중 PR 없음, main 머지는 사용자 확인 후.
+- **디자인(docs 브랜치만)**:
+  - 1차 자료 정독 → [`design-research/2026-10-01-primary-sources.md`](design-research/2026-10-01-primary-sources.md): Emil Kowalski·Rauno·Maggie Appleton·Josh Comeau·토스·당근 SEED·KWCAG 2.2·WCAG 2.2·서울디지털재단 고령층 표준. 화면 규칙 후보 32개 + 모션 토큰 후보 표(**미확정**).
+  - 정정: interfacecraft.dev는 Rauno가 아니라 Josh Puckett의 유료 라이브러리, 토스 UX 라이팅 링크 404(내용은 consumer-ux-guide로 이동), Vaul 저장소 "unmaintained"(의존성 대신 상수만 참고). 성공자 연구 문서에 반영.
+  - `DESIGN.md` §9 화면 규칙 초안(공통·오늘·이야기·우리·어르신 온보딩·시트/토스트·목업). 토큰 값은 손대지 않음.
+  - 목업 3안 [`mockups/2026-10-01-ds/`](mockups/2026-10-01-ds/) — A 한 장씩 / B 날짜별 앨범 / C 큰글씨 간편 모드(이야기 탭 paper 배경). 스크린샷 `shots/*.png`. 비교표·고를 것은 그 폴더 README.
+  - 새 열린 질문: Q-HONOR(어르신 경어 수준), Q-ILLUST(일러스트), Q-STORYBG(이야기 탭 배경).
+- **Q-PAY 결정 자료**: [`research/2026-10-01-q-pay-providers.md`](research/2026-10-01-q-pay-providers.md). 사업자 등록 시 포트원 V2(+토스페이먼츠) / 미등록 시 Paddle(대안 Polar) / 무료 출시. 일부 항목은 검색 요약 근거(문서에 표시). 구현·ENV_MANIFEST 키 이름은 사용자 선택 후.
+- **Phase 9 `test(e2e)` 서버 부분**: 커밋 f089b91(푸시 완료) — `tests/e2e-core-flow.test.ts` 한 흐름(로그인→Space→아이→초대→수락→사진 업로드·확정→기록→좋아요·댓글→이야기·별·물어보기→할머니 계정 삭제→Space 삭제·Cron 파기→엄마 계정 삭제, 단계마다 푸시 대상·잔존 데이터 0 확인). 잔존 검사는 `tests/helpers/residual.ts`로 분리. 파일 첫머리에서도 `assertLocalDatabaseUrl`. Vitest 289 → **290** 통과, format·lint·typecheck 통과, 뮤테이션 2건 확인. 브라우저·카카오 리다이렉트·공유·PWA·실기기 푸시는 남김(UI 이후).
+- 환경 메모: 기존 스위트에서 3번 중 1번 테스트 1건이 실패했다가 재실행에 통과(어떤 테스트인지 기록 못 함 — 다음에 반복 실행으로 찾을 것). Docker Hub 429로 `db:up` 첫 시도 실패, 재시도 성공. 컨테이너에 한글 폰트가 없어 목업 스크린샷은 Pretendard woff2를 받아 Playwright route로 주입(스크래치패드, 리포에 넣지 않음).
+
+### 다음 할 일 (Phase DS 1차 이후)
+
+1. **사용자**: 목업 안 고르기(또는 섞기), Q-STORYBG·Q-HONOR·온보딩 단계 결정 → 고른 안으로 2차 목업(시트·토스트·빈 화면 포함).
+2. 그 뒤 Phase DS 남은 것: 로고(Q-LOGO)·손글씨(Q-FONT) 결정, 토큰 확정(모션 토큰 후보 표에서 고르기) + 대비 검증 표. 확정 전에는 코드에 토큰을 넣지 않는다.
+3. **사용자**: Q-PAY 선택(선결: 사업자 등록 여부). 고르면 ENV_MANIFEST Phase 8 키 이름부터 채우고 Phase 8 착수.
+4. e2e 커밋(f089b91)은 main 머지 대기 — 사용자 확인 후 PR.
 
 ## 현재 상태 — Phase 7 (2026-10-01)
 
