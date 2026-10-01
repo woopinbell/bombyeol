@@ -113,14 +113,27 @@
 
 ## Phase 5 — 우리·임신 기록
 
+> 2026-10-01 서버 설계(세션 제안 — **머지 전 사용자 확인 필요**. 수치는 `plan.ts` 초안):
+> - **동의(Consent)**: 추가 전용 기록 `Consent(userId, spaceId?, kind, version, grantedAt, withdrawnAt?)`. kind = `terms`·`privacy`(사용자 단위, spaceId 없음) / `child_data`(법정대리인 동의)·`pregnancy`(Space 단위). 현재 문구 버전은 코드 카탈로그 `src/lib/consents.ts` 한 곳 — 버전이 바뀌면 옛 동의는 "유효하지 않음"이 되어 다시 받는다. 유효 = 철회 안 됨 + 현재 버전. 같은 동의를 다시 누르면 기존 행을 돌려준다(advisory lock).
+> - **서버 강제 범위(이번)**: **임신 동의만 강제** — 임신 기록 쓰기·고치기는 쓰는 사람의 유효한 `pregnancy` 동의가 있어야 한다(`CONSENT_REQUIRED`). 동의는 parent만 할 수 있다(임신 기록을 쓰는 사람). `terms`·`privacy`·`child_data`는 이번엔 **기록·조회(`consent.status`로 빠진 동의 목록)만** 하고, 로그인 후 모든 API를 막는 게이트는 온보딩 화면 커밋(Phase 1 `feat(onboarding)`)에서 함께 건다(지금 걸면 화면 없이 모든 API가 막힌다). → **확인 요청 ①**
+> - **철회**: 이번엔 `pregnancy`만 철회 가능(약관·처리방침 철회 = 계정 삭제는 Phase 7, 아이 정보 철회 = 아이 삭제도 Phase 7). 철회 시 옵션 `deleteRecords`: 참이면 그 Space에서 **내가 쓴** 임신 기록과 초음파 파일을 지운다(R2 먼저, G-05). 거짓이면 기록은 남기되 **내가 쓴 기록을 전부 `parents_only`로 되돌린다**(동의를 거뒀으니 가족 공개도 거둔다 — 보수적). 철회 후에는 새 기록·수정 불가. → **확인 요청 ②**
+> - **PregnancyRecord**: `(spaceId, childId, kind, date @db.Date, note?, photoAssetId? UNIQUE, visibility, createdById)`. kind = `ultrasound`(초음파 — 사진 한 장 필수, 이미지만) / `checkup`(검진 — 미래 날짜 허용, 예정일+60일까지) / `kick`(태동) / `note`(메모). **주차는 저장하지 않고 조회 시점에 아이의 현재 출생 예정일로 계산**(`gestationalAge` — 280일 기준 주·일. 예정일이 바뀌어도 맞게, PRD 초안의 `weekAt` 필드 대신). 예정일이 없으면 주차 없음. 대상 아이는 `expecting`이거나, `born`이면 날짜가 생일 이전인 기록만(출생 후 소급 정리). 출생 후에도 기록은 유지(PRD §4.2).
+> - **visibility 서버 강제(PRIVACY §3)**: 기본 `parents_only`. 조회(list·get)는 parent가 아니면 쿼리 조건에 `visibility = family`를 넣는다(클라이언트 필터 금지). 숨은 기록을 id로 찾으면 `NOT_FOUND`(존재를 드러내지 않음). 숨은 기록 수·요약도 내보내지 않는다. 초음파 파일 읽기 URL은 임신 기록 응답에서만 나가고, 자산은 다른 곳에 붙일 수 없게 `unattachedAssetWhere`에 임신 사진을 더한다(id를 알아도 Moment에 붙여 우회 공개 불가). 역할이 바뀌거나 멤버에서 빠지면 다음 요청부터 바로 반영(매 요청 멤버십·역할 검사).
+> - **임신 기록 권한**: 쓰기 = parent(동의 필요). 고치기(내용·visibility) = 쓴 사람만(가족 공개는 쓴 사람의 결정). 단 다른 parent도 **`parents_only`로 좁히기**는 할 수 있다(안전 방향). 지우기 = 쓴 사람 또는 parent. grandparent·relative는 `family` 기록 열람만, **반응(좋아요·댓글)은 붙이지 않는다**(노출면 최소화). → **확인 요청 ③**
+> - **아이 프로필(태명·예정일)은 지금처럼 가족 전체에 보인다** — 숨기는 대상은 임신 기록(검진·초음파·메모)만. 캘린더 자동 카드에 출생 예정일은 넣지 않는다. → **확인 요청 ④**
+> - **가족 캘린더(FamilyEvent)**: `(title, kind(gathering|birthday|anniversary|other), startsAt, endsAt?, allDay, recurrence(none|yearly), note?)`. 시각 있는 일정은 UTC 순간으로 저장하고 클라이언트가 현지 시각으로 보여준다. **종일 일정은 날짜만 의미가 있으므로 그 날의 UTC 자정으로 저장하고 시간대 변환 없이 날짜로 보여준다**. `calendar.list(from, to)`는 범위(최대 400일) 안의 일정과 매년 반복 일정의 그 해 회차를 펼쳐 돌려준다(조회 시점 계산, 정시 push 없음). 쓰기 = parent·grandparent(relative는 열람만 — Phase 3 원칙), 고치기·지우기 = 만든 사람 또는 parent. 리밋: 일정 쓰기 100/일(G-07), Space당 일정 500(G-11), 제목 40자·메모 500자.
+> - **멤버 관리**: 관계 표시명은 본인 또는 parent가 고친다. 역할 변경·내보내기는 parent만, **자기 자신과 Space를 만든 사람은 대상이 아니다**(마지막 관리자 소실·관리자끼리 서로 내보내기 방지). 역할 변경은 요금제 역할별 인원 상한(G-11, `MEMBER_ROLE_LIMIT`)을 다시 검사(advisory lock). 기념 상태인 분은 역할 변경·내보내기 불가(되돌린 뒤). 스스로 나가기(`leave`)는 만든 사람만 불가(Space 삭제는 Phase 7). 멤버가 빠지면 이야기는 스냅샷으로 남고 받은 물어보기는 사라진다(기존 FK 규칙). → **확인 요청 ⑤**
+> - **우리 탭 카드(`family.upcoming`)**: 다음 가족 모임 D-day(가장 가까운 `gathering`, 반복 포함)와 앞으로 N일(초안 30일) 안의 생일(태어난 아이·멤버 없음 — 사람 생일은 사용자가 캘린더에 `birthday`로 등록)·반려동물 생일·입양기념일·직접 등록한 기념일. 모두 조회 시점 계산, `today`는 클라이언트 현지 날짜(Phase 4 기일과 같은 방식). 기일 계산 함수는 `src/lib/anniversary.ts`로 옮겨 기일·생일이 함께 쓴다.
+
 - [ ] `chore(prisma): FamilyEvent·PregnancyRecord·Consent 스키마 정의`
 - [ ] `feat(consent): 동의 기록 및 임신 정보 별도 동의 구현`
 - [ ] `feat(pregnancy): 임신 기록(주차 계산·초음파·메모) 및 visibility 서버 강제 구현` [PRIVACY §3]
 - [ ] `test(pregnancy): parents_only 비노출 통합 테스트`
-- [ ] `feat(calendar): 가족 캘린더 CRUD 구현(UTC 저장·로컬 표시)`
-- [ ] `feat(family): 멤버·역할·관계 표시명 관리 구현`
+- [ ] `feat(calendar): 가족 캘린더 CRUD 구현(UTC 저장·로컬 표시)` [G-07, G-11]
+- [ ] `feat(family): 멤버·역할·관계 표시명 관리 구현` [G-11]
+- [ ] (추가) `refactor(memorial): 기일 계산을 공용 기념일 계산으로 분리`
 - [ ] `feat(family): 다음 가족 모임 D-day 및 생일·입양기념일 카드 구현`
-- [ ] `feat(us): 우리 탭 화면 구성`
+- [ ] `feat(us): 우리 탭 화면 구성` — **Phase DS 토큰 확정 후**
 
 ## Phase 6 — 알림
 
