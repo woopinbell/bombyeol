@@ -132,6 +132,10 @@ export const EVENT_POLICY = {
   maxSpanDays: 31,
   /** 한 번에 조회하는 최대 범위(일) */
   maxRangeDays: 400,
+  /** 우리 탭 카드: 기본으로 앞으로 며칠 안의 생일·기념일을 보여주나 */
+  upcomingDays: 30,
+  /** 우리 탭 카드: 요청할 수 있는 최대 날 수 */
+  upcomingMaxDays: 90,
 } as const;
 
 /**
