@@ -9,11 +9,11 @@
 | 대화의 주장 | 결과 | 비고 |
 |---|---|---|
 | 후카사와 "Without Thought"/슈퍼노멀 | **확인됨** | "Without Thought"는 무의식적 행동에 스며드는 디자인, Super Normal은 2006 Jasper Morrison과 시작한 프로젝트 [Wikipedia](https://en.wikipedia.org/wiki/Naoto_Fukasawa), [Fukasawa 공식](https://naotofukasawa.com/about/) |
-| 토스 디자인 시스템·한국어 타이포 리듬 | **부분 확인** | TDS와 **UX 라이팅 원칙(해요체·능동형·한 줄)** 은 확인 [토스 UX 라이팅](https://developers-apps-in-toss.toss.im/design/ux-writing.html), [토스 8가지 라이팅 원칙](https://toss.tech/article/8-writing-principles-of-toss). "타이포 리듬"은 라이팅이 아닌 시각 규칙이라 별도 확인 필요 |
+| 토스 디자인 시스템·한국어 타이포 리듬 | **부분 확인** | TDS와 **UX 라이팅 원칙(해요체·능동형·한 줄)** 은 확인 [토스 UX 라이팅](https://developers-apps-in-toss.toss.im/design/ux-writing.html)(2026-10-01 현재 404 — 내용은 `consumer-ux-guide.md`로 이동, 1차 자료 문서 §5), [토스 8가지 라이팅 원칙](https://toss.tech/article/8-writing-principles-of-toss). "타이포 리듬"은 라이팅이 아닌 시각 규칙이라 별도 확인 필요 |
 | Josh Comeau 마이크로 인터랙션 | **확인됨** | 인터랙티브 설명 콘텐츠, *Whimsical Animations* 코스, 디즈니 12원칙 기반 SVG 마이크로 인터랙션 [Josh W. Comeau](https://www.joshwcomeau.com/animation/), [Whimsical Animations](https://whimsy.joshwcomeau.com/) |
 | Maggie Appleton — 손그림 일러스트·디지털 가든 | **확인됨** (설명 보정) | 일러스트를 곁들인 시각적 에세이와 디지털 가든을 운영, 디자인 엔지니어/연구자(GitHub Next). 그림 스타일이 "구술 아카이브"에 어울린다는 것은 **우리의 해석**이지 그의 주장이 아니다 [maggieappleton.com](https://maggieappleton.com/about) |
 | **Emil Kowalski** — Sonner/Vaul, 미니멀 촉각 모션 | **확인됨** (소속 보정) | Sonner(토스트)·Vaul(드로어) 제작, *Animations on the Web* 코스. **현재 Linear 디자인 엔지니어**, 이전 Vercel [animations.dev](https://animations.dev/) |
-| **Rauno Freiberg(Vercel/Linear)** | **부분 정정** | **Vercel Staff Design Engineer**(Linear가 아님). cmdk 제작자, *Devouring Details*(인터랙션 디자인 23장+), Interface Craft [Raycast 스토리](https://www.raycast.com/community-stories/rauno-freiberg), [interfacecraft.dev](https://www.interfacecraft.dev/) |
+| **Rauno Freiberg(Vercel/Linear)** | **부분 정정** | **Vercel Staff Design Engineer**(Linear가 아님). cmdk 제작자, *Devouring Details*(인터랙션 디자인 23장+) [Raycast 스토리](https://www.raycast.com/community-stories/rauno-freiberg). **정정(2026-10-01 1차 자료 정독)**: interfacecraft.dev는 Josh Puckett의 유료 라이브러리로 Rauno와 무관 — `2026-10-01-primary-sources.md` §2 |
 | Panic(파이어워치, Playdate) 노스탤직 톤 | **미검증** | Firewatch는 Campo Santo 개발·Panic 퍼블리싱으로 알고 있으나 이번에 검증하지 않았다. 톤 레퍼런스로 쓰려면 실제 작품·제품을 확인한 뒤 채택 |
 | StoryWorth / Artifact Uprising = 가족 구술사 → 실물 | **부분** | StoryWorth(주간 질문 → 답변 → 책)는 이 문제를 푸는 제품으로 알고 있음(이번에 재검증 안 함). **Artifact Uprising은 사진 인화·포토북 제품**으로 알고 있어 구술사 제품이 아니다(미검증) — 포토북 플로우 참고용으로만 |
 | **얼라이트(Alright Studio) — 토스·배민 계열 한국형 프로덕트 디자인** | **근거 없음 → 제외** | 검색된 Alright Studio는 **뉴욕 브루클린의 전략·크리에이티브 에이전시**이며 토스·배민 작업 근거 없음 [alright.studio](https://alright.studio/). 한국 제품 디자인 레퍼런스는 토스(TDS)·배민 등 **직접 확인 가능한 것**으로 대체 |
@@ -65,7 +65,9 @@
 
 ## 7. 다음 세션(클라우드 초반)의 디자인 리서치 작업
 
-- [ ] Emil Kowalski·Rauno Freiberg 1차 자료(Devouring Details, animations.dev 공개 글)에서 시트·토스트·이징 규칙을 뽑아 `DESIGN.md` §5 모션 토큰에 반영
+> 2026-10-01 수행 → [`2026-10-01-primary-sources.md`](2026-10-01-primary-sources.md). 화면 규칙은 `DESIGN.md` §9.
+
+- [x] Emil Kowalski·Rauno Freiberg 1차 자료(Devouring Details, animations.dev 공개 글)에서 시트·토스트·이징 규칙을 뽑아 `DESIGN.md` §5 모션 토큰에 반영
 - [ ] Maggie Appleton 일러스트 스타일 분석 → 봄별 빈 화면 일러스트 방향(직접 그릴지, 생성할지, 미사용할지는 사용자 결정)
 - [ ] Josh Comeau 마이크로 인터랙션 중 채택할 3개 이내 선정
 - [ ] 한국 제품·서체 레퍼런스(§4 미검증 후보) 조사
