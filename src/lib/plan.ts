@@ -148,6 +148,12 @@ export const PUSH_POLICY = {
   tokenStaleDays: 60,
   /** FCM 등록 토큰 최대 길이(문자) */
   tokenMaxChars: 4096,
+  /** 수신자 한 명에게 시간당 보내는 알림 수(가족 안의 폭주로부터 어르신 보호) */
+  perRecipientPerHour: 20,
+  /** 이벤트 하나에서 수신자당 보내는 기기 수(최근에 쓴 기기부터) */
+  tokensPerRecipient: 3,
+  /** 이벤트 하나의 최대 발송 수 — Workers 무료 플랜 하위 요청 50개 안(토큰 교환 1회 포함) */
+  maxSendsPerEvent: 40,
 } as const;
 
 /**
