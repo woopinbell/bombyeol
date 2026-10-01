@@ -61,13 +61,15 @@
 
 ## Phase 2 — 미디어 파이프라인 (비용·보안 핵심, 여기서 게이트를 먼저 만든다)
 
-- [ ] `chore(prisma): MediaAsset·UsageCounter 스키마 정의`
-- [ ] `feat(media): 업로드 요청·서명 발급 구현` [G-01, G-03, G-04]
-- [ ] `feat(media): 업로드 확인(confirm) 및 자산 소유·크기 검증 구현` [G-02]
-- [ ] `feat(media): 자산 삭제 시 R2 객체 삭제 구현` [G-05]
-- [ ] `chore(infra): pending 접두사 R2 수명주기 규칙 및 Cron 정리 작업` [G-05, G-15]
-- [ ] `feat(media): Space 사용량 집계 및 한도 판정(plan.ts) 구현` [G-03, G-15]
-- [ ] `test(media): 크기 초과·타 Space 자산·pending 참조·한도 경계 테스트` [G-01~05]
+- [x] `chore(prisma): MediaAsset·UsageCounter 스키마 정의`
+- [x] `feat(media): 업로드 요청·서명 발급 구현` [G-01, G-03, G-04] — 저장소 인터페이스(R2 S3 API·aws4fetch / 테스트용 메모리)
+- [x] `feat(media): 업로드 확인(confirm) 및 자산 소유·크기 검증 구현` [G-02] — `requireConfirmedAssets`(이후 기능의 참조 검증)
+- [x] `feat(media): 자산 삭제 시 R2 객체 삭제 구현` [G-05]
+- [x] `chore(infra): pending 접두사 R2 수명주기 규칙 및 Cron 정리 작업` [G-05, G-15] — `worker.ts` scheduled → 내부 경로 호출(번들 중복 방지), 매시 17분
+- [x] `feat(media): Space 사용량 집계 및 한도 판정(plan.ts) 구현` [G-03, G-15]
+- [x] `test(media): 크기 초과·타 Space 자산·pending 참조·한도 경계 테스트` [G-01~05]
+- [x] (추가) `fix(infra): Worker 환경 타입 생성에서 로컬 .env 변수 제외`, `chore(infra): 배포 스모크 내부 경로 추가`
+- [ ] (추가) 읽기용 서명 URL 조회 — Phase 3 피드에서 함께(저장소 `presignGet`은 준비됨)
 
 ## Phase 3 — 오늘(봄)
 

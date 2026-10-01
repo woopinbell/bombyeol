@@ -21,7 +21,7 @@
 
 ## 현재 상태
 
-스택 확정(2026-10-01, 스파이크 S-1~S-8 통과). Phase 0(디자인 토큰 이식 제외)은 main에 머지됨(PR woopinbell/bombyeol#2). Phase 1 서버 쪽(온보딩 UI 제외)도 main에 머지됨(PR woopinbell/bombyeol#3), 스테이징 `bombyeol-staging` 배포·실로그인 확인됨. 다음은 Phase 2(미디어). 스파이크 코드는 `spike/s1-opennext-prisma` 참고용(머지 금지). 개발 코드 쪽 에이전트 규칙은 main의 `AGENTS.md`(Next.js가 관리하는 블록 — 코드 작성 전 `node_modules/next/dist/docs/` 확인)도 함께 읽는다. 실제 상태는 항상 `docs/PROGRESS.md`가 우선한다.
+스택 확정(2026-10-01, 스파이크 S-1~S-8 통과). Phase 0(디자인 토큰 이식 제외)은 main에 머지됨(PR woopinbell/bombyeol#2). Phase 1 서버 쪽(온보딩 UI 제외)도 main에 머지됨(PR woopinbell/bombyeol#3), 스테이징 `bombyeol-staging` 배포·실로그인 확인됨. Phase 2(미디어) 서버 커밋은 작업 브랜치에 있음(R2 토큰 대기). 스파이크 코드는 `spike/s1-opennext-prisma` 참고용(머지 금지). 개발 코드 쪽 에이전트 규칙은 main의 `AGENTS.md`(Next.js가 관리하는 블록 — 코드 작성 전 `node_modules/next/dist/docs/` 확인)도 함께 읽는다. 실제 상태는 항상 `docs/PROGRESS.md`가 우선한다.
 
 ## 브랜치 구조 (사용자 결정, 2026-10-01)
 
