@@ -13,7 +13,7 @@
 | 런타임/호스팅 | **Cloudflare Workers** + `@opennextjs/cloudflare`(OpenNext) | Vercel Pro(월 $20 + Spend Management) | 2026년 기준 OpenNext CF 어댑터가 서버 렌더링 Next.js의 권장 경로이고 Pages는 신규 풀스택 시작점이 아니라는 자료 확인(2026-10-01 웹 조사). R2와 한 벤더. **Cloudflare에는 하드 지출 상한이 없다**(예산 알림만, 정보성) — 비용 방어는 앱 레벨 게이트가 담당(`COST_GUARDS.md`) |
 | DB | **Postgres**(서버리스형) + Prisma + `@prisma/adapter-pg` + Hyperdrive | D1(SQLite) + `@prisma/adapter-d1`(현재 Preview) | Workers에서 pg는 nodejs_compat + Hyperdrive로 Prisma 실행 가능(요청마다 클라이언트 생성). 공급자 **Supabase Postgres**(사용자 선택, S-1 통과 2026-10-01: Hyperdrive가 Supabase 직결 IPv6 문자열로 동작, PG 17.11). Supabase는 일반 Postgres로만 사용(RLS·Auth·Storage 미사용, `CLOUD_SESSION.md` §2.1). Prisma 7 `prisma-client` 생성기 `runtime = "workerd"` |
 | 실시간 | **사용하지 않음** | — | 가족 피드·아카이브는 실시간이 필수가 아니다. TanStack Query refetch-on-focus + 푸시로 충분. 클라이언트가 직접 브로드캐스트하는 공개 채널 자체가 없으므로 hamkke의 Realtime 우회 남용 리스크가 **구조적으로 사라진다**(G-08) |
-| 인증 | **Auth.js v5** — 카카오 + Google | Better Auth(카카오 문서 있음) | Auth.js 환경변수 규칙 `AUTH_<PROVIDER>_ID/SECRET` → `AUTH_KAKAO_ID/SECRET` 확인(2026-10-01). 이메일 매직링크 없음. Workers에서의 세션 동작은 S-2 |
+| 인증 | **Auth.js v5** — 카카오 + Google | Better Auth(카카오 문서 있음) | Auth.js 환경변수 규칙 `AUTH_<PROVIDER>_ID/SECRET` → `AUTH_KAKAO_ID/SECRET` 확인(2026-10-01). 이메일 매직링크 없음. **S-2 통과(2026-10-01)**: Workers(OpenNext)에서 JWT 세션·카카오·Google 실로그인·보호 tRPC 확인. v5는 아직 beta(5.0.0-beta.32) — 버전 고정 |
 | 미디어 | **Cloudflare R2** | — | egress 무료. 업로드 경로는 §5. S-3: Worker 프록시 + `FixedLengthStream`으로 크기 강제 확인(presign 비교는 키 대기) |
 | 알림 | **FCM 웹푸시** + 카카오톡 공유하기(사용자 발송) | — | iOS는 홈 화면 추가 PWA만 푸시 가능(웹 조사로 확인) |
 | 결제 | **미정**(`OPEN_QUESTIONS.md` Q-PAY) | 후보: 포트원+토스페이먼츠 등 국내 PG, Stripe(해외 법인 필요 가능) | Stripe는 한국 사업자에 계정 개설이 불가하다는 자료 확인 — 착수 전 재결정 |
