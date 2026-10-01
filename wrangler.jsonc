@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   // 최상위 = 로컬 개발(wrangler dev / opennextjs-cloudflare preview).
   // 배포는 반드시 --env staging | production 으로 한다(최상위 이름으로 배포 금지).
-  "main": ".open-next/worker.js",
+  "main": "worker.ts",
   "name": "bombyeol-local",
   "compatibility_date": "2026-09-30",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -12,6 +12,8 @@
   },
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol-local" }],
   "observability": { "enabled": true },
+  // 정기 정리(G-05·G-15·G-17): 버려진 업로드·오래된 카운터. 무료 플랜 Cron 한도 안(계정당 5개)
+  "triggers": { "crons": ["17 * * * *"] },
   // 로컬은 localConnectionString(docker-compose Postgres)으로 연결한다. id는 로컬에서 쓰이지 않는 자리표시.
   // staging·production의 Hyperdrive는 리소스 생성 승인 후 각 env 블록에 실제 id로 추가한다.
   "hyperdrive": [

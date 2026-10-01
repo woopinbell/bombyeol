@@ -6,8 +6,7 @@ import type { MediaStorage } from "./types";
  * 요청 환경의 R2 설정으로 저장소를 만든다. 설정(버킷·S3 토큰)이 없는 환경에서는
  * 미디어 기능을 쓸 때만 실패하도록 지연 오류를 돌려준다.
  */
-export function storageFromEnv(): MediaStorage {
-  const { env } = getCloudflareContext();
+export function storageFromEnv(env: CloudflareEnv = getCloudflareContext().env): MediaStorage {
   const config = {
     accountId: env.R2_ACCOUNT_ID ?? "",
     bucket: env.R2_BUCKET_NAME ?? "",
