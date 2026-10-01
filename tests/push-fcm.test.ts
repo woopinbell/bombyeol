@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { classifyFcmResponse, createFcmSender, pemBody } from "@/server/push/fcm";
+import {
+  classifyFcmResponse,
+  createFcmSender,
+  keyShape,
+  pemBody,
+  probeFcm,
+} from "@/server/push/fcm";
 
 async function serviceAccount() {
   const pair = (await crypto.subtle.generateKey(
@@ -132,5 +138,65 @@ describe("FCM 발송(S-5 계승)", () => {
     ).toBe("error");
     expect(classifyFcmResponse(429, { error: { status: "RESOURCE_EXHAUSTED" } })).toBe("error");
     expect(classifyFcmResponse(503, {})).toBe("error");
+  });
+
+  describe("probeFcm(배포 스모크 진단)", () => {
+    const link = "https://bombyeol.test/";
+
+    it("키·교환·호출이 정상이면 가짜 토큰은 invalid_token", async () => {
+      const account = await serviceAccount();
+      const fetcher = (async (url: string) =>
+        url.includes("oauth2")
+          ? Response.json({ access_token: "at", expires_in: 3600 })
+          : Response.json(
+              {
+                error: {
+                  status: "INVALID_ARGUMENT",
+                  message: "The registration token is not a valid FCM registration token",
+                },
+              },
+              { status: 400 },
+            )) as typeof fetch;
+      const config = { projectId: "p", clientEmail: "probe-a@p", privateKey: account.privateKey };
+      expect(await probeFcm(config, link, fetcher)).toBe("invalid_token");
+    });
+
+    it("키를 읽지 못하면 key 단계와 키 모양(값 없이)을 알려준다", async () => {
+      const broken = "-----BEGIN PRIVATE KEY-----\\nQUJDRA==\\n-----END PRIVATE KEY-----";
+      const result = await probeFcm(
+        { projectId: "p", clientEmail: "probe-b@p", privateKey: broken },
+        link,
+        (async () => Response.json({})) as typeof fetch,
+      );
+      expect(result).toMatch(/^key: /);
+      expect(result).toContain(keyShape(broken));
+      expect(result).not.toContain("QUJDRA");
+    });
+
+    it("토큰 교환이 거부되면 Google 오류 코드를 알려준다", async () => {
+      const account = await serviceAccount();
+      const fetcher = (async () =>
+        Response.json(
+          { error: "invalid_grant", error_description: "Invalid JWT Signature." },
+          { status: 400 },
+        )) as typeof fetch;
+      const config = { projectId: "p", clientEmail: "probe-c@p", privateKey: account.privateKey };
+      expect(await probeFcm(config, link, fetcher)).toBe(
+        "token: 400 invalid_grant Invalid JWT Signature.",
+      );
+    });
+
+    it("발송 단계 오류는 상태 코드와 FCM 상태만", async () => {
+      const account = await serviceAccount();
+      const fetcher = (async (url: string) =>
+        url.includes("oauth2")
+          ? Response.json({ access_token: "at", expires_in: 3600 })
+          : Response.json(
+              { error: { status: "PERMISSION_DENIED" } },
+              { status: 403 },
+            )) as typeof fetch;
+      const config = { projectId: "p", clientEmail: "probe-d@p", privateKey: account.privateKey };
+      expect(await probeFcm(config, link, fetcher)).toBe("send: 403 PERMISSION_DENIED");
+    });
   });
 });

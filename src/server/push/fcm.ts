@@ -41,6 +41,17 @@ async function importKey(pem: string) {
   );
 }
 
+/** 실패 단계를 남기는 오류(스모크 진단용 — 메시지에 키·토큰 값을 넣지 않는다) */
+export class FcmStageError extends Error {
+  constructor(
+    readonly stage: "key" | "token",
+    detail: string,
+  ) {
+    super(`${stage}: ${detail}`);
+    this.name = "FcmStageError";
+  }
+}
+
 async function accessToken(config: FcmConfig, fetcher: typeof fetch) {
   const now = Math.floor(Date.now() / 1000);
   if (cached && cached.key === config.clientEmail && cached.exp - 60 > now) return cached.token;
@@ -54,7 +65,12 @@ async function accessToken(config: FcmConfig, fetcher: typeof fetch) {
       exp: now + 3600,
     }),
   );
-  const key = await importKey(config.privateKey);
+  let key: CryptoKey;
+  try {
+    key = await importKey(config.privateKey);
+  } catch (error) {
+    throw new FcmStageError("key", (error as Error).name);
+  }
   const sig = await crypto.subtle.sign(
     "RSASSA-PKCS1-v1_5",
     key,
@@ -68,7 +84,17 @@ async function accessToken(config: FcmConfig, fetcher: typeof fetch) {
       assertion: `${header}.${claims}.${b64url(sig)}`,
     }),
   });
-  if (!res.ok) throw new Error(`FCM 토큰 교환 실패 ${res.status}`);
+  if (!res.ok) {
+    // Google 오류 코드·설명(예: invalid_grant / Invalid JWT Signature)만 남긴다
+    const body = (await res.json().catch(() => ({}))) as {
+      error?: string;
+      error_description?: string;
+    };
+    throw new FcmStageError(
+      "token",
+      `${res.status} ${body.error ?? ""} ${body.error_description ?? ""}`.trim().slice(0, 120),
+    );
+  }
   const json = (await res.json()) as { access_token: string; expires_in: number };
   cached = { key: config.clientEmail, token: json.access_token, exp: now + json.expires_in };
   return cached.token;
@@ -94,49 +120,98 @@ export function classifyFcmResponse(status: number, body: FcmError): SendOutcome
   return "error";
 }
 
+async function post(config: FcmConfig, fetcher: typeof fetch, token: string, message: PushMessage) {
+  const auth = await accessToken(config, fetcher);
+  const res = await fetcher(
+    `https://fcm.googleapis.com/v1/projects/${config.projectId}/messages:send`,
+    {
+      method: "POST",
+      headers: { authorization: `Bearer ${auth}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        message: {
+          token,
+          notification: { title: message.title, body: message.body },
+          data: { ...message.data, link: message.link },
+          webpush: {
+            headers: { TTL: String(WEBPUSH_TTL_SEC) },
+            fcm_options: { link: message.link },
+          },
+        },
+      }),
+    },
+  );
+  if (res.status === 401) cached = null; // 키가 바뀐 경우 다음 발송에서 다시 교환
+  const body = res.ok ? {} : ((await res.json().catch(() => ({}))) as FcmError);
+  return { status: res.status, body };
+}
+
 export function createFcmSender(config: FcmConfig, fetcher: typeof fetch = fetch): PushSender {
   return {
     async send(token: string, message: PushMessage) {
-      let auth: string;
       try {
-        auth = await accessToken(config, fetcher);
+        const { status, body } = await post(config, fetcher, token, message);
+        return classifyFcmResponse(status, body);
       } catch {
         return "error";
       }
-      const res = await fetcher(
-        `https://fcm.googleapis.com/v1/projects/${config.projectId}/messages:send`,
-        {
-          method: "POST",
-          headers: { authorization: `Bearer ${auth}`, "content-type": "application/json" },
-          body: JSON.stringify({
-            message: {
-              token,
-              notification: { title: message.title, body: message.body },
-              data: { ...message.data, link: message.link },
-              webpush: {
-                headers: { TTL: String(WEBPUSH_TTL_SEC) },
-                fcm_options: { link: message.link },
-              },
-            },
-          }),
-        },
-      );
-      if (res.status === 401) cached = null; // 키가 바뀐 경우 다음 발송에서 다시 교환
-      const body = res.ok ? {} : ((await res.json().catch(() => ({}))) as FcmError);
-      return classifyFcmResponse(res.status, body);
     },
   };
+}
+
+/** 개인 키 문자열의 모양(값 없이): 시작 표시·이스케이프 줄바꿈·실제 줄바꿈·본문 길이 */
+export function keyShape(pem: string) {
+  return [
+    `begin=${pem.includes("BEGIN PRIVATE KEY") ? "y" : "n"}`,
+    `escaped=${pem.includes("\\n") ? "y" : "n"}`,
+    `newline=${pem.includes("\n") ? "y" : "n"}`,
+    `quoted=${/^\s*"/.test(pem) ? "y" : "n"}`,
+    `body=${pemBody(pem).length}`,
+  ].join(" ");
+}
+
+/**
+ * 배포 스모크용 진단: 가짜 등록 토큰으로 보내고 어느 단계에서 멈췄는지 돌려준다.
+ * 기대값은 `invalid_token`(키·토큰 교환·FCM 호출이 모두 정상). 키·토큰 값은 결과에 넣지 않는다.
+ */
+export async function probeFcm(
+  config: FcmConfig,
+  link: string,
+  fetcher: typeof fetch = fetch,
+): Promise<string> {
+  try {
+    const { status, body } = await post(config, fetcher, "bombyeol-smoke-invalid-token", {
+      title: "smoke",
+      body: "smoke",
+      link,
+      data: { type: "smoke" },
+    });
+    const outcome = classifyFcmResponse(status, body);
+    if (outcome !== "error") return outcome;
+    return `send: ${status} ${body.error?.status ?? ""}`.trim();
+  } catch (error) {
+    if (error instanceof FcmStageError) {
+      return error.stage === "key"
+        ? `${error.message} (${keyShape(config.privateKey)})`
+        : error.message;
+    }
+    return `fail: ${(error as Error).name}`;
+  }
 }
 
 /**
  * 요청 환경의 서비스 계정으로 발송기를 만든다. 설정이 없는 환경(키 미등록 스테이징·로컬)은
  * null — 알림만 건너뛰고 기능은 그대로 동작한다.
  */
-export function fcmSenderFromEnv(env: CloudflareEnv): PushSender | null {
+export function fcmConfigFromEnv(env: CloudflareEnv): FcmConfig | null {
   const config = {
     projectId: env.FIREBASE_ADMIN_PROJECT_ID ?? "",
     clientEmail: env.FIREBASE_ADMIN_CLIENT_EMAIL ?? "",
     privateKey: env.FIREBASE_ADMIN_PRIVATE_KEY ?? "",
   };
-  return Object.values(config).every(Boolean) ? createFcmSender(config) : null;
+  return Object.values(config).every(Boolean) ? config : null;
+}
+
+export function fcmSenderFromEnv(env: CloudflareEnv): PushSender | null {
+  const config = fcmConfigFromEnv(env);
+  return config ? createFcmSender(config) : null;
 }
