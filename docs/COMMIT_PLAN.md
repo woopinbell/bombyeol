@@ -100,6 +100,7 @@
 > - **물어보기(StoryAsk, 추가 모델)**: parent → grandparent, 카드 또는 직접 쓴 질문(정확히 하나, 체크 제약). 같은 카드가 열려 있으면 기존 것을 돌려줌. 답하면 `entryId`로 닫힘(동시 답은 하나만). 화자는 질문받은 어르신(가족이 받아 적기 가능). 알림은 Phase 6, 카카오톡 공유는 클라이언트 링크.
 > - **반응**: `Reaction.storyEntryId` + kind `star`. **좋아요는 오늘 기록(Moment·Milestone), 별 하나는 이야기에만**(토글, 사용자·대상당 하나). 댓글은 모든 대상. 이름·동작 최종안은 DESIGN 시안 단계(PRD §2).
 > - **리밋·상한(초안)**: 이야기 쓰기 100/일, 물어보기 30/일, 별 하나 300/시간(G-07), 어르신당 열린 물어보기 30, 본문 5000자·제목 60자·질문 200자.
+> - **기념(MemorialProfile)**: 행이 있으면 기념 상태(지우면 되돌림), 멤버·반려동물 중 하나(멤버가 사라지면 스냅샷만 남도록 체크 제약은 "최대 하나"). 전환·수정·되돌리기 parent만, 자기 자신은 불가.
 
 - [x] `chore(prisma): StoryEntry·StoryAsk·MemorialProfile 스키마 정의` — StoryPrompt는 코드 카탈로그(위 메모), Reaction에 storyEntryId·star 추가
 - [x] `feat(story): 질문 카드 콘텐츠 시드 및 조회 구현` — 코드 카탈로그 + `story.prompts`(어르신별 답한 카드 표시)
@@ -107,8 +108,8 @@
 - [x] `feat(story): 사진에 얽힌 이야기 구현` [G-01~04]
 - [x] `feat(story): 부모의 질문 보내기(물어보기) 구현`
 - [x] `feat(story): 세대 교차 반응(별 하나·댓글) 구현`
-- [ ] `feat(memorial): 기념 상태 전환(사람·반려동물)과 영구 보존 정책 구현` — 구독 만료와 무관 보존, `PRIVACY_AND_LEGAL.md` §5
-- [ ] `feat(story): 이야기 탭 화면 구성`
+- [x] `feat(memorial): 기념 상태 전환(사람·반려동물)과 영구 보존 정책 구현` — 구독 만료와 무관 보존, `PRIVACY_AND_LEGAL.md` §5. 기념인 분: 새 이야기·대필·물어보기 불가, 기존 이야기 수정·삭제 불가(되돌린 뒤 가능), 열린 물어보기는 거둠, 반응 허용. 반려동물: 마일스톤 불가·추억 사진 허용, `Pet.status/passedAt` 동기화. 기일은 조회 시점 계산(`today`는 클라이언트 현지 날짜)
+- [ ] `feat(story): 이야기 탭 화면 구성` — **Phase DS 토큰 확정 후**(서버 API는 준비됨)
 
 ## Phase 5 — 우리·임신 기록
 

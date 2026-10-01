@@ -119,11 +119,12 @@ Moment(id, spaceId, childId?, petId?, kind(media|diary), body?, takenAt, created
 MomentMedia(momentId, position, assetId UNIQUE, thumbnailAssetId? UNIQUE) // 첨부 최대 10, 자산은 한 곳에만
 MediaAsset(id, spaceId, key, kind, bytes, contentType, status(pending|confirmed|deleted), createdAt, confirmedAt?) // G-02·G-05
 Milestone(id, spaceId, childId?, petId?, kind, value(Json), recordedAt, createdById) // 정확히 하나만 채운다(체크 제약), kind는 src/lib/milestones.ts 프리셋
-StoryPrompt(id, category, textKey, ageHint?)                  // 큐레이션(코드/JSON), 번역은 키
-StoryEntry(id, spaceId, authorMemberId, scribeMemberId?, promptId?, mediaId?, body, storyDate?, createdAt)
-Reaction(id, spaceId, momentId?, milestoneId?, kind(like|comment), body?, createdById, createdAt) // 대상별 FK 중 정확히 하나(체크 제약). 이야기·별 하나는 Phase 4에서 storyEntryId·kind 추가
+// StoryPrompt는 DB 모델이 아니라 코드 카탈로그(src/lib/story-prompts.ts: key → category), 문구는 messages story.prompts.<key>
+StoryEntry(id, spaceId, narratorMemberId?, narratorName?, narratorLabel?, scribeMemberId?, scribeName?, promptKey?, category?, title?, body, storyYear?, petId?, photoAssetId? UNIQUE, createdById) // 화자·대필자는 Member FK(SetNull) + 이름 스냅샷
+StoryAsk(id, spaceId, askedById, toMemberId, promptKey?, question?, entryId? UNIQUE)  // 물어보기: 카드·질문 중 정확히 하나, 답하면 entryId
+Reaction(id, spaceId, momentId?, milestoneId?, storyEntryId?, kind(like|comment|star), body?, createdById, createdAt) // 대상별 FK 중 정확히 하나(체크 제약). like는 오늘 기록, star(별 하나)는 이야기
 FamilyEvent(id, spaceId, title, startsAt, allDay, recurring, kind)
-MemorialProfile(id, spaceId, memberId?, petId?, name, relationLabel, passedAt?, note?)  // 기념 상태(사람 또는 반려동물)
+MemorialProfile(id, spaceId, memberId? UNIQUE, petId? UNIQUE, name?, relationLabel?, passedAt?, note?, createdById)  // 기념 상태(사람 또는 반려동물), 행 삭제 = 되돌리기
 Subscription(id, spaceId UNIQUE, provider, providerSubscriptionId, status, currentPeriodEnd, ...) // G-09: spaceId 기준 upsert
 UsageCounter(spaceId, periodKey, uploadUrlsIssued, bytesStored, pdfExports, ...)                 // G-03·G-04
 PushToken(id, userId, token, platform, createdAt)
