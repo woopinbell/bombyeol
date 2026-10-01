@@ -4,7 +4,8 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 5): **Phase 5 우리·임신 기록 서버 main 머지 완료(PR woopinbell/bombyeol#7, 머지 커밋 6c7b55b), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 5".
+- 단계(2026-10-01, Phase 6): **Phase 6 알림 서버 4커밋, 작업 브랜치 `claude/clever-dijkstra-7qvhxv` 푸시 완료 — main 머지는 사용자 확인 대기**(UI·공유·PWA 제외) — 아래 "현재 상태 — Phase 6".
+- (이전) 단계(2026-10-01, Phase 5): **Phase 5 우리·임신 기록 서버 main 머지 완료(PR woopinbell/bombyeol#7, 머지 커밋 6c7b55b), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 5".
 - (이전) 단계(2026-10-01, Phase 4): **Phase 4 이야기(별) 서버 main 머지 완료(PR woopinbell/bombyeol#6, 머지 커밋 fc94348), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 4".
 - (이전) 단계(2026-10-01, Phase 3): **Phase 3 오늘(봄) 서버 main 머지 완료(PR woopinbell/bombyeol#5, 머지 커밋 3b0d90d), 스테이징 마이그레이션·배포 완료, R2 Secret 3종 재등록 후 스모크 전부 통과** — 아래 "현재 상태 — Phase 3".
 - (이전) 단계(2026-10-01, Phase 2): **Phase 2 미디어 서버 커밋 완료, 스테이징 배포, R2 토큰 대기** — 아래 "현재 상태 — Phase 2".
@@ -14,6 +15,31 @@
 - (이전 기록) 기반 문서 작성 완료, 리포 부트스트랩 완료(2026-10-01). GitHub private 리포 `woopinbell/bombyeol` 생성, `main`(빈 초기 커밋 9744db2)·`docs`(고아, 8621748) 푸시 완료. 클라우드 환경은 사용자가 claude.ai/code에서 만든다(허용 도메인 Custom, 개발용 키만). 첫 세션 프롬프트는 `docs/CLOUD_SESSION.md` §4.
 - 결정 완료(사용자): 식별자 `bombyeol` / 서버리스 재선정 / 웹·PWA 우선 후 Android / 새 GitHub private 리포 + `docs` 고아 브랜치 / 비용 방어는 설계 제약 / 개인정보 초기 설계 / 텍스트 우선·음성 후속 / 가족 1 Space 안에 여러 아이 / 카카오+Google 로그인 / Cloudflare 검토 / next-intl(한국어만 출시) / 임신 기록·고인 처리 V1 포함 / PDF 다운로드 프리미엄 / 웹푸시 + 카카오톡 공유 / devlog는 docs 브랜치에만 / hamkke 절대 원칙 4종 계승.
 - 미해결: `OPEN_QUESTIONS.md` (특히 **Q-PAY 결제 공급자 재결정**).
+
+## 현재 상태 — Phase 6 (2026-10-01)
+
+- 작업 브랜치 `claude/clever-dijkstra-7qvhxv`(main 6c7b55b에서 시작) 4커밋, 푸시 완료: `chore(prisma)` PushToken → `feat(push)` 토큰 등록·해제·오래된 토큰 정리 → `feat(push)` FCM 발송 유틸 → `feat(push)` 새 사진·이야기·반응·질문(+임신 기록) 알림 연결. **main 머지 전 사용자 확인 필요**(COMMIT_PLAN Phase 6 메모 ①~⑤). PR은 아직 만들지 않음.
+- 로컬 검증: format·lint·typecheck·Vitest **260건** 통과(223 → 260), OpenNext 빌드 통과, `wrangler deploy --dry-run --env staging` 13.48 MiB(gzip 3.63 MiB). 뮤테이션 점검: 임신 visibility → 역할 제한을 빼면 3건, 기념 멤버 제외를 빼면 1건 실패.
+- 실제 FCM 확인: 클라우드 환경의 개발 서비스 계정으로 JWT 교환 → FCM 호출까지 왕복, 가짜 토큰이 `invalid_token`으로 분류됨(실기기 수신은 S-5에서 확인, 이번엔 클라이언트가 없어 미확인).
+- 새 마이그레이션 `20261001153126_push`: PushToken(token unique, userId cascade, lastSeenAt 인덱스). main 머지 시 `Migrate staging DB`가 자동 적용.
+- 새 API: `push.register·unregister`. 기존 mutation(`moment.create·createDiary`, `story.create·ask`, `reaction.toggleLike·toggleStar·addComment`, `pregnancy.create`)이 저장 성공 뒤 알림 이벤트를 `waitUntil`로 넘긴다. Context에 `push` 추가(테스트 기본값 `noPush`).
+- 설계 요약(COMMIT_PLAN Phase 6 메모):
+  - 발송 시점 재확인: 대상이 아직 있는지, 수신자가 지금 멤버인지(삭제된 Space·탈퇴 계정 제외), 기념 상태가 아닌지, 본인이 아닌지. 임신 기록은 **발송 시점 visibility**(parents_only → 다른 parent만). 물어보기는 아직 열려 있을 때만.
+  - 문구: 제목 "봄별" + 종류별 고정 문구(`messages/ko.json` `push.*`), 임신은 "새 소식이 있어요". 이름·관계·본문·질문 내용 없음(테스트로 확인). 데이터는 종류·id·링크(`/open/{종류}/{id}`, 화면 라우트는 UI 때).
+  - 상한(`plan.ts` 초안): 토큰 사용자당 10·등록 30/일·60일 미갱신 정리, 수신자당 시간당 20건, 이벤트당 수신자별 기기 3·전체 40건(무료 플랜 하위 요청 50 안), 좋아요·별 같은 대상 6시간에 1번, 댓글 30분에 1번. 재시도 없음. 무효 토큰(UNREGISTERED·SENDER_ID_MISMATCH·토큰 문제인 INVALID_ARGUMENT)만 지움.
+  - 키가 없으면 발송만 건너뛴다(스테이징은 지금 이 상태).
+- 남긴 것: 마일스톤 알림(안 보냄 — 확인 ②), 알림 끄기·Space별 음소거(설정 UI 때), 나중에 가족 공개로 바꿀 때 알림, 카카오톡 공유·PWA 매니페스트·서비스 워커·토큰 발급 클라이언트(UI 단계 — 확인 ⑤).
+
+### 확인 요청 (사용자, main 머지 전)
+
+COMMIT_PLAN Phase 6 메모 ①~⑤: ① 알림 문구 6종(고정 문구) ② 수신자 규칙(마일스톤 제외, 이야기 대필 시 화자 포함, 반응은 쓴 사람·화자에게) ③ 소음·비용 상한 수치 ④ 알림 설정을 UI 때로 미루기 ⑤ 카카오톡 공유·PWA를 UI 단계로 미루기.
+
+### 다음 할 일 (Phase 6 이후)
+
+1. 사용자 확인 → PR(main, 머지 커밋) → CI → 머지 → `Migrate staging DB` 자동 적용 → 스테이징 배포·스모크(health, `push.register` 비로그인 401).
+2. 스테이징에서 실제 발송까지 보려면 사용자가 Worker Secret 3종 등록: `FIREBASE_ADMIN_PROJECT_ID`·`FIREBASE_ADMIN_CLIENT_EMAIL`·`FIREBASE_ADMIN_PRIVATE_KEY`(`npx wrangler secret put <이름> --env staging`, Secret 유형). 없어도 기능은 동작하고 알림만 건너뛴다. 실기기 수신 확인은 UI(서비스 워커) 이후.
+3. 다음 개발: Phase 7(삭제·개인정보) 서버 — 계정 삭제 연쇄에 PushToken 포함(이미 cascade). 새 키 없음(ENV_MANIFEST).
+4. 환경 메모: 이 세션은 Docker Hub pull 문제 없이 `npm run db:up` 동작. `node scripts/with-local-db.mjs prisma ...`는 PATH 문제로 조용히 실패 — `npm run db:migrate -- --name <이름>`을 쓴다.
 
 ## 현재 상태 — Phase 5 (2026-10-01)
 
