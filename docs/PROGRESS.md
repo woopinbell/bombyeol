@@ -30,6 +30,14 @@
   - 새 상한·리밋(모두 `plan.ts` **초안**): 반려동물 무료 3·프리미엄 10(G-11), 글 기록(마일스톤·일기) 사용자당 300/일, 좋아요 300/시간, 댓글 60/시간(G-07), Moment 첨부 10, 본문 2000자, 댓글 500자.
 - 남긴 것(의도적으로 이번 범위 밖): 아이·반려동물 삭제(Phase 7 삭제 연쇄), 반려동물 기념 전환(Phase 4 memorial — 스키마 `status`·`passedAt`만 있음), 댓글 수정, 반응 알림(Phase 6).
 
+### 세션 이동 권고 (2026-10-01, Phase 3 종료 시점)
+
+- **새 세션으로 옮긴다.** 이 세션은 Phase 3 구현·PR·머지·스테이징 반영·R2 회귀 복구까지 마쳐 컨텍스트가 크고, 진행 중 PR이 없다(PR woopinbell/bombyeol#5 머지·구독 해제 완료).
+- 환경 변경 필요 없음: Phase 4 서버는 새 키가 없다(ENV_MANIFEST에 Phase 4 항목 없음). 클라우드 환경의 R2 변수는 없어도 된다(테스트는 메모리 저장소).
+- 코드 상태: 작업 브랜치 `claude/gracious-wright-1xpzcj` = main 3b0d90d(미푸시 변경 없음). 새 세션은 main에서 자기 작업 브랜치를 딴다.
+- 새 세션 시작 시: Docker 데몬이 꺼져 있을 수 있음(`dockerd &` → `npm run db:up`), `npm ci`, 스키마 변경 후 `npx prisma generate`.
+- 새 세션 첫 프롬프트(`CLOUD_SESSION.md` §4.1, 3번만 채움): "오늘 할 일: Phase 4(이야기) 서버 먼저, UI 제외. Reaction에 storyEntryId·별 하나 추가, storageFromEnv 오류 문구에 R2_ACCOUNT_ID 추가도 함께."
+
 ### 다음 할 일 (Phase 3 이후)
 
 1. ~~PR·main 머지~~ 완료(PR woopinbell/bombyeol#5, 3b0d90d).

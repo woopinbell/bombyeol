@@ -39,7 +39,7 @@ Phase별로 필요한 키를 **이름·형식·발급처·등급**으로 미리 
 ## Phase 2 (미디어)
 
 > 2026-10-01: S-3용으로 R2 4종 등록됨(버킷 `bombyeol-spike-s3` 한정 토큰). 본 개발용 버킷·토큰은 Phase 2에서 별도 발급.
-> 2026-10-01(Phase 2): 스테이징 버킷 `bombyeol-staging-media`(APAC) 생성. 버킷 이름·계정 ID는 비밀이 아니므로 `wrangler.jsonc` vars로 둔다. **S3 토큰 2종(`R2_ACCESS_KEY_ID`/`R2_SECRET_ACCESS_KEY`)은 사용자가 Cloudflare 대시보드에서 Worker `bombyeol-staging`의 Secret으로 직접 등록**(클라우드 환경에 넣지 않음 — 세션은 값이 필요 없고 테스트는 가짜 저장소로 한다). 클라우드 환경에 남은 스파이크용 R2 4종은 무효(삭제 권장). **주의(2026-10-01 Phase 3 배포에서 확인)**: 대시보드에서 등록할 때 반드시 "Secret"(암호화) 유형으로 — 일반 "변수"로 넣으면 다음 `wrangler deploy`가 `wrangler.jsonc`의 vars로 덮어써 사라진다(`R2_ACCESS_KEY_ID`가 그렇게 빠졌음). CLI는 `npx wrangler secret put R2_ACCESS_KEY_ID --env staging`.
+> 2026-10-01(Phase 2): 스테이징 버킷 `bombyeol-staging-media`(APAC) 생성. 버킷 이름은 `wrangler.jsonc` vars로 둔다. 계정 ID(`R2_ACCOUNT_ID`)는 비밀은 아니지만 리포에 넣지 않고 Secret으로 둔다(현재 스테이징 상태). **S3 토큰 2종(`R2_ACCESS_KEY_ID`/`R2_SECRET_ACCESS_KEY`)은 사용자가 Cloudflare 대시보드에서 Worker `bombyeol-staging`의 Secret으로 직접 등록**(클라우드 환경에 넣지 않음 — 세션은 값이 필요 없고 테스트는 가짜 저장소로 한다). 클라우드 환경에 남은 스파이크용 R2 4종은 무효(삭제 권장). **주의(2026-10-01 Phase 3 배포에서 확인)**: 대시보드에서 등록할 때 반드시 "Secret"(암호화) 유형으로 — 일반 "변수"로 넣으면 다음 `wrangler deploy`가 `wrangler.jsonc`의 vars로 덮어써 사라진다(`R2_ACCESS_KEY_ID`가 그렇게 빠졌음). CLI는 `npx wrangler secret put R2_ACCESS_KEY_ID --env staging`.
 
 | 변수 | 형식 | 발급처 | 등급 | 상태 |
 |---|---|---|---|---|
