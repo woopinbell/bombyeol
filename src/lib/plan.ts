@@ -17,6 +17,10 @@ export const RATE_LIMITS = {
   uploadIssuePerSpace: { limit: 500, windowSec: 24 * 60 * 60 },
   /** G-07: 글 기록(마일스톤·일기) 작성(사용자당) — 파일 없는 쓰기도 폭주를 막는다 */
   recordWritePerUser: { limit: 300, windowSec: 24 * 60 * 60 },
+  /** G-07: 좋아요 토글(사용자당) */
+  likePerUser: { limit: 300, windowSec: 60 * 60 },
+  /** G-07: 댓글 작성(사용자당) */
+  commentPerUser: { limit: 60, windowSec: 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 /** G-11: 계정 단위 상한(요금제와 무관) */
@@ -72,6 +76,14 @@ export const MOMENT_POLICY = {
   bodyMaxChars: 2000,
   /** 피드 한 번에 가져오는 수 */
   pageSize: 20,
+} as const;
+
+/** 반응(좋아요·댓글) 정책 */
+export const REACTION_POLICY = {
+  /** 댓글 최대 글자 수 */
+  commentMaxChars: 500,
+  /** 댓글 한 번에 가져오는 수 */
+  pageSize: 50,
 } as const;
 
 type TierLimits = {

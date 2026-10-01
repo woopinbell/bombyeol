@@ -6,6 +6,7 @@ import { RATE_LIMITS } from "@/lib/plan";
 import { inputError, limitError, notFound } from "@/server/errors";
 import { lockKey } from "@/server/locks";
 import { hitRateLimit } from "@/server/rate-limit";
+import { reactionSummaries } from "@/server/reactions";
 import { canRecordFor, memberSubjectInput, resolveSubject } from "@/server/subjects";
 import { spaceProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
@@ -109,11 +110,18 @@ export const milestoneRouter = router({
     .input(z.object({ subject: memberSubjectInput }))
     .query(async ({ ctx, input }) => {
       const subject = await resolveSubject(ctx.prisma, ctx.member.spaceId, input.subject);
-      return ctx.prisma.milestone.findMany({
+      const rows = await ctx.prisma.milestone.findMany({
         where: subject,
         orderBy: [{ recordedAt: "desc" }, { createdAt: "desc" }],
         select: milestoneSelect,
       });
+      const reactions = await reactionSummaries(
+        ctx.prisma,
+        ctx.userId,
+        "milestoneId",
+        rows.map((m) => m.id),
+      );
+      return rows.map((m) => ({ ...m, reactions: reactions.get(m.id)! }));
     }),
 
   /** 아이 나이 기반 제안(PRD §4.2): 나이에 맞고 아직 기록하지 않은 "처음" 기록 + 키·몸무게 */

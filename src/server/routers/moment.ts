@@ -6,6 +6,7 @@ import { inputError, limitError, mediaError, notFound } from "@/server/errors";
 import { removeAsset, requireAttachableAssets, withAttachConflict } from "@/server/media/assets";
 import { mediaKeys, type MediaStorage } from "@/server/storage/types";
 import { hitRateLimit } from "@/server/rate-limit";
+import { reactionSummaries } from "@/server/reactions";
 import { canRecordFor, resolveSubject, subjectInput, type SubjectInput } from "@/server/subjects";
 import type { Context } from "@/server/trpc/context";
 import { parentProcedure, spaceProcedure } from "@/server/trpc/procedures";
@@ -212,8 +213,19 @@ export const momentRouter = router({
       });
       const page = rows.slice(0, MOMENT_POLICY.pageSize);
       const last = page.at(-1);
+      const reactions = await reactionSummaries(
+        ctx.prisma,
+        ctx.userId,
+        "momentId",
+        page.map((m) => m.id),
+      );
       return {
-        items: await Promise.all(page.map((m) => withReadUrls(ctx.storage, spaceId, m))),
+        items: await Promise.all(
+          page.map(async (m) => ({
+            ...(await withReadUrls(ctx.storage, spaceId, m)),
+            reactions: reactions.get(m.id)!,
+          })),
+        ),
         nextCursor:
           rows.length > MOMENT_POLICY.pageSize && last
             ? { takenAt: last.takenAt, id: last.id }
