@@ -1,14 +1,22 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { auth } from "@/auth";
 import { createPrisma } from "./db";
 
-export function createContext({ req }: { req: Request }) {
+export async function createContext({ req }: { req: Request }) {
   const ip = req.headers.get("cf-connecting-ip") ?? "local";
-  return { prisma: createPrisma(), ip };
+  const session = await auth();
+  return { prisma: createPrisma(), ip, session };
 }
 
-const t = initTRPC.context<ReturnType<typeof createContext>>().create();
+const t = initTRPC.context<Awaited<ReturnType<typeof createContext>>>().create();
+
+// S-2: 로그인한 사용자만 통과
+const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+  if (!ctx.session?.user) throw new TRPCError({ code: "UNAUTHORIZED" });
+  return next({ ctx: { ...ctx, session: ctx.session } });
+});
 
 // 바인딩 방식: Cloudflare 위치(PoP) 단위·10/60초 창. 짧은 폭주 방어용.
 const bindingLimited = t.procedure.use(async ({ ctx, path, next }) => {
@@ -35,6 +43,11 @@ function dbLimited(limit: number, windowSec: number) {
 }
 
 export const appRouter = t.router({
+  me: protectedProcedure.query(async ({ ctx }) => {
+    const [row] = await ctx.prisma.$queryRaw<{ now: Date }[]>`select now()`;
+    const s = ctx.session as typeof ctx.session & { provider?: string; userId?: string };
+    return { provider: s.provider, userId: s.userId, name: s.user?.name ?? null, hasEmail: Boolean(s.user?.email), dbNow: row.now };
+  }),
   limitedBinding: bindingLimited.query(() => ({ ok: true })),
   // 고정 키 진단용: IP 변동과 무관하게 바인딩 동작만 확인
   limitedBindingFixed: t.procedure.query(async () => {

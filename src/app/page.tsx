@@ -1,69 +1,31 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import { auth, signIn, signOut } from "@/auth";
 
-export default function Home() {
+// S-2 스파이크 확인 화면(디자인 아님)
+export default async function Home() {
+  const session = await auth();
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
+    <main style={{ padding: 24, fontFamily: "sans-serif", lineHeight: 1.8 }}>
+      <h1>봄별 S-2 로그인 스파이크</h1>
+      {session?.user ? (
+        <>
+          <p>로그인됨: {session.user.name ?? "(이름 없음)"}</p>
           <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+            <a href="/api/trpc/me">보호된 tRPC 호출(/api/trpc/me) 열기</a>
           </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          <form action={async () => { "use server"; await signOut(); }}>
+            <button type="submit">로그아웃</button>
+          </form>
+        </>
+      ) : (
+        <>
+          <form action={async () => { "use server"; await signIn("kakao"); }}>
+            <button type="submit">카카오로 로그인</button>
+          </form>
+          <form action={async () => { "use server"; await signIn("google"); }}>
+            <button type="submit">Google로 로그인</button>
+          </form>
+        </>
+      )}
+    </main>
   );
 }
