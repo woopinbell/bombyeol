@@ -8,3 +8,149 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// ---------------------------------------------------------------------------
+// 계정 — Auth.js는 JWT 세션(DB 어댑터 없음). 로그인 시 Account로 User를 찾거나 만든다.
+// 카카오 이메일은 수집하지 않는다(PRIVACY §2 최소 수집).
+// ---------------------------------------------------------------------------
+
+model User {
+  id        String    @id @default(cuid())
+  name      String?
+  locale    String    @default("ko")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  accounts       Account[]
+  memberships    Member[]
+  spacesCreated  Space[]   @relation("SpaceCreatedBy")
+  invitesCreated Invite[]  @relation("InviteCreatedBy")
+  invitesUsed    Invite[]  @relation("InviteUsedBy")
+  childrenAdded  Child[]
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String // "kakao" | "google"
+  providerAccountId String
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// 가족 Space · 멤버 · 초대
+// ---------------------------------------------------------------------------
+
+enum MemberRole {
+  parent
+  grandparent
+  relative
+}
+
+model Space {
+  id          String    @id @default(cuid())
+  name        String
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  createdBy User     @relation("SpaceCreatedBy", fields: [createdById], references: [id])
+  members   Member[]
+  invites   Invite[]
+  children  Child[]
+
+  @@index([createdById])
+}
+
+model Member {
+  id            String     @id @default(cuid())
+  spaceId       String
+  userId        String
+  role          MemberRole
+  relationLabel String? // 할머니·외할아버지 등 자유 입력
+  joinedAt      DateTime   @default(now())
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([spaceId, userId])
+  @@index([userId])
+}
+
+model Invite {
+  id            String     @id @default(cuid())
+  spaceId       String
+  code          String     @unique // 6자, 혼동 문자 제외. 링크도 같은 코드를 쓴다
+  role          MemberRole
+  relationLabel String?
+  expiresAt     DateTime
+  usedAt        DateTime?
+  usedById      String?
+  revokedAt     DateTime?
+  createdById   String
+  createdAt     DateTime   @default(now())
+
+  space     Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdBy User  @relation("InviteCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  usedBy    User? @relation("InviteUsedBy", fields: [usedById], references: [id], onDelete: SetNull)
+
+  @@index([spaceId, createdAt])
+}
+
+// 초대 코드 입력 실패 기록(brute-force 방지, G-07·G-11). 보관: 판정 창보다 긴 기간만 필요 → 정리 Cron 대상(G-17).
+model InviteCodeAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  ip        String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([ip, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// 아이 — Space 생성 직후 등록(태명/이름, 출생 예정일 또는 생일)
+// ---------------------------------------------------------------------------
+
+enum ChildStatus {
+  expecting
+  born
+}
+
+model Child {
+  id          String      @id @default(cuid())
+  spaceId     String
+  name        String?
+  nickname    String? // 태명·애칭
+  dueDate     DateTime?   @db.Date
+  birthDate   DateTime?   @db.Date
+  status      ChildStatus
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  space     Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdBy User  @relation(fields: [createdById], references: [id])
+
+  @@index([spaceId])
+}
+
+// ---------------------------------------------------------------------------
+// 레이트 리밋 — DB 고정 창 카운터(S-6: 비용 게이트의 정확한 판정용). 정리 Cron 대상(G-17).
+// ---------------------------------------------------------------------------
+
+model RateCounter {
+  key         String
+  windowStart DateTime
+  count       Int      @default(0)
+
+  @@id([key, windowStart])
+  @@index([windowStart])
+}
