@@ -19,7 +19,9 @@
     "db:up": "docker compose up -d --wait postgres",
     "db:migrate": "node scripts/with-local-db.mjs prisma migrate dev",
     "db:reset": "node scripts/with-local-db.mjs prisma migrate reset --force",
-    "db:studio": "node scripts/with-local-db.mjs prisma studio"
+    "db:studio": "node scripts/with-local-db.mjs prisma studio",
+    "test": "node scripts/with-local-db.mjs vitest run",
+    "test:watch": "node scripts/with-local-db.mjs vitest"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "1.20.7",
@@ -38,7 +40,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
-    "@types/node": "^20",
+    "@types/node": "^22.20.4",
     "@types/pg": "8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -49,6 +51,7 @@
     "prisma": "7.10.0",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
+    "vitest": "5.0.3",
     "wrangler": "4.145.0"
   }
 }
