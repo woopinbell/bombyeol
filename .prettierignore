@@ -1,0 +1,17 @@
+.next/
+.open-next/
+.wrangler/
+out/
+build/
+coverage/
+node_modules/
+package-lock.json
+next-env.d.ts
+cloudflare-env.d.ts
+src/generated/
+
+# docs 브랜치 워크트리·링크(main 밖)
+.docs/
+docs
+CLAUDE.md
+image-asset
