@@ -1,5 +1,6 @@
 import { publicProcedure, router } from "@/server/trpc/init";
 import { childRouter } from "./child";
+import { consentRouter } from "./consent";
 import { inviteRouter } from "./invite";
 import { mediaRouter } from "./media";
 import { memorialRouter } from "./memorial";
@@ -18,6 +19,7 @@ export const appRouter = router({
     return { ok: true };
   }),
   user: userRouter,
+  consent: consentRouter,
   space: spaceRouter,
   child: childRouter,
   invite: inviteRouter,
