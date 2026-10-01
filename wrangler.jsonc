@@ -17,7 +17,7 @@
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
-      "id": "HYPERDRIVE_ID_PLACEHOLDER",
+      "id": "073ee1da206c4cf984dca3e2eed8034b",
       "localConnectionString": "postgresql://postgres:postgres@localhost:5432/bombyeol"
     }
   ]
