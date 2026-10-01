@@ -20,6 +20,12 @@
 - 내부 경로(`/api/internal/cleanup`·`/smoke`)는 AUTH_SECRET에서 용도별 HMAC 토큰을 유도해 인증(없으면 404). 스모크: `node scripts/smoke-staging.mjs`(AUTH_SECRET 필요) — **스테이징 R2 왕복 통과(2026-10-01, 사용자가 토큰을 Worker Secret으로 등록 후)**: 길이 위반 PUT 403, 타입 위반 PUT 403, 정확한 PUT 200, Head 1000 image/jpeg, Copy·정리 ok, DB ok.
 - R2_ACCOUNT_ID는 리포에 넣지 않고 Worker Secret으로 등록(클라우드 환경 값을 stdin으로).
 
+### 세션 이동 권고 (2026-10-01, Phase 2 종료 시점)
+
+- 이 세션(제목 "Phase 0") 컨텍스트 약 52% 사용(518k/1M). Phase 3는 스키마·피드·마일스톤 등 커밋이 많아 **새 세션 권장**(PR woopinbell/bombyeol#4 머지 확인까지는 이 세션).
+- 새 세션에 필요한 환경 변경 없음(R2 토큰은 Worker Secret이라 세션 무관). 첫 프롬프트는 `CLOUD_SESSION.md` §4.1에 "오늘 할 일: Phase 3(서버 먼저, UI 제외)"을 넣는다.
+- 새 세션 시작 시: Docker 데몬이 꺼져 있을 수 있음(`dockerd &` → `npm run db:up`), `npm ci` 필요할 수 있음. 작업 브랜치는 세션이 지정하는 새 이름을 쓴다.
+
 ### 다음 할 일 (Phase 2 이후)
 
 1. ~~R2 S3 토큰 발급·등록~~ 완료(사용자, Worker Secret만 — 클라우드 환경에는 넣지 않음), 스모크 통과.
@@ -247,3 +253,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: PR woopinbell/bombyeol#3 CI 통과 후 사용자 머지(a2a1145). 작업 브랜치를 main에서 다시 땀. Phase 2는 스테이징 R2 버킷 생성 승인 대기.
 - 2026-10-01: 사용자 승인으로 R2 스테이징 버킷 생성(수명주기 접두사 실수 즉시 복구). Phase 2 커밋 10개, 스테이징 배포·마이그레이션, 스모크 경로. 대기: R2 S3 토큰.
 - 2026-10-01: R2 토큰 등록(사용자) → 스테이징 스모크 R2 왕복 통과. 다음: Phase 2 PR.
+- 2026-10-01: Phase 2 PR woopinbell/bombyeol#4 생성. 사용자 규칙 추가: Phase 종료마다 세션 지속/이동 권고 보고(CLOUD_SESSION §5).
