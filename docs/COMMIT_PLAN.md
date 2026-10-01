@@ -169,11 +169,12 @@
 
 - [x] `chore(prisma): DeletionRequest 스키마 정의` — MediaStatus `purging` 추가(별도 마이그레이션 `media_purging`)
 - [x] (추가) `feat(privacy): 아이·반려동물 삭제(기록·파일 연쇄) 구현` [G-05] — 정리 Cron에 실행당 R2 삭제 몫(40) 도입
-- [ ] (순서 앞당김) `feat(privacy): Space 삭제(유예 기간·내보내기 후 파기) 구현` [G-06] — 계정 삭제가 혼자 남은 Space 삭제를 쓰므로 먼저
-- [ ] `feat(privacy): 계정 삭제 구현(R2·DB·푸시 토큰 연쇄)` [G-06]
+- [x] (순서 앞당김) `feat(privacy): Space 삭제(유예 기간·내보내기 후 파기) 구현` [G-06] — 계정 삭제가 혼자 남은 Space 삭제를 쓰므로 먼저. 유예 중 쓰기 차단은 `spaceProcedure`(tRPC meta `allowWhileDeleting`: 취소·나가기·임신 동의 철회)
+- [x] `feat(privacy): 계정 삭제 구현(R2·DB·푸시 토큰 연쇄)` [G-06] — `protectedProcedure`가 매 요청 `deletedAt` 확인
+- [x] (추가) `fix(privacy): 계정 삭제 시 초대 입력 실패 기록도 삭제` — 잔존 데이터 테스트를 설계하다 발견(IP 포함)
 - [ ] `feat(privacy): 웹 계정·데이터 삭제 페이지 구현` [G-06] — **UI 단계**(API는 위 커밋들)
-- [ ] `feat(privacy): 데이터 내보내기(원본 목록·이야기 텍스트) 구현` — ZIP은 클라이언트
-- [ ] `test(privacy): 삭제 후 잔존 데이터 0 및 구독 해지 호출 검증` [G-06] — 구독 해지는 Phase 8에서 추가
+- [x] `feat(privacy): 데이터 내보내기(원본 목록·이야기 텍스트) 구현` — ZIP은 클라이언트, `archive.media·records`
+- [x] `test(privacy): 삭제 후 잔존 데이터 0 검증` [G-06] — `spaceId`·`userId` 열이 있는 모든 표를 DB에서 직접 읽어 검사(새 모델도 자동 포함). 구독 해지 호출 검증은 Phase 8에서 추가
 
 ## Phase 8 — 수익화 (선행 조건: `OPEN_QUESTIONS.md` Q-PAY 결정)
 

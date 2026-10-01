@@ -50,6 +50,7 @@ Phase별로 필요한 키를 **이름·형식·발급처·등급**으로 미리 
 ## Phase 6 (알림)
 
 > 2026-10-01(Phase 6 서버): 서버 발송은 `FIREBASE_ADMIN_PROJECT_ID`·`FIREBASE_ADMIN_CLIENT_EMAIL`·`FIREBASE_ADMIN_PRIVATE_KEY` 3종만 읽는다(`src/server/push/fcm.ts`, `CloudflareEnv`에 선언). 없으면 알림만 건너뛴다. 클라우드 환경 값으로 실제 FCM 왕복(가짜 토큰 → INVALID_ARGUMENT로 분류) 확인. **스테이징 Worker에는 아직 없음** — 사용자가 `npx wrangler secret put FIREBASE_ADMIN_PROJECT_ID --env staging`(CLIENT_EMAIL·PRIVATE_KEY도 같은 방법, 반드시 Secret 유형)으로 등록. `NEXT_PUBLIC_FIREBASE_*`·VAPID는 클라이언트(UI 단계)에서 빌드 시점에 필요.
+> 2026-10-01(PR woopinbell/bombyeol#9 이후): 사용자가 스테이징 Worker에 `FIREBASE_ADMIN_*` 3종 등록. 내부 스모크 `fcm` 결과 `key: InvalidCharacterError (begin=y escaped=n newline=n quoted=n body=1626)` — **개인 키 값의 형식 문제**(줄바꿈이 사라지고 본문이 base64 길이(4의 배수)가 아님, 2자 남음). 같은 코드에 클라우드 환경의 키를 넣으면 `invalid_token`(정상). 재등록 권장: 서비스 계정 JSON 파일에서 직접 넣기 — `node -e 'process.stdout.write(require("./service-account.json").private_key)' | npx wrangler secret put FIREBASE_ADMIN_PRIVATE_KEY --env staging`(실제 줄바꿈으로 들어가고 코드가 처리한다). 등록 후 `node scripts/smoke-staging.mjs`에서 `"fcm":"invalid_token"`이면 정상.
 > 2026-10-01: S-5용으로 Firebase 10종 등록됨(개발 프로젝트). 클라우드 환경 UI는 `FIREBASE_ADMIN_PRIVATE_KEY`를 실제 줄바꿈으로 저장한다 — 코드는 `\n` 이스케이프와 실제 줄바꿈을 모두 처리할 것. Workers에서는 `firebase-admin` 대신 HTTP v1 + WebCrypto 서명(S-5).
 
 | 변수 | 형식 | 발급처 | 등급 | 상태 |
