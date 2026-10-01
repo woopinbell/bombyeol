@@ -14,7 +14,7 @@
 ## 현재 상태 — Phase 1 (2026-10-01)
 
 - 스테이징 생성(사용자 승인): Hyperdrive `bombyeol-staging`(id `610ad8cefd3f49268ca0a581b488d80d`, Supabase 직결) + Worker `bombyeol-staging` → https://bombyeol-staging.seungwoo7050.workers.dev . 스모크 `GET /api/trpc/health` 200(Worker → Hyperdrive → Supabase 왕복). 배포 직후 몇 초는 이전 버전이 응답할 수 있음(404를 한 번 봄).
-- Phase 1 서버 커밋 9개 완료(브랜치 `claude/cloud-session-phase-0-72a2lc` — PR woopinbell/bombyeol#2 머지 후 main에서 같은 이름으로 다시 땀). 테스트 54건 통과. **main 미머지, PR 미생성.** 온보딩 화면 2커밋은 Phase DS 이후.
+- **Phase 1 main 머지 완료(PR woopinbell/bombyeol#3, 머지 커밋 a2a1145).** (이전 기록) Phase 1 서버 커밋 9개 완료(브랜치 `claude/cloud-session-phase-0-72a2lc` — PR woopinbell/bombyeol#2 머지 후 main에서 같은 이름으로 다시 땀). 테스트 54건 통과. **main 미머지, PR 미생성.** 온보딩 화면 2커밋은 Phase DS 이후.
 - 결정·구현 요약:
   - 인증: Auth.js v5 beta.32, JWT 세션. 로그인 시 `Account(provider, providerAccountId)`로 `User`를 찾거나 만든다(`src/server/auth/users.ts`). **이메일·프로필 사진은 저장·토큰 보관하지 않음**(PRIVACY 최소 수집), 이름만 50자. 로그인 signin/callback에 IP당 30회/시간(G-07, DB 카운터).
   - 접근 통제: `protectedProcedure` → `spaceProcedure`(멤버 아니거나 삭제된 Space면 NOT_FOUND) → `parentProcedure`/`spaceRoleProcedure(...)`(FORBIDDEN).
@@ -27,7 +27,7 @@
 
 1. ~~`STAGING_DATABASE_URL` 등록~~ 완료(사용자, 2026-10-01). **Supabase Session pooler(IPv4)로 GitHub 러너 → Supabase 마이그레이션 확인.** 주의: 수동 실행(workflow_dispatch)은 기본이 main이라 main에 없는 마이그레이션은 적용되지 않는다 — 첫 실행이 그래서 "No migration found". 작업 브랜치 기준으로 다시 실행해 `init` 적용(main 머지 전 스테이징 검증용).
 2. ~~redirect URI 등록~~ 완료(사용자). 스테이징 500의 실제 원인은 **OpenNext가 Turbopack의 스코프 패키지 해시 외부 이름(`@prisma/client-<hash>`)을 매핑하지 못한 것**(`No such module .../wasm-compiler-edge`, OpenNext 1.20.7 `discoverExternalModuleMappings`가 `.next/node_modules` 최상위 링크만 읽음). `next.config.ts`의 `transpilePackages: ["@prisma/client"]`로 번들 포함해 해결(`fix(infra)` 커밋). 확인: health 200, 비로그인 space.list 401, CSRF+POST 로그인 시작 → kauth/accounts.google 302(redirect_uri 정확). **사용자 브라우저 실로그인 통과(2026-10-01): Google·카카오 모두 → `user.me`로 provider 확인, `space.list` 빈 목록 200.** 카카오 콘솔 동의항목: 닉네임 필수, 프로필 사진 선택(사용자 설정) — 코드는 이름만 저장하고 사진은 저장하지 않는다(PRIVACY 최소 수집, 필요해지면 별도 결정). 이름 없이 가입한 계정은 다음 로그인 때 이름을 채운다(`fix(auth)`). 확인용 `/api/auth/session`은 userId만 보이므로 `/api/trpc/user.me`를 쓴다. 교훈: 배포 후 health만이 아니라 인증 경로도 스모크한다.
-3. Phase 1 PR 생성·머지(사용자 확인). 이후 Phase 2(미디어) — R2 버킷·토큰 신규 발급 필요(ENV_MANIFEST Phase 2), 버킷 생성은 승인 후.
+3. ~~Phase 1 PR 머지~~ 완료(a2a1145). 이후 Phase 2(미디어) — R2 버킷·토큰 신규 발급 필요(ENV_MANIFEST Phase 2), 버킷 생성은 승인 후.
 4. 결정 필요(사용자, 급하지 않음): 무료 relative 0명 유지 여부, 위 상한 수치(Q-PRICE). 카카오 이메일 미수집 확정.
 5. 정리 Cron(InviteCodeAttempt·RateCounter 보관 기간, G-17)은 Phase 2 Cron 커밋에서 함께.
 
@@ -227,3 +227,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: 스테이징 마이그레이션(작업 브랜치 기준) 적용, Prisma 외부 모듈 배포 오류 수정·재배포. 사용자 실로그인 확인 대기.
 - 2026-10-01: 스테이징 실로그인(Google·카카오) 사용자 확인 통과. `user.me` 추가, 빈 이름 채움 수정. 다음: Phase 1 PR(사용자 확인).
 - 2026-10-01: Phase 1 PR woopinbell/bombyeol#3 생성(13커밋), CI 대기. Phase 2는 PR 머지 후 같은 작업 브랜치를 main에서 다시 따서 진행. 필요: 스테이징 R2 버킷 생성 승인, R2 S3 토큰(Worker 시크릿으로 사용자가 직접 등록).
+- 2026-10-01: PR woopinbell/bombyeol#3 CI 통과 후 사용자 머지(a2a1145). 작업 브랜치를 main에서 다시 땀. Phase 2는 스테이징 R2 버킷 생성 승인 대기.
