@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@/generated/prisma/client";
-import { createPushDispatcher, type PushDispatcher } from "@/server/push/dispatch";
+import { createPushDispatcher, type PushDispatcher, type PushTask } from "@/server/push/dispatch";
 import type { PushMessage, PushSender, SendOutcome } from "@/server/push/types";
 
 export const TEST_ORIGIN = "https://bombyeol.test";
@@ -19,17 +19,24 @@ export class FakeSender implements PushSender {
   }
 }
 
-/** 응답 뒤 작업을 모아 두었다가 flush()로 기다리는 디스패처(waitUntil 흉내) */
+/**
+ * 응답 뒤 작업을 모아 두었다가 flush()에서 실제 디스패처로 실행한다(waitUntil 흉내).
+ * 응답과 발송 사이에 생긴 변화(멤버 제외·visibility 변경)를 재현할 수 있게 flush 전에는 시작하지 않는다.
+ */
 export function testPush(prisma: PrismaClient, sender: PushSender = new FakeSender()) {
-  const pending: Promise<unknown>[] = [];
-  const dispatcher: PushDispatcher = createPushDispatcher(
-    { prisma, sender, origin: TEST_ORIGIN },
-    (work) => pending.push(work),
-  );
+  const queued: PushTask[] = [];
+  const dispatcher: PushDispatcher = { defer: (task) => void queued.push(task) };
   return {
     dispatcher,
     async flush() {
-      while (pending.length > 0) await Promise.all(pending.splice(0));
+      while (queued.length > 0) {
+        const running: Promise<unknown>[] = [];
+        const real = createPushDispatcher({ prisma, sender, origin: TEST_ORIGIN }, (work) =>
+          running.push(work),
+        );
+        for (const task of queued.splice(0)) real.defer(task);
+        await Promise.all(running);
+      }
     },
   };
 }

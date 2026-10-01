@@ -9,6 +9,7 @@ import {
   type StoryPromptKey,
 } from "@/lib/story-prompts";
 import { inputError, limitError, notFound } from "@/server/errors";
+import { notify } from "@/server/push/events";
 import { lockKey } from "@/server/locks";
 import { removeAsset, requireAttachableAssets, withAttachConflict } from "@/server/media/assets";
 import { hitRateLimit } from "@/server/rate-limit";
@@ -302,6 +303,12 @@ export const storyRouter = router({
           });
         }),
       );
+      notify(ctx.push, {
+        type: "story",
+        spaceId: ctx.member.spaceId,
+        actorId: ctx.userId,
+        storyId: row.id,
+      });
       return toStory(ctx, row);
     }),
 
@@ -401,7 +408,7 @@ export const storyRouter = router({
 
   /**
    * 물어보기(PRD §4.3): parent가 어르신(grandparent)께 질문 카드나 직접 쓴 질문을 보낸다.
-   * 같은 카드를 이미 보내 답을 기다리는 중이면 그 물어보기를 돌려준다. 알림은 Phase 6,
+   * 같은 카드를 이미 보내 답을 기다리는 중이면 그 물어보기를 돌려준다. 새 물어보기는 어르신께 알림,
    * 카카오톡 공유는 클라이언트가 링크로 보낸다(서버 비용 0). 리밋·열린 물어보기 상한(G-07).
    */
   ask: parentProcedure
@@ -432,18 +439,18 @@ export const storyRouter = router({
       );
       if (!ok) throw limitError("RATE_LIMITED");
 
-      const row = await ctx.prisma.$transaction(async (tx) => {
+      const { row, created } = await ctx.prisma.$transaction(async (tx) => {
         await lockKey(tx, `story-ask:${to.id}`);
         if (input.promptKey) {
           const existing = await tx.storyAsk.findFirst({
             where: { toMemberId: to.id, promptKey: input.promptKey, entryId: null },
             select: askSelect,
           });
-          if (existing) return existing;
+          if (existing) return { row: existing, created: false };
         }
         const open = await tx.storyAsk.count({ where: { toMemberId: to.id, entryId: null } });
         if (open >= STORY_POLICY.openAsksPerMember) throw limitError("ASK_OPEN_LIMIT");
-        return tx.storyAsk.create({
+        const row = await tx.storyAsk.create({
           data: {
             spaceId,
             askedById: ctx.userId,
@@ -453,7 +460,10 @@ export const storyRouter = router({
           },
           select: askSelect,
         });
+        return { row, created: true };
       });
+      // 이미 열려 있던 같은 카드를 돌려줄 때는 다시 알리지 않는다
+      if (created) notify(ctx.push, { type: "ask", spaceId, actorId: ctx.userId, askId: row.id });
       return toAsk(row);
     }),
 

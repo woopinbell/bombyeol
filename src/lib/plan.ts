@@ -154,6 +154,10 @@ export const PUSH_POLICY = {
   tokensPerRecipient: 3,
   /** 이벤트 하나의 최대 발송 수 — Workers 무료 플랜 하위 요청 50개 안(토큰 교환 1회 포함) */
   maxSendsPerEvent: 40,
+  /** 좋아요·별 하나 알림: 같은 대상에 이 시간(초)에 한 번(누가 눌렀든) */
+  heartCooldownSec: 6 * 60 * 60,
+  /** 댓글 알림: 같은 대상에 이 시간(초)에 한 번 */
+  commentCooldownSec: 30 * 60,
 } as const;
 
 /**

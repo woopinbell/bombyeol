@@ -3,6 +3,8 @@ import { z } from "zod";
 import { RATE_LIMITS, REACTION_POLICY } from "@/lib/plan";
 import { limitError, notFound } from "@/server/errors";
 import { lockKey } from "@/server/locks";
+import type { PushDispatcher } from "@/server/push/dispatch";
+import { notify } from "@/server/push/events";
 import { hitRateLimit } from "@/server/rate-limit";
 import type { PrismaClient } from "@/generated/prisma/client";
 import type { RateLimitRule } from "@/server/rate-limit";
@@ -32,7 +34,12 @@ const commentSelect = {
  * 돌려주는 값: 지금 켜졌는지와 대상의 같은 종류 반응 수.
  */
 async function toggleReaction(
-  ctx: { prisma: PrismaClient; userId: string; member: { spaceId: string } },
+  ctx: {
+    prisma: PrismaClient;
+    push: PushDispatcher;
+    userId: string;
+    member: { spaceId: string };
+  },
   input: ReactionTarget,
   kind: "like" | "star",
   rule: RateLimitRule,
@@ -42,7 +49,7 @@ async function toggleReaction(
   const ok = await hitRateLimit(ctx.prisma, `${kind}:${ctx.userId}`, rule);
   if (!ok) throw limitError("RATE_LIMITED");
 
-  return ctx.prisma.$transaction(async (tx) => {
+  const result = await ctx.prisma.$transaction(async (tx) => {
     await lockKey(tx, `${kind}:${targetIdOf(target)}:${ctx.userId}`);
     const where = { ...target, kind, createdById: ctx.userId };
     const existing = await tx.reaction.findFirst({ where, select: { id: true } });
@@ -51,6 +58,11 @@ async function toggleReaction(
     const count = await tx.reaction.count({ where: { ...target, kind } });
     return { on: !existing, count };
   });
+  // 켤 때만 알린다(끄기·다시 켜기 반복은 대상별 쿨다운이 막는다)
+  if (result.on) {
+    notify(ctx.push, { type: "reaction", spaceId, actorId: ctx.userId, kind, target: input });
+  }
+  return result;
 }
 
 /** 반응은 모든 멤버(relative 포함)가 남길 수 있다(PRD §4.2 "가족 멤버만"). 쓰기는 사용자당 리밋(G-07) */
@@ -93,10 +105,18 @@ export const reactionRouter = router({
         RATE_LIMITS.commentPerUser,
       );
       if (!ok) throw limitError("RATE_LIMITED");
-      return ctx.prisma.reaction.create({
+      const comment = await ctx.prisma.reaction.create({
         data: { ...target, spaceId, kind: "comment", body: input.body, createdById: ctx.userId },
         select: commentSelect,
       });
+      notify(ctx.push, {
+        type: "reaction",
+        spaceId,
+        actorId: ctx.userId,
+        kind: "comment",
+        target: input.target,
+      });
+      return comment;
     }),
 
   /** 댓글 목록: 오래된 것부터, 커서는 (createdAt, id) */
