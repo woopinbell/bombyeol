@@ -36,3 +36,19 @@ export function mediaError(reason: MediaFailure) {
     message: reason,
   });
 }
+
+/** 같은 Space에 없는 대상(아이·반려동물·기록 등). 존재 여부를 드러내지 않는다 */
+export function notFound(reason: "SUBJECT_NOT_FOUND" | "ITEM_NOT_FOUND") {
+  return new TRPCError({ code: "NOT_FOUND", message: reason });
+}
+
+export type InputFailure =
+  "NAME_REQUIRED" | "DATE_IN_FUTURE" | "USE_MARK_BORN" | "CHILD_ALREADY_BORN";
+
+/** 스키마로 표현하기 어려운 입력 규칙 위반 */
+export function inputError(reason: InputFailure) {
+  return new TRPCError({
+    code: reason === "CHILD_ALREADY_BORN" ? "CONFLICT" : "BAD_REQUEST",
+    message: reason,
+  });
+}
