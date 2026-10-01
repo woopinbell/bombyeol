@@ -151,4 +151,39 @@ export const mediaRouter = router({
       }
       return { assetId: asset.id, status: "confirmed" as const };
     }),
+
+  /**
+   * 자산 삭제(G-05): 올린 사람 또는 parent만. R2 객체를 먼저 지우고 성공했을 때만 DB를 바꾼다
+   * (실패하면 그대로 오류 → 재시도. "DB만 지워지고 파일이 남는" 상태를 만들지 않는다).
+   */
+  delete: spaceProcedure
+    .input(z.object({ assetId: z.string().min(1).max(64) }))
+    .mutation(async ({ ctx, input }) => {
+      const spaceId = ctx.member.spaceId;
+      const asset = await ctx.prisma.mediaAsset.findFirst({
+        where: { id: input.assetId, spaceId, status: { in: ["pending", "confirmed"] } },
+        select: { id: true, bytes: true, status: true, uploadedById: true },
+      });
+      if (!asset) throw mediaError("ASSET_INVALID");
+      if (asset.uploadedById !== ctx.userId && ctx.member.role !== "parent") {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      await ctx.storage.delete(mediaKeys.final(spaceId, asset.id));
+      await ctx.storage.delete(mediaKeys.pending(spaceId, asset.id));
+
+      const now = new Date();
+      const { count } = await ctx.prisma.mediaAsset.updateMany({
+        where: { id: asset.id, status: asset.status },
+        data: { status: "deleted", deletedAt: now },
+      });
+      if (count === 1 && asset.status === "confirmed") {
+        await ctx.prisma.usageCounter.upsert({
+          where: { spaceId_periodKey: { spaceId, periodKey: periodKey(now) } },
+          create: { spaceId, periodKey: periodKey(now), bytesDeleted: asset.bytes },
+          update: { bytesDeleted: { increment: asset.bytes } },
+        });
+      }
+      return { ok: true };
+    }),
 });
