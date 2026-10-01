@@ -83,6 +83,10 @@ export const spaceRouter = router({
             status: true,
           },
         },
+        pets: {
+          orderBy: { createdAt: "asc" },
+          select: { id: true, name: true, species: true, status: true },
+        },
       },
     }),
   ),

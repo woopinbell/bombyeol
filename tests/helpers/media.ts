@@ -10,3 +10,20 @@ export async function mediaSetup(prisma: PrismaClient) {
   const { id: spaceId } = await api.space.create({ name: "가족" });
   return { parent, storage, api, spaceId };
 }
+
+type Api = ReturnType<typeof callerFor>;
+
+/** 업로드 요청 → 저장소 PUT → 확정까지 마친 자산 ID */
+export async function uploadConfirmed(
+  api: Api,
+  storage: MemoryStorage,
+  spaceId: string,
+  kind: "image" | "video" = "image",
+  bytes = 100,
+) {
+  const contentType = kind === "image" ? "image/jpeg" : "video/mp4";
+  const { assetId } = await api.media.requestUpload({ spaceId, kind, contentType, bytes });
+  storage.upload(`pending/${spaceId}/${assetId}`, bytes, contentType);
+  await api.media.confirm({ spaceId, assetId });
+  return assetId;
+}

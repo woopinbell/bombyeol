@@ -1,4 +1,9 @@
-import type { MediaStatus, Prisma, PrismaClient } from "@/generated/prisma/client";
+import {
+  Prisma,
+  type MediaKind,
+  type MediaStatus,
+  type PrismaClient,
+} from "@/generated/prisma/client";
 import { mediaError } from "@/server/errors";
 import { mediaKeys, type MediaStorage } from "@/server/storage/types";
 import { periodKey } from "./usage";
@@ -20,6 +25,42 @@ export async function requireConfirmedAssets(
   });
   if (found.length !== unique.length) throw mediaError("ASSET_INVALID");
   return found;
+}
+
+/** 자산이 어딘가(반려동물 커버·Moment 첨부 등)에 붙어 있지 않은 조건 */
+export const unattachedAssetWhere = {
+  petCover: { is: null },
+} satisfies Prisma.MediaAssetWhereInput;
+
+/**
+ * 새로 붙일 자산 검증: requireConfirmedAssets(G-02)에 더해 종류가 맞고 아직 다른 곳에 붙지 않았어야 한다.
+ * 자산 하나는 한 곳에만 붙는다 — 삭제 연쇄(G-05)가 다른 기록의 파일을 지우지 않도록.
+ */
+export async function requireAttachableAssets(
+  prisma: Pick<PrismaClient, "mediaAsset">,
+  spaceId: string,
+  assetIds: string[],
+  kinds: readonly MediaKind[] = ["image", "video"],
+) {
+  const found = await requireConfirmedAssets(prisma, spaceId, assetIds);
+  if (found.some((a) => !kinds.includes(a.kind))) throw mediaError("ASSET_INVALID");
+  const free = await prisma.mediaAsset.count({
+    where: { id: { in: found.map((a) => a.id) }, ...unattachedAssetWhere },
+  });
+  if (free !== found.length) throw mediaError("ASSET_IN_USE");
+  return found;
+}
+
+/** 동시에 같은 자산을 붙이려 해 unique 제약에 걸리면 ASSET_IN_USE로 돌려준다 */
+export async function withAttachConflict<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      throw mediaError("ASSET_IN_USE");
+    }
+    throw e;
+  }
 }
 
 /**

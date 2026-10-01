@@ -67,6 +67,8 @@ type TierLimits = {
   membersByRole: Record<MemberRole, number>;
   /** G-11: Space당 아이 수 */
   children: number;
+  /** G-11: Space당 반려동물 수 */
+  pets: number;
   /** G-01: 파일 하나의 최대 바이트(종류별) */
   maxUploadBytes: Record<MediaKindName, number>;
   /** G-03: Space 총 저장 상한(confirmed + 진행 중 업로드) */
@@ -77,12 +79,14 @@ export const TIER_LIMITS: Record<PlanTier, TierLimits> = {
   free: {
     membersByRole: { parent: 2, grandparent: 4, relative: 0 },
     children: 3,
+    pets: 3,
     maxUploadBytes: { image: 10 * MB, video: 50 * MB },
     storageBytes: 2 * GB,
   },
   premium: {
     membersByRole: { parent: 2, grandparent: 4, relative: 14 },
     children: 10,
+    pets: 10,
     maxUploadBytes: { image: 20 * MB, video: 200 * MB },
     storageBytes: 50 * GB,
   },

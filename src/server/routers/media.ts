@@ -11,7 +11,7 @@ import {
 import { limitError, mediaError } from "@/server/errors";
 import { lockKey } from "@/server/locks";
 import { hitRateLimit } from "@/server/rate-limit";
-import { removeAsset } from "@/server/media/assets";
+import { removeAsset, unattachedAssetWhere } from "@/server/media/assets";
 import { fitsStorage, openPendingWhere, periodKey, spaceUsage } from "@/server/media/usage";
 import { mediaKeys } from "@/server/storage/types";
 import { spaceProcedure } from "@/server/trpc/procedures";
@@ -148,6 +148,11 @@ export const mediaRouter = router({
       if (asset.uploadedById !== ctx.userId && ctx.member.role !== "parent") {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
+      // 기록에 붙은 자산은 그 기록을 지울 때 함께 지운다(기록에 깨진 파일이 남지 않게).
+      const attached = await ctx.prisma.mediaAsset.count({
+        where: { id: asset.id, NOT: unattachedAssetWhere },
+      });
+      if (attached) throw mediaError("ASSET_IN_USE");
 
       await removeAsset(ctx.prisma, ctx.storage, spaceId, asset);
       return { ok: true };

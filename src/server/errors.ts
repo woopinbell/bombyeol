@@ -5,6 +5,7 @@ export type LimitReason =
   | "SPACE_CREATE_LIMIT"
   | "MEMBERSHIP_LIMIT"
   | "CHILD_LIMIT"
+  | "PET_LIMIT"
   | "MEMBER_ROLE_LIMIT"
   | "INVITE_ACTIVE_LIMIT"
   | "FILE_TOO_LARGE"
@@ -28,13 +29,18 @@ export function inviteError(reason: InviteFailure) {
   });
 }
 
-export type MediaFailure = "UPLOAD_NOT_FOUND" | "UPLOAD_MISMATCH" | "ASSET_INVALID";
+export type MediaFailure =
+  "UPLOAD_NOT_FOUND" | "UPLOAD_MISMATCH" | "ASSET_INVALID" | "ASSET_IN_USE";
+
+const mediaErrorCode = {
+  UPLOAD_NOT_FOUND: "NOT_FOUND",
+  UPLOAD_MISMATCH: "BAD_REQUEST",
+  ASSET_INVALID: "NOT_FOUND",
+  ASSET_IN_USE: "CONFLICT",
+} as const satisfies Record<MediaFailure, TRPCError["code"]>;
 
 export function mediaError(reason: MediaFailure) {
-  return new TRPCError({
-    code: reason === "UPLOAD_MISMATCH" ? "BAD_REQUEST" : "NOT_FOUND",
-    message: reason,
-  });
+  return new TRPCError({ code: mediaErrorCode[reason], message: reason });
 }
 
 /** 같은 Space에 없는 대상(아이·반려동물·기록 등). 존재 여부를 드러내지 않는다 */
