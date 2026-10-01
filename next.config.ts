@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   // 개발 도구(wrangler·workerd·Prisma CLI·PGlite)가 next.config·prisma.config 경유로
@@ -30,6 +33,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
 
 initOpenNextCloudflareForDev();
