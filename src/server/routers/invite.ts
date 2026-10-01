@@ -1,12 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import type { Prisma } from "@/generated/prisma/client";
-import { INVITE_POLICY, RATE_LIMITS, TIER_LIMITS, tierOf } from "@/lib/plan";
-import { limitError } from "@/server/errors";
-import { generateInviteCode } from "@/server/invite-code";
+import { ACCOUNT_LIMITS, INVITE_POLICY, RATE_LIMITS, TIER_LIMITS, tierOf } from "@/lib/plan";
+import { inviteError, limitError } from "@/server/errors";
+import { isInviteAttemptBlocked, recordInviteFailure } from "@/server/invite-attempts";
+import { generateInviteCode, normalizeInviteCode } from "@/server/invite-code";
 import { lockKey } from "@/server/locks";
 import { hitRateLimit } from "@/server/rate-limit";
-import { parentProcedure } from "@/server/trpc/procedures";
+import type { Context } from "@/server/trpc/context";
+import { parentProcedure, protectedProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
 import { relationLabel } from "./inputs";
 
@@ -26,7 +28,88 @@ const inviteSelect = {
   expiresAt: true,
 } satisfies Prisma.InviteSelect;
 
+const codeInput = z.object({ code: z.string().max(32) });
+
+/**
+ * 코드로 유효한 초대를 찾는다. 차단 중이면 429, 못 찾으면 실패를 기록하고 INVITE_INVALID.
+ * 없음·만료·사용됨·회수됨·삭제된 Space를 구분하지 않는다(코드 탐색에 정보를 주지 않기 위해).
+ */
+async function findValidInvite(ctx: Context & { userId: string }, rawCode: string) {
+  if (await isInviteAttemptBlocked(ctx.prisma, ctx.userId, ctx.ip)) {
+    throw limitError("RATE_LIMITED");
+  }
+  const code = normalizeInviteCode(rawCode);
+  const invite = code
+    ? await ctx.prisma.invite.findFirst({
+        where: { code, usedAt: null, revokedAt: null, expiresAt: { gt: new Date() } },
+        select: {
+          id: true,
+          spaceId: true,
+          role: true,
+          relationLabel: true,
+          space: { select: { name: true, deletedAt: true } },
+        },
+      })
+    : null;
+  if (!invite || invite.space.deletedAt) {
+    await recordInviteFailure(ctx.prisma, ctx.userId, ctx.ip);
+    throw inviteError("INVITE_INVALID");
+  }
+  return invite;
+}
+
 export const inviteRouter = router({
+  /** 합류 전 확인용(어느 가족에 어떤 역할로 들어가는지). 실패는 brute-force 카운트에 포함 */
+  preview: protectedProcedure.input(codeInput).query(async ({ ctx, input }) => {
+    const invite = await findValidInvite(ctx, input.code);
+    return { spaceName: invite.space.name, role: invite.role, relationLabel: invite.relationLabel };
+  }),
+
+  /** 초대 수락: 1회용 소비 + 멤버 생성을 한 트랜잭션으로(G-11 정원 재확인) */
+  accept: protectedProcedure
+    .input(codeInput.extend({ relationLabel: relationLabel.optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const invite = await findValidInvite(ctx, input.code);
+
+      return ctx.prisma.$transaction(async (tx) => {
+        await lockKey(tx, `space-invites:${invite.spaceId}`);
+        await lockKey(tx, `user-spaces:${ctx.userId}`);
+
+        const already = await tx.member.findUnique({
+          where: { spaceId_userId: { spaceId: invite.spaceId, userId: ctx.userId } },
+          select: { id: true },
+        });
+        if (already) throw inviteError("ALREADY_MEMBER");
+
+        const [memberships, roleCount] = await Promise.all([
+          tx.member.count({ where: { userId: ctx.userId, space: { deletedAt: null } } }),
+          tx.member.count({ where: { spaceId: invite.spaceId, role: invite.role } }),
+        ]);
+        if (memberships >= ACCOUNT_LIMITS.membershipsPerUser) throw limitError("MEMBERSHIP_LIMIT");
+        if (roleCount >= TIER_LIMITS[tierOf()].membersByRole[invite.role]) {
+          throw limitError("MEMBER_ROLE_LIMIT");
+        }
+
+        // 1회용: 아직 유효할 때만 소비한다(동시 수락 중 하나만 성공).
+        const now = new Date();
+        const { count } = await tx.invite.updateMany({
+          where: { id: invite.id, usedAt: null, revokedAt: null, expiresAt: { gt: now } },
+          data: { usedAt: now, usedById: ctx.userId },
+        });
+        if (count !== 1) throw inviteError("INVITE_INVALID");
+
+        await tx.member.create({
+          data: {
+            spaceId: invite.spaceId,
+            userId: ctx.userId,
+            role: invite.role,
+            relationLabel: input.relationLabel ?? invite.relationLabel,
+          },
+        });
+        return { spaceId: invite.spaceId };
+      });
+    }),
+
   /** 초대 발급(parent). 링크는 같은 코드를 쓴다: /invite/{code} */
   create: parentProcedure
     .input(z.object({ role: memberRole, relationLabel: relationLabel.optional() }))

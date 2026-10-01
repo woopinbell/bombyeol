@@ -9,9 +9,18 @@ export type LimitReason =
   | "INVITE_ACTIVE_LIMIT"
   | "RATE_LIMITED";
 
+export type InviteFailure = "INVITE_INVALID" | "ALREADY_MEMBER";
+
 export function limitError(reason: LimitReason) {
   return new TRPCError({
     code: reason === "RATE_LIMITED" ? "TOO_MANY_REQUESTS" : "PRECONDITION_FAILED",
+    message: reason,
+  });
+}
+
+export function inviteError(reason: InviteFailure) {
+  return new TRPCError({
+    code: reason === "INVITE_INVALID" ? "NOT_FOUND" : "CONFLICT",
     message: reason,
   });
 }

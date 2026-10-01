@@ -29,6 +29,10 @@ export const INVITE_POLICY = {
   ttlHours: 72,
   /** G-11: Space당 동시에 유효한(미사용·미회수·미만료) 초대 수 */
   activePerSpace: 10,
+  /** G-07·G-11: 코드 입력 실패 허용(사용자당) */
+  failedAttemptsPerUser: { limit: 5, windowSec: 15 * 60 },
+  /** G-07·G-11: 코드 입력 실패 허용(IP당, 여러 계정으로 시도하는 경우) */
+  failedAttemptsPerIp: { limit: 20, windowSec: 60 * 60 },
 } as const;
 
 type TierLimits = {
