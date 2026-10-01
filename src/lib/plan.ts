@@ -15,7 +15,7 @@ export const RATE_LIMITS = {
   uploadIssuePerUser: { limit: 120, windowSec: 60 * 60 },
   /** G-04: 업로드 URL 발급(Space당) */
   uploadIssuePerSpace: { limit: 500, windowSec: 24 * 60 * 60 },
-  /** G-07: 글 기록(마일스톤·일기) 작성(사용자당) — 파일 없는 쓰기도 폭주를 막는다 */
+  /** G-07: 글 기록(마일스톤·일기·임신 기록) 작성(사용자당) — 파일 없는 쓰기도 폭주를 막는다 */
   recordWritePerUser: { limit: 300, windowSec: 24 * 60 * 60 },
   /** G-07: 좋아요 토글(사용자당) */
   likePerUser: { limit: 300, windowSec: 60 * 60 },
@@ -106,6 +106,16 @@ export const STORY_POLICY = {
   openAsksPerMember: 30,
   /** 목록 한 번에 가져오는 수 */
   pageSize: 20,
+} as const;
+
+/** 임신 기록 정책(요금제 무관, PRIVACY §3) */
+export const PREGNANCY_POLICY = {
+  /** 메모 최대 글자 수 */
+  noteMaxChars: 1000,
+  /** 검진 일정은 미래 날짜를 받는다 — 출생 예정일(없으면 오늘) 뒤로 이 날 수까지 */
+  checkupMaxDaysAhead: 60,
+  /** 목록 한 번에 가져오는 수 */
+  pageSize: 30,
 } as const;
 
 /**

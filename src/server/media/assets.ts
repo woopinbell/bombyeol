@@ -27,12 +27,16 @@ export async function requireConfirmedAssets(
   return found;
 }
 
-/** 자산이 어딘가(반려동물 커버·Moment 첨부·이야기 사진 등)에 붙어 있지 않은 조건 */
+/**
+ * 자산이 어딘가(반려동물 커버·Moment 첨부·이야기 사진·초음파 사진)에 붙어 있지 않은 조건.
+ * 초음파 사진도 여기 있어야 id를 아는 다른 멤버가 Moment 등에 붙여 visibility를 우회할 수 없다(PRIVACY §3).
+ */
 export const unattachedAssetWhere = {
   petCover: { is: null },
   momentMedia: { is: null },
   momentThumb: { is: null },
   storyPhoto: { is: null },
+  pregnancy: { is: null },
 } satisfies Prisma.MediaAssetWhereInput;
 
 /**
