@@ -4,11 +4,22 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계: **기반 문서 작성 완료, 리포 부트스트랩 완료(2026-10-01), 코드 없음.** GitHub private 리포 `woopinbell/bombyeol` 생성, `main`(빈 초기 커밋 9744db2)·`docs`(고아, 8621748) 푸시 완료. 클라우드 환경은 사용자가 claude.ai/code에서 만든다(허용 도메인 Custom, 개발용 키만). 첫 세션 프롬프트는 `docs/CLOUD_SESSION.md` §4.
+- 단계(2026-10-01 갱신): **스택 확정 — 스파이크 S-1~S-8 전부 통과, ARCHITECTURE 확정(사용자 승인). 다음은 Phase 0.** 스파이크 Cloudflare 리소스(Worker·Hyperdrive·R2 버킷)는 삭제 완료. main은 여전히 초기 커밋뿐.
+- (이전 기록) 기반 문서 작성 완료, 리포 부트스트랩 완료(2026-10-01). GitHub private 리포 `woopinbell/bombyeol` 생성, `main`(빈 초기 커밋 9744db2)·`docs`(고아, 8621748) 푸시 완료. 클라우드 환경은 사용자가 claude.ai/code에서 만든다(허용 도메인 Custom, 개발용 키만). 첫 세션 프롬프트는 `docs/CLOUD_SESSION.md` §4.
 - 결정 완료(사용자): 식별자 `bombyeol` / 서버리스 재선정 / 웹·PWA 우선 후 Android / 새 GitHub private 리포 + `docs` 고아 브랜치 / 비용 방어는 설계 제약 / 개인정보 초기 설계 / 텍스트 우선·음성 후속 / 가족 1 Space 안에 여러 아이 / 카카오+Google 로그인 / Cloudflare 검토 / next-intl(한국어만 출시) / 임신 기록·고인 처리 V1 포함 / PDF 다운로드 프리미엄 / 웹푸시 + 카카오톡 공유 / devlog는 docs 브랜치에만 / hamkke 절대 원칙 4종 계승.
 - 미해결: `OPEN_QUESTIONS.md` (특히 **Q-PAY 결제 공급자 재결정**).
 
-## 다음 할 일
+## 다음 할 일 (2026-10-01 갱신)
+
+**Phase 0 착수** — 새 클라우드 세션 권장(아래 "새 세션 시작 프롬프트"는 `CLOUD_SESSION.md` §4). 스파이크에서 얻은 Phase 0 반영 사항:
+- 스캐폴드: `create-next-app`은 **`--disable-git`** 으로, 임시 폴더에서 만들면 `.git` 제외 복사(사고 기록 참고). 생성되는 `AGENTS.md`/`CLAUDE.md`는 리포의 CLAUDE.md 링크와 충돌하므로 처리 방침 결정(Next가 `next dev` 때 다시 만든다는 안내가 있음 — main에 `AGENTS.md`만 두고 루트 `CLAUDE.md`는 docs 링크 유지 권장).
+- `prisma init`이 만드는 `.agents/ .claude/ .windsurf/ skills-lock.json`은 커밋하지 않는다. Prisma는 7.10.x 고정(`latest`가 8 RC), 생성기 `runtime = "workerd"`.
+- `next.config.ts`에 `outputFileTracingExcludes`(wrangler·workerd·Prisma CLI·PGlite 등) 필수 — 없으면 53 MiB.
+- 레이트 리밋은 DB 카운터 주력, 업로드는 presign(Content-Length/Type 서명) + confirm HeadObject 기본.
+- Supabase 마이그레이션 CI: GitHub 호스티드 러너는 IPv6가 없어 Supabase 직결(IPv6) 불가 가능성이 높다 → **Supabase Session pooler(IPv4) 연결 문자열을 GitHub Actions secret으로** 받는 방식이 유력(Phase 0 `chore(infra)` 때 이름을 ENV_MANIFEST에 먼저 적고 요청).
+- 키 재사용: 카카오·Google·Firebase 콘솔에 등록된 redirect/도메인은 삭제된 스파이크 URL(`bombyeol-spike-s1.seungwoo7050.workers.dev`) 기준 → 개발 배포 URL이 정해지면 갱신 필요. R2 S3 토큰은 삭제된 버킷 한정이라 무효 — 대시보드에서 폐기 권장, Phase 2에서 새로 발급.
+
+### (이전) 다음 할 일
 
 1. ~~리포 부트스트랩~~ 완료. 주의: 루트 심볼릭 링크 `docs`와 브랜치 `docs`의 이름이 겹쳐 `git log docs`가 모호 오류를 낸다 → 브랜치는 `refs/heads/docs`(또는 `.docs/`에서 `git -C .docs ...`)로 참조한다.
 2. (사용자) 클라우드 환경 생성(리포 `woopinbell/bombyeol`). 스파이크 전에 필요한 키(`ENV_MANIFEST.md` Phase S)는 Claude가 세션에서 정확히 요청한다.
@@ -45,7 +56,7 @@
 | S-2 | **통과(사용자 브라우저 실로그인 확인)** — Auth.js v5 beta 리스크 기록 | 2026-10-01 |
 | S-3 | **통과(Worker 프록시·presign 둘 다)** | 2026-10-01 |
 | S-4 | **재측정 완료**(전 기능 통합 12.2 MiB) — 출시 시 유료, 개발 중 무료 | 2026-10-01 |
-| S-5 | **서버 측 통과, 실기기 수신은 사용자 확인 대기** | 2026-10-01 |
+| S-5 | **통과(사용자 Android 실기기 수신 확인)** | 2026-10-01 |
 | S-6 | **통과(DB 카운터 주력 + 바인딩 보조)** | 2026-10-01 |
 | S-7 | **통과** | 2026-10-01 |
 | S-8 | **통과(HTTPS 전부)** — DB 직접 TCP만 불가(설계로 우회) | 2026-10-01 |
@@ -93,7 +104,7 @@
 - 키 10종 확인(값 미출력): 프로젝트 ID 일치·authDomain·appId(senderId 포함)·서비스 계정 이메일 도메인·PEM·VAPID(65바이트 P-256) 모두 정상. 서비스 계정 → OAuth 토큰 발급 200, FCM v1 `validate_only` 가짜 토큰 → `INVALID_ARGUMENT`(= API 활성·권한 정상). 주의: 환경 UI에 넣은 `FIREBASE_ADMIN_PRIVATE_KEY`는 `\n` 이스케이프가 아니라 **실제 줄바꿈**으로 들어왔다 → 코드가 두 형태 모두 처리.
 - 구현: `firebase-admin` 없이 WebCrypto(RS256)로 서비스 계정 JWT 서명 → 토큰 교환(모듈 스코프 캐시) → FCM HTTP v1 fetch. 발송 API는 로그인 필수(비로그인 401). 클라이언트는 firebase 12.19.0 + `firebase-messaging-sw.js`(공개 설정은 SW 등록 URL 쿼리로 전달, 파일에 키 없음).
 - 원격 진단: Worker에서 가짜 토큰 발송 → FCM 도달(`INVALID_ARGUMENT`) 확인.
-- 남은 것: **사용자 실기기(Android Chrome 권장) 수신** — 포그라운드(즉시)·백그라운드(10초 지연) 각각.
+- **사용자 실기기 수신 확인 완료(2026-10-01).** iPhone(홈 화면 PWA)은 Phase 6에서 확인.
 
 ### S-4 재측정 (2026-10-01, S-2·S-3·S-5 통합 후)
 
@@ -125,7 +136,6 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 
 ## 미완료 검증 항목
 
-- S-5 실기기 수신(사용자) — 포그라운드·백그라운드
 - 계정 플랜이 Free인지 대시보드 확인(사용자)
 - S-6 DB 카운터 원격 동작(Supabase 마이그레이션 경로 확정 후)
 - S-7 실기기(저사양 Android·iPhone) PDF 생성 시간
@@ -154,3 +164,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: S-2 키 확인·구현·배포 → 사용자 실로그인 확인으로 통과. 다음: S-5(Firebase 키·실기기), S-3 presign(R2 키), 이후 S-4 재측정.
 - 2026-10-01(결정): 개발 중 완전 무료 유지. Workers Paid는 공개 베타 직전(또는 1102 관측 시) 재결정 — ARCHITECTURE §10. 계정 플랜은 사용자 대시보드 확인(API로는 usage_model=standard만 보여 구분 불가).
 - 2026-10-01: Firebase·R2 키 확인. S-3 presign 비교 통과, S-5 서버 측 통과·배포, S-4 재측정. 실기기 푸시 수신 확인 요청.
+- 2026-10-01: S-5 실기기 통과 → 스파이크 전부 통과. 사용자 승인으로 ARCHITECTURE 확정, 스파이크 리소스(Worker·Hyperdrive·R2 버킷) 삭제(기존 `hamkke` 버킷은 유지). Phase 0은 새 세션 권장.

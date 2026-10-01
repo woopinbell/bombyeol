@@ -5,7 +5,7 @@
 이 파일은 새 세션이 시작될 때 가장 먼저 읽는 진입점이다. **이 파일과 `docs/`, `image-asset/`은 `docs` 브랜치에만 있고 `main`에는 없다**(아래 "브랜치 구조"). 클라우드 세션이라면 먼저 `docs/CLOUD_SESSION.md` §1의 부트스트랩을 실행해 이 파일들이 작업 트리에 붙어 있는지 확인한다.
 
 - [docs/PRD.md](docs/PRD.md) — 제품 명세, 화면 구조, 데이터 모델 초안, 무료/프리미엄 경계
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 서버리스 스택(잠정 확정), 인증·알림·결제·미디어 설계, 스택 검증 스파이크
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 서버리스 스택(**확정 2026-10-01**), 인증·알림·결제·미디어 설계, 스택 검증 스파이크
 - [docs/COST_GUARDS.md](docs/COST_GUARDS.md) — 금전 리스크 방어 게이트(불변 원칙). **기능 커밋마다 해당 게이트를 함께 만족해야 한다**
 - [docs/PRIVACY_AND_LEGAL.md](docs/PRIVACY_AND_LEGAL.md) — 아동·건강(임신)·음성·고인 데이터 처리 설계
 - [docs/DESIGN.md](docs/DESIGN.md) — 디자인 앵커·토큰·타이포·모션 (임의 변경 금지)
@@ -21,7 +21,7 @@
 
 ## 현재 상태
 
-기반 문서 작성 단계(2026-10-01). 코드는 없다. 첫 클라우드 세션의 시작점은 `docs/COMMIT_PLAN.md` Phase 0, 그 전에 `docs/ARCHITECTURE.md` §9의 스택 검증 스파이크를 먼저 수행한다. 실제 상태는 항상 `docs/PROGRESS.md`가 우선한다.
+스택 확정(2026-10-01, 스파이크 S-1~S-8 통과). 다음 시작점은 `docs/COMMIT_PLAN.md` **Phase 0**(디자인 토큰 이식 제외). main에는 아직 개발 코드가 없다(스파이크 코드는 `spike/s1-opennext-prisma` 참고용, 머지 금지). 실제 상태는 항상 `docs/PROGRESS.md`가 우선한다.
 
 ## 브랜치 구조 (사용자 결정, 2026-10-01)
 
