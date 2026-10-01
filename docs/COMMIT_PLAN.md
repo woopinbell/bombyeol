@@ -69,11 +69,18 @@
 - [x] `feat(media): Space 사용량 집계 및 한도 판정(plan.ts) 구현` [G-03, G-15]
 - [x] `test(media): 크기 초과·타 Space 자산·pending 참조·한도 경계 테스트` [G-01~05]
 - [x] (추가) `fix(infra): Worker 환경 타입 생성에서 로컬 .env 변수 제외`, `chore(infra): 배포 스모크 내부 경로 추가`
-- [ ] (추가) 읽기용 서명 URL 조회 — Phase 3 피드에서 함께(저장소 `presignGet`은 준비됨)
+- [ ] (추가) 읽기용 서명 URL 조회 — Phase 3 피드에서 함께(저장소 `presignGet`은 준비됨) → `feat(moment)` 피드 커밋에 포함
 
 ## Phase 3 — 오늘(봄)
 
-- [ ] `chore(prisma): Pet·Moment·Milestone 스키마 정의`(Child는 Phase 1에서 정의) — Moment·Milestone은 child/pet 중 하나만 참조(체크 제약)
+> 2026-10-01 서버 설계(세션 결정, 수치는 `plan.ts` 초안):
+> - **Moment**: `kind = media | diary`(PRD 초안의 photo/video/text를 대체 — 사진·영상은 첨부 종류로 구분). 첨부는 `MomentMedia`(Moment당 최대 10, 순서·클라이언트 썸네일 자산). 대상은 아이/반려동물/가족 전체 중 하나(체크 제약). 자산 하나는 한 곳에만 붙는다(unique), 붙은 자산은 `media.delete`로 지울 수 없고(`ASSET_IN_USE`) Moment 삭제 시 R2 객체와 함께 지운다(G-05).
+> - **권한**: 아이 프로필·아이 대상 기록·일기는 `parent`(PRIVACY §4). 반려동물·가족 전체 대상 사진은 `parent`·`grandparent`. 반려동물 프로필 관리는 `parent`. 반응(좋아요·댓글)은 모든 멤버, 댓글 삭제는 작성자 또는 `parent`.
+> - **Reaction**: 다형 targetId 대신 대상별 nullable FK(momentId·milestoneId, 이야기는 Phase 4에서 추가) + 체크 제약. 좋아요 토글은 advisory lock으로 중복 방지(부분 unique 인덱스는 Prisma 드리프트 때문에 쓰지 않음).
+> - 피드 조회 응답에 읽기용 서명 URL(짧은 TTL)을 넣는다(Phase 2의 남은 항목).
+> - 아이·반려동물 삭제는 Phase 7(삭제 연쇄)에서 함께 한다.
+
+- [ ] `chore(prisma): Pet·Moment·Milestone 스키마 정의`(Child는 Phase 1에서 정의) — Moment·Milestone은 child/pet 중 하나만 참조(체크 제약), `MomentMedia` 포함
 - [ ] `feat(child): 아이 프로필 관리(태명→출생 전환 포함) 구현`
 - [ ] `feat(pet): 반려동물 프로필 관리(입양일·생일 추정·종) 구현` [G-11: 아이·반려동물 수 상한]
 - [ ] `feat(moment): 사진·영상 피드 구현(아이·반려동물·가족 전체 대상, 썸네일 클라이언트 생성)` [G-01~04 재사용]
