@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      # Supabase와 같은 메이저(17). 통합 테스트는 이 로컬 DB만 쓴다.
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bombyeol
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d bombyeol"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      LOCAL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/bombyeol
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: node scripts/with-local-db.mjs npx prisma migrate deploy
+      - run: npm test
+      - run: npm run cf:build

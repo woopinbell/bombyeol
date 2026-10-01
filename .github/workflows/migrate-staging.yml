@@ -1,0 +1,37 @@
+name: Migrate staging DB
+
+# 원격(Supabase) 마이그레이션은 CI에서만 적용한다(클라우드 VM은 Supabase에 직접 닿지 않는다).
+# GitHub 호스티드 러너는 IPv6가 없으므로 Supabase Session pooler(IPv4) 연결 문자열을 쓴다.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "prisma/migrations/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migrate-staging
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "STAGING_DATABASE_URL 시크릿이 없습니다." >&2
+            exit 1
+          fi
+          npx prisma migrate deploy

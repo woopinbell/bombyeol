@@ -10,3 +10,12 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 .DS_Store
+/out/
+/build
+*.pem
+npm-debug.log*
+.vercel
+.dev.vars*
+
+# prisma
+/src/generated/

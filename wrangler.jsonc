@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // 최상위 = 로컬 개발(wrangler dev / opennextjs-cloudflare preview).
+  // 배포는 반드시 --env staging | production 으로 한다(최상위 이름으로 배포 금지).
+  "main": ".open-next/worker.js",
+  "name": "bombyeol-local",
+  "compatibility_date": "2026-09-30",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol-local" }],
+  "observability": { "enabled": true },
+  // 로컬은 localConnectionString(docker-compose Postgres)으로 연결한다. id는 로컬에서 쓰이지 않는 자리표시.
+  // staging·production의 Hyperdrive는 리소스 생성 승인 후 각 env 블록에 실제 id로 추가한다.
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "00000000000000000000000000000000",
+      "localConnectionString": "postgresql://postgres:postgres@localhost:5432/bombyeol",
+    },
+  ],
+  "env": {
+    // 비프로덕션: 개발 중 배포 스모크·사용자 기기 확인용(개발용 키·DB만).
+    "staging": {
+      "name": "bombyeol-staging",
+      "workers_dev": true,
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol-staging" }],
+      "vars": { "APP_ENV": "staging" },
+    },
+    // 프로덕션: 시크릿은 사용자가 Cloudflare 대시보드/CLI로 직접 등록(등급 B).
+    "production": {
+      "name": "bombyeol",
+      "workers_dev": false,
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol" }],
+      "vars": { "APP_ENV": "production" },
+    },
+  },
+  "vars": { "APP_ENV": "local" },
+}
