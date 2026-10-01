@@ -24,10 +24,11 @@ model User {
 
   accounts       Account[]
   memberships    Member[]
-  spacesCreated  Space[]   @relation("SpaceCreatedBy")
-  invitesCreated Invite[]  @relation("InviteCreatedBy")
-  invitesUsed    Invite[]  @relation("InviteUsedBy")
+  spacesCreated  Space[]      @relation("SpaceCreatedBy")
+  invitesCreated Invite[]     @relation("InviteCreatedBy")
+  invitesUsed    Invite[]     @relation("InviteUsedBy")
   childrenAdded  Child[]
+  mediaUploaded  MediaAsset[]
 }
 
 model Account {
@@ -61,10 +62,12 @@ model Space {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  createdBy User     @relation("SpaceCreatedBy", fields: [createdById], references: [id])
+  createdBy User           @relation("SpaceCreatedBy", fields: [createdById], references: [id])
   members   Member[]
   invites   Invite[]
   children  Child[]
+  media     MediaAsset[]
+  usage     UsageCounter[]
 
   @@index([createdById])
 }
@@ -153,4 +156,52 @@ model RateCounter {
 
   @@id([key, windowStart])
   @@index([windowStart])
+}
+
+// ---------------------------------------------------------------------------
+// 미디어 — 업로드는 pending → confirmed. 참조 mutation은 자기 Space의 confirmed 자산만 받는다(G-02).
+// 키: pending/{spaceId}/{id} → 확인 후 spaces/{spaceId}/{id} (ARCHITECTURE §5)
+// ---------------------------------------------------------------------------
+
+enum MediaKind {
+  image
+  video
+}
+
+enum MediaStatus {
+  pending
+  confirmed
+  deleted
+}
+
+model MediaAsset {
+  id           String      @id @default(cuid())
+  spaceId      String
+  uploadedById String
+  kind         MediaKind
+  contentType  String
+  bytes        Int // 선언 크기 = 서명에 들어간 Content-Length(G-01). 상한 200MB < Int 범위
+  status       MediaStatus @default(pending)
+  createdAt    DateTime    @default(now())
+  confirmedAt  DateTime?
+  deletedAt    DateTime?
+
+  space      Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  uploadedBy User  @relation(fields: [uploadedById], references: [id])
+
+  @@index([spaceId, status])
+  @@index([status, createdAt])
+}
+
+// Space별 일 단위 사용량(G-15 가시성). 판정은 MediaAsset 합계·RateCounter로 하고, 이 표는 집계·이상치 감시용.
+model UsageCounter {
+  spaceId          String
+  periodKey        String // YYYY-MM-DD (UTC)
+  uploadUrlsIssued Int    @default(0)
+  bytesConfirmed   BigInt @default(0)
+  bytesDeleted     BigInt @default(0)
+
+  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@id([spaceId, periodKey])
 }
