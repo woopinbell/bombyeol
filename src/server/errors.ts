@@ -7,6 +7,9 @@ export type LimitReason =
   | "CHILD_LIMIT"
   | "MEMBER_ROLE_LIMIT"
   | "INVITE_ACTIVE_LIMIT"
+  | "FILE_TOO_LARGE"
+  | "STORAGE_LIMIT"
+  | "PENDING_LIMIT"
   | "RATE_LIMITED";
 
 export type InviteFailure = "INVITE_INVALID" | "ALREADY_MEMBER";
@@ -21,6 +24,15 @@ export function limitError(reason: LimitReason) {
 export function inviteError(reason: InviteFailure) {
   return new TRPCError({
     code: reason === "INVITE_INVALID" ? "NOT_FOUND" : "CONFLICT",
+    message: reason,
+  });
+}
+
+export type MediaFailure = "UPLOAD_NOT_FOUND" | "UPLOAD_MISMATCH" | "ASSET_INVALID";
+
+export function mediaError(reason: MediaFailure) {
+  return new TRPCError({
+    code: reason === "UPLOAD_MISMATCH" ? "BAD_REQUEST" : "NOT_FOUND",
     message: reason,
   });
 }
