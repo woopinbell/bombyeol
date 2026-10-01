@@ -1,11 +1,12 @@
 import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
 import Kakao from "next-auth/providers/kakao";
 import { createPrisma } from "@/server/db";
 import { findOrCreateUser } from "@/server/auth/users";
 
 // JWT 세션(DB 어댑터 없음, S-2). 자격증명은 AUTH_SECRET·AUTH_<PROVIDER>_ID/SECRET에서 읽는다.
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [Kakao],
+  providers: [Kakao, Google],
   session: { strategy: "jwt" },
   trustHost: true,
   callbacks: {
