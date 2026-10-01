@@ -4,7 +4,7 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 3): **Phase 3 오늘(봄) 서버 main 머지 완료(PR woopinbell/bombyeol#5, 머지 커밋 3b0d90d), 스테이징 마이그레이션·배포 완료. ⚠️ 스테이징 R2 시크릿 `R2_ACCESS_KEY_ID` 재등록 필요(사용자)** — 아래 "현재 상태 — Phase 3".
+- 단계(2026-10-01, Phase 3): **Phase 3 오늘(봄) 서버 main 머지 완료(PR woopinbell/bombyeol#5, 머지 커밋 3b0d90d), 스테이징 마이그레이션·배포 완료, R2 Secret 3종 재등록 후 스모크 전부 통과** — 아래 "현재 상태 — Phase 3".
 - (이전) 단계(2026-10-01, Phase 2): **Phase 2 미디어 서버 커밋 완료, 스테이징 배포, R2 토큰 대기** — 아래 "현재 상태 — Phase 2".
 - (이전) 단계(2026-10-01, Phase 1): **Phase 1 서버 커밋 완료(온보딩 UI 제외), 스테이징 배포됨** — 아래 "현재 상태 — Phase 1".
 - (이전) 단계(2026-10-01, Phase 0 세션): **Phase 0 코드 커밋 완료(디자인 토큰 이식 제외)** — 작업 브랜치 `claude/cloud-session-phase-0-72a2lc`에 9커밋 푸시, **main 머지 완료(PR woopinbell/bombyeol#2, 머지 커밋 06591ce)**. 스테이징 배포·Hyperdrive 생성·CI 마이그레이션 시크릿은 사용자 승인/등록 대기(아래 "다음 할 일").
@@ -33,9 +33,10 @@
 ### 다음 할 일 (Phase 3 이후)
 
 1. ~~PR·main 머지~~ 완료(PR woopinbell/bombyeol#5, 3b0d90d).
-2. ~~스테이징 반영~~ 마이그레이션·배포 완료. **남은 것: 사용자가 `R2_ACCESS_KEY_ID`를 스테이징 Worker Secret으로 재등록**(위 회귀) → 스모크 r2 ok 확인.
-3. ~~결정 필요~~ **사용자 승인(2026-10-01)**: 권한 정책(아이 기록 parent만, 반려동물·가족 사진 grandparent 허용, relative 열람·반응만)과 상한 수치를 결제 전 운영값으로 확정(OPEN_QUESTIONS Q-PRICE에 기록).
-4. 다음 개발: Phase 4 이야기(별) 서버 — `chore(prisma): StoryPrompt·StoryEntry·MemorialProfile`부터. Reaction에 `storyEntryId`·"별 하나" kind 추가 필요.
+2. ~~스테이징 반영~~ 완료. R2 회귀도 해결: 사용자가 `R2_ACCESS_KEY_ID`·`R2_ACCOUNT_ID`를 **Secret**으로 재등록(R2_ACCOUNT_ID도 한때 평문 변수였음) → Worker Secret = R2_ACCESS_KEY_ID·R2_ACCOUNT_ID·R2_SECRET_ACCESS_KEY + AUTH 5종, `R2_BUCKET_NAME`만 wrangler.jsonc var. 스모크(버전 cefbebd7): db ok, 크기·타입 위반 PUT 403, 정확한 PUT 200, Head 1000 image/jpeg, copy·cleanup ok. 이제 배포해도 R2 값이 지워지지 않는다.
+3. (작은 수정, 다음 개발 커밋에 함께) `storageFromEnv` 오류 문구에 `R2_ACCOUNT_ID`가 빠져 있음.
+4. ~~결정 필요~~ **사용자 승인(2026-10-01)**: 권한 정책(아이 기록 parent만, 반려동물·가족 사진 grandparent 허용, relative 열람·반응만)과 상한 수치를 결제 전 운영값으로 확정(OPEN_QUESTIONS Q-PRICE에 기록).
+5. 다음 개발: Phase 4 이야기(별) 서버 — `chore(prisma): StoryPrompt·StoryEntry·MemorialProfile`부터. Reaction에 `storyEntryId`·"별 하나" kind 추가 필요.
 
 ## 현재 상태 — Phase 2 (2026-10-01)
 
@@ -282,3 +283,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: PR woopinbell/bombyeol#4 CI 통과 후 사용자 머지. 이 세션은 여기서 종료 권장 — Phase 3는 새 세션(§4.1 프롬프트, "오늘 할 일: Phase 3(서버 먼저, UI 제외)").
 - 2026-10-01(Phase 3 세션): 부트스트랩 후 Phase 3 서버 9커밋(스키마 → child → refactor(media) → pet → moment 피드 → milestone → 일기 → Reaction 스키마 → reaction), 테스트 133건. COMMIT_PLAN 설계 메모·PRD §6 데이터 모델 갱신. 대기: PR·머지, 스테이징 반영 승인.
 - 2026-10-01(Phase 3 세션): 사용자 "전부 승인" → PR woopinbell/bombyeol#5 생성·CI 통과·머지(3b0d90d), 스테이징 마이그레이션 자동 적용·배포·스모크. R2_ACCESS_KEY_ID(평문 var)가 배포로 사라져 R2 스모크 실패 — 사용자 Secret 재등록 대기. 권한 정책·상한 수치 승인 기록.
+- 2026-10-01: 사용자가 스테이징 Worker에 R2_ACCESS_KEY_ID·R2_ACCOUNT_ID를 Secret으로 재등록 → R2 스모크 통과. 클라우드 세션 환경의 R2 변수 삭제와는 무관(원인은 Worker 평문 var + 배포 덮어쓰기).
