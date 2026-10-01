@@ -8,9 +8,17 @@ export function openSpaceDeletion(spaceId: string): Prisma.DeletionRequestWhereI
   return { kind: "space", spaceId, canceledAt: null, completedAt: null };
 }
 
-/** 로그인한 사용자만 통과. ctx.userId를 string으로 좁힌다. */
-export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
+/**
+ * 로그인한 사용자만 통과. ctx.userId를 string으로 좁힌다.
+ * 계정을 지운 뒤에도 이미 발급된 세션(JWT)이 남아 있을 수 있으므로 매 요청 삭제 여부를 확인한다.
+ */
+export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   if (!ctx.userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+  const user = await ctx.prisma.user.findUnique({
+    where: { id: ctx.userId },
+    select: { deletedAt: true },
+  });
+  if (!user || user.deletedAt) throw new TRPCError({ code: "UNAUTHORIZED" });
   return next({ ctx: { ...ctx, userId: ctx.userId } });
 });
 
