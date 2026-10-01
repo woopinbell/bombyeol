@@ -109,6 +109,22 @@ printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
 오늘 할 일: 부트스트랩 검증(V-1~V-5) 결과 보고 후 스파이크 S-1 착수 여부를 나에게 확인.
 ```
 
+### 4.1 이후 세션용 (스파이크 완료 후, 2026-10-01 추가)
+
+```
+봄별 클라우드 세션. main에는 문서가 없고 docs 브랜치에 있어.
+1) 부트스트랩을 그대로 실행해줘:
+   git fetch origin docs
+   [ -d .docs ] || git worktree add -B docs .docs origin/docs
+   git -C .docs pull --ff-only origin docs || true
+   for p in CLAUDE.md docs image-asset; do ln -sfn ".docs/$p" "$p"; done
+   printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
+   (브랜치 docs는 refs/heads/docs 또는 git -C .docs 로 다뤄)
+2) CLAUDE.md → docs/PROGRESS.md("다음 할 일") → docs/COMMIT_PLAN.md 해당 Phase 순서로 읽어.
+3) 오늘 할 일: <예: Phase 0>. 개발 커밋은 작업 브랜치에서 COMMIT_PLAN 단위로, 문서는 docs 브랜치에 수시 커밋·푸시. main 머지는 내 확인 후.
+4) 키가 필요하면 ENV_MANIFEST 기준 이름을 먼저 알려주고 멈춰. 세션을 끝내기 전 PROGRESS 갱신·푸시하고 알려줘.
+```
+
 ## 5. 세션 인수인계 체크리스트 (Claude가 세션 종료 전 수행)
 
 - [ ] `docs/PROGRESS.md` 갱신: 완료한 커밋, 다음 항목, 막힌 것(키·결정), 미완료 검증, 임시 완화한 게이트(`TODO(G-xx)`)
