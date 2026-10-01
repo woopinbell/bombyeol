@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>봄별 목업 안 A</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  /* 안 A — 한 장씩: 기록 하나 = 큰 카드 하나, 여백 넉넉, 캐주얼 해요체(토스식) */
+  .head { display: flex; align-items: flex-end; justify-content: space-between; padding: 8px 0 14px; }
+  .head h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+  .head .who { font-size: 15px; font-weight: 600; color: var(--ink-muted); }
+  .night .head .who { color: var(--night-silver); }
+  .filters { display: flex; gap: 8px; margin-bottom: 16px; }
+  .filters .chip.on { border-width: 2.5px; border-color: var(--ink); font-weight: 800; }
+  .card { border: 1.5px solid var(--night-silver); border-radius: 20px; overflow: hidden; margin-bottom: 16px; }
+  .card .photo { border-radius: 0; height: 300px; }
+  .card .body { padding: 14px 16px 12px; }
+  .card .line { font-size: 18px; line-height: 1.5; font-weight: 500; }
+  .card .by { margin-top: 6px; }
+  .card .acts { display: flex; gap: 8px; padding: 0 12px 12px; }
+  .act { min-height: 44px; flex: 1; border: 1.5px solid var(--night-silver); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 15px; font-weight: 600; }
+  .act svg { width: 20px; height: 20px; }
+  .mile { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--spring-yellow); margin-bottom: 16px; }
+  .mile b { font-size: 17px; }
+  .mile .meta { color: var(--ink); }
+  .fab { position: absolute; right: 20px; bottom: 104px; box-shadow: none; }
+
+  /* 이야기 */
+  .qcard { border: 1.5px solid var(--starlight-gold); border-radius: 20px; padding: 20px 18px 18px; margin-bottom: 22px; }
+  .qcard .from { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--starlight-gold); }
+  .qcard .from svg { width: 18px; height: 18px; }
+  .qcard .q { font-size: 24px; font-weight: 700; line-height: 1.4; margin: 10px 0 18px; }
+  .sub { font-size: 15px; font-weight: 700; color: var(--night-silver); margin-bottom: 10px; }
+  .garden { list-style: none; }
+  .garden li { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--night-indigo); }
+  .garden .stage { width: 52px; flex: none; text-align: center; font-size: 12px; font-weight: 700; color: var(--night-silver); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .garden .stage svg { width: 24px; height: 24px; }
+  .garden .stage.done { color: var(--starlight-gold); }
+  .garden .t { font-size: 17px; font-weight: 600; line-height: 1.4; }
+  .garden .m { font-size: 14px; color: var(--night-silver); margin-top: 2px; }
+
+  /* 우리 */
+  .dday { border-radius: 20px; background: var(--night-navy); color: var(--paper); padding: 20px; margin-bottom: 22px; }
+  .dday .k { font-size: 14px; font-weight: 600; color: var(--night-silver); }
+  .dday .big { display: flex; align-items: baseline; gap: 12px; margin-top: 6px; }
+  .dday .big b { font-size: 34px; font-weight: 800; color: var(--starlight-gold); }
+  .dday .big span { font-size: 20px; font-weight: 700; }
+  .dday .when { font-size: 15px; color: var(--night-silver); margin-top: 4px; }
+  .gen { font-size: 14px; font-weight: 700; color: var(--ink-muted); margin: 4px 0 6px; }
+  .people { list-style: none; margin-bottom: 14px; }
+  .people li { display: flex; align-items: center; gap: 12px; min-height: 56px; border-bottom: 1px solid var(--night-silver); }
+  .ava { width: 40px; height: 40px; border-radius: 50%; flex: none; overflow: hidden; }
+  .people .n { font-size: 17px; font-weight: 600; flex: 1; }
+  .people .r { font-size: 14px; color: var(--ink-muted); }
+  .memo { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; padding: 3px 8px; border-radius: 8px; border: 1px solid var(--night-indigo); color: var(--night-indigo); }
+  .memo svg { width: 14px; height: 14px; }
+  .links { display: flex; gap: 8px; }
+  .links .btn { flex: 1; font-size: 15px; min-height: 48px; padding: 0 10px; border-color: var(--night-silver); }
+
+  /* 온보딩 */
+  .onb { padding: 0 24px 28px; }
+  .step { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 22px; font-size: 15px; font-weight: 600; color: var(--ink-muted); }
+  .step .back { display: flex; align-items: center; gap: 2px; color: var(--ink); min-height: 48px; }
+  .step .back svg { width: 22px; height: 22px; }
+  .bar { display: flex; gap: 6px; margin-bottom: 26px; }
+  .bar i { flex: 1; height: 6px; border-radius: 3px; background: var(--night-silver); }
+  .bar i.on { background: var(--night-navy); }
+  .onb h3 { font-size: 28px; font-weight: 800; line-height: 1.35; letter-spacing: -0.02em; }
+  .onb p.d { font-size: 19px; line-height: 1.55; margin-top: 12px; }
+  .grow { flex: 1; }
+  .kakao { background: var(--spring-yellow); border-color: var(--spring-yellow); color: var(--ink); }
+  .inviter { display: flex; align-items: center; gap: 14px; margin: 28px 0; padding: 16px; border: 1.5px solid var(--night-silver); border-radius: 18px; }
+  .inviter .ava { width: 64px; height: 64px; }
+  .inviter b { font-size: 20px; display: block; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 26px; }
+  .choices .btn { min-height: 64px; font-size: 20px; border-color: var(--night-silver); }
+  .choices .btn.on { border: 2.5px solid var(--night-navy); }
+  .sizes { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+  .size { border: 1.5px solid var(--night-silver); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .size.on { border: 2.5px solid var(--night-navy); }
+  .size .s { font-weight: 700; }
+  .size .check { width: 28px; height: 28px; color: var(--night-navy); }
+  .done-photo { height: 240px; margin: 26px 0 0; }
+</style>
+</head>
+<body>
+<div class="board">
+  <h1>안 A — 한 장씩</h1>
+  <p class="lede">기록 하나를 큰 카드 하나로 보여줘요. 여백을 넉넉히 두고 화면마다 초점은 하나예요. 이야기 탭은 navy 배경(DESIGN §6 그대로). 문구는 토스식 캐주얼 해요체(Q-HONOR 비교용). 색·글자 값은 초안 토큰 그대로이고 확정이 아니에요. 사진은 자리 표시(평면 도형)예요.</p>
+
+  <div class="row" id="tabs">
+    <!-- 오늘 -->
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="screen">
+          <div class="head"><h2>오늘</h2><span class="who">지우네 가족</span></div>
+          <div class="filters"><span class="chip on">모두</span><span class="chip">지우</span><span class="chip">콩이</span></div>
+          <div class="mile"><span class="icon" data-i="sprout"></span><div><b>지우가 처음 걸었어요</b><div class="meta">3월 2일 · 엄마가 남겼어요</div></div></div>
+          <div class="card">
+            <div class="photo" data-scene="park"></div>
+            <div class="body">
+              <div class="line">놀이터에서 혼자 미끄럼틀 탔어요</div>
+              <div class="meta by">엄마 · 오늘 오후 3:20</div>
+            </div>
+            <div class="acts"><span class="act"><span data-i="heart"></span>좋아요 2</span><span class="act"><span data-i="talk"></span>댓글 1</span></div>
+          </div>
+        </div>
+        <span class="btn primary fab"><span class="icon" data-i="plus"></span>기록하기</span>
+        <div class="tabs" data-tabs="today"></div>
+      </div>
+      <p class="cap"><b>오늘</b> — 마일스톤은 노란 띠 하나 — 이 화면의 봄 색은 노랑 하나뿐(선택 칩은 굵은 테두리로, DESIGN §3 규칙 2). 기록하기는 글자 라벨이 있는 버튼 하나.</p>
+    </div>
+    <!-- 이야기 -->
+    <div>
+      <div class="phone night">
+        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="screen">
+          <div class="head"><h2>이야기</h2><span class="who">할머니의 이야기</span></div>
+          <div class="qcard">
+            <div class="from"><span data-i="starFill"></span>지우 엄마가 물어봤어요</div>
+            <div class="q">어린 시절 살던 동네는 어땠어요?</div>
+            <span class="btn gold block elder"><span class="icon" data-i="pen"></span>답하기</span>
+          </div>
+          <div class="sub">이야기 정원 · 12개</div>
+          <ul class="garden">
+            <li><span class="stage done"><span data-i="starFill"></span>답 완료</span><div><div class="t">시집오던 날 탄 버스</div><div class="m">별 3 · 9월 28일</div></div></li>
+            <li><span class="stage"><span data-i="pen"></span>쓰는 중</span><div><div class="t">처음 끓여 본 된장찌개</div><div class="m">어제 이어서 썼어요</div></div></li>
+            <li><span class="stage"><span data-i="sprout"></span>질문만</span><div><div class="t">손주가 태어난 날</div><div class="m">외삼촌이 물어봤어요</div></div></li>
+          </ul>
+        </div>
+        <div class="tabs" data-tabs="story"></div>
+      </div>
+      <p class="cap"><b>이야기</b> — 맨 위 질문 카드 하나 + 골드 [답하기]. 아래 "정원"은 상태를 그림과 글로 함께(답 완료·쓰는 중·질문만). 손그림 일러스트는 넣지 않았어요(Q-ILLUST).</p>
+    </div>
+    <!-- 우리 -->
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="screen">
+          <div class="head"><h2>우리</h2><span class="who">지우네 가족</span></div>
+          <div class="dday"><div class="k">다음 가족 일</div><div class="big"><b>D-12</b><span>할머니 생신</span></div><div class="when">10월 13일 월요일</div></div>
+          <div class="gen">할머니·할아버지</div>
+          <ul class="people">
+            <li><span class="ava" data-scene="hands"></span><span class="n">할머니</span><span class="r">이야기 12</span></li>
+            <li><span class="ava" data-scene="old"></span><span class="n">외할아버지</span><span class="memo"><span data-i="star"></span>별이 되셨어요</span></li>
+          </ul>
+          <div class="gen">엄마·아빠</div>
+          <ul class="people">
+            <li><span class="ava" data-scene="cake"></span><span class="n">엄마</span><span class="r">관리자</span></li>
+          </ul>
+          <div class="gen">아이·반려동물</div>
+          <ul class="people">
+            <li><span class="ava" data-scene="park"></span><span class="n">지우</span><span class="r">3살</span></li>
+            <li><span class="ava" data-scene="dog"></span><span class="n">콩이</span><span class="r">우리 가족 된 지 2년</span></li>
+          </ul>
+        </div>
+        <div class="tabs" data-tabs="us"></div>
+      </div>
+      <p class="cap"><b>우리</b> — 맨 위 D-day 하나. 세대별로 나눈 가족 목록, 별이 되신 분은 색이 아니라 표식과 글로 구분. 달력·초대·설정은 아래로 스크롤.</p>
+    </div>
+  </div>
+
+  <div class="row" id="onb">
+    <div>
+      <div class="phone"><div class="status"><span>9:41</span><span></span></div>
+        <div class="screen onb">
+          <div class="step"><span></span><span>1 / 4 · 3단계 남았어요</span></div>
+          <div class="bar"><i class="on"></i><i></i><i></i><i></i></div>
+          <h3>지우네 가족이<br>초대했어요</h3>
+          <div class="inviter"><span class="ava" data-scene="cake"></span><div><b>지우 엄마</b><span class="meta" style="font-size:16px">손주 지우 사진 34장이 있어요</span></div></div>
+          <p class="d">카카오로 한 번만 들어오면 돼요. 비밀번호는 필요 없어요.</p>
+          <div class="grow"></div>
+          <span class="btn kakao block elder">카카오로 시작하기</span>
+        </div>
+      </div>
+      <p class="cap"><b>1. 초대 확인</b> — 누가 불렀는지 먼저 보여주고, 로그인은 카카오 한 번. 카카오 버튼 색·모양은 카카오 로그인 디자인 가이드를 따라야 해서 여기선 자리 표시예요.</p>
+    </div>
+    <div>
+      <div class="phone"><div class="status"><span>9:41</span><span></span></div>
+        <div class="screen onb">
+          <div class="step"><span class="back"><span data-i="left"></span>이전</span><span>2 / 4 · 2단계 남았어요</span></div>
+          <div class="bar"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+          <h3>가족이 어떻게<br>부르면 될까요?</h3>
+          <div class="choices"><span class="btn on">할머니</span><span class="btn">외할머니</span><span class="btn">할아버지</span><span class="btn">외할아버지</span></div>
+          <p class="d meta" style="font-size:17px">목록에 없으면 직접 쓸 수 있어요</p>
+          <div class="grow"></div>
+          <span class="btn primary block elder">다음</span>
+        </div>
+      </div>
+      <p class="cap"><b>2. 부를 이름</b> — 큰 선택 버튼 넷, 직접 쓰기는 보조.</p>
+    </div>
+    <div>
+      <div class="phone"><div class="status"><span>9:41</span><span></span></div>
+        <div class="screen onb">
+          <div class="step"><span class="back"><span data-i="left"></span>이전</span><span>3 / 4 · 1단계 남았어요</span></div>
+          <div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+          <h3>잘 보이는 글자<br>크기를 골라요</h3>
+          <div class="sizes">
+            <div class="size"><span class="s" style="font-size:18px">지우가 처음 걸었어요</span></div>
+            <div class="size on"><span class="s" style="font-size:22px">지우가 처음 걸었어요</span><span class="check" data-i="check"></span></div>
+            <div class="size"><span class="s" style="font-size:26px">지우가 처음 걸었어요</span></div>
+          </div>
+          <p class="d meta" style="font-size:17px">나중에 우리 탭에서 바꿀 수 있어요</p>
+          <div class="grow"></div>
+          <span class="btn primary block elder">다음</span>
+        </div>
+      </div>
+      <p class="cap"><b>3. 글자 크기</b> — 실제 문장으로 미리보기.</p>
+    </div>
+    <div>
+      <div class="phone"><div class="status"><span>9:41</span><span></span></div>
+        <div class="screen onb">
+          <div class="step"><span></span><span>4 / 4 · 다 됐어요</span></div>
+          <div class="bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+          <h3>할머니, 반가워요</h3>
+          <p class="d">지우가 오늘 찍은 사진이 기다리고 있어요.</p>
+          <div class="photo done-photo" data-scene="park"></div>
+          <div class="grow"></div>
+          <span class="btn primary block elder">사진 보러 가기</span>
+        </div>
+      </div>
+      <p class="cap"><b>4. 끝</b> — 바로 손주 사진으로. 알림 허용은 여기서 묻지 않고 첫 사진을 본 뒤에.</p>
+    </div>
+  </div>
+</div>
+<script src="mock.js"></script>
+</body>
+</html>

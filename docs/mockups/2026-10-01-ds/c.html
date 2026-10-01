@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>봄별 목업 안 C</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  /* 안 C — 큰글씨 간편 모드 우선: 사진 한 장씩 + 큰 [이전]/[다음], 요소 최소. 이야기 탭도 paper 배경 + navy 띠(Q-STORYBG). 존칭 문구 */
+  body { --fs: 21px; }
+  .tabs .tab { min-height: 72px; font-size: 16px; font-weight: 700; }
+  .tabs .tab svg { width: 28px; height: 28px; }
+  .head { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 14px; }
+  .head h2 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+  .who { font-size: 17px; font-weight: 700; }
+  .big { border-radius: 20px; height: 380px; }
+  .cap1 { font-size: 22px; font-weight: 600; line-height: 1.5; margin: 16px 2px 4px; }
+  .by { font-size: 17px; color: var(--ink); }
+  .nav { display: flex; gap: 10px; margin-top: 16px; }
+  .nav .btn { flex: 1; min-height: 60px; font-size: 19px; border-color: var(--night-silver); }
+  .count { text-align: center; font-size: 16px; font-weight: 700; margin-top: 10px; }
+  .like { margin-top: 12px; }
+
+  /* 이야기 — paper 배경 + navy 띠 */
+  .band { background: var(--night-navy); color: var(--paper); margin: 0 -20px; padding: 18px 20px 22px; }
+  .band .k { font-size: 17px; font-weight: 700; color: var(--starlight-gold); display: flex; align-items: center; gap: 8px; }
+  .band .k svg { width: 20px; height: 20px; }
+  .band .q { font-size: 28px; font-weight: 800; line-height: 1.38; margin: 10px 0 18px; }
+  .band .btn + .btn { margin-top: 10px; }
+  .sub { font-size: 18px; font-weight: 800; margin: 20px 0 6px; }
+  .list { list-style: none; }
+  .list li { display: flex; align-items: center; gap: 12px; min-height: 64px; border-bottom: 1px solid var(--night-silver); font-size: 20px; font-weight: 600; }
+  .list li .st { margin-left: auto; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 10px; border: 1.5px solid var(--night-navy); color: var(--night-navy); white-space: nowrap; }
+  .list li .st svg { width: 16px; height: 16px; }
+  .list li .st.wait { border-color: var(--night-silver); color: var(--ink); }
+
+  /* 우리 */
+  .dd { border: 2px solid var(--night-navy); border-radius: 20px; padding: 18px; }
+  .dd .k { font-size: 17px; font-weight: 700; }
+  .dd .t { font-size: 30px; font-weight: 800; margin-top: 6px; }
+  .dd .w { font-size: 19px; margin-top: 4px; }
+  .rows { list-style: none; margin-top: 18px; }
+  .rows li { display: flex; align-items: center; gap: 14px; min-height: 72px; border-bottom: 1px solid var(--night-silver); font-size: 21px; font-weight: 700; }
+  .rows li .ico { width: 44px; height: 44px; border-radius: 12px; border: 1.5px solid var(--night-silver); display: flex; align-items: center; justify-content: center; flex: none; }
+  .rows li .ico svg { width: 24px; height: 24px; }
+  .rows li .go { margin-left: auto; width: 24px; height: 24px; color: var(--ink-muted); }
+  .rows li .v { font-size: 17px; font-weight: 600; color: var(--ink); margin-left: auto; }
+
+  /* 온보딩 */
+  .onb { padding: 0 24px 28px; }
+  .top { display: flex; align-items: center; justify-content: space-between; min-height: 60px; margin-bottom: 10px; }
+  .top .btn { min-height: 52px; font-size: 18px; padding: 0 14px; border-color: var(--night-silver); }
+  .top .btn svg { width: 22px; height: 22px; }
+  .stepk { font-size: 18px; font-weight: 700; }
+  .onb h3 { font-size: 32px; font-weight: 800; line-height: 1.32; letter-spacing: -0.02em; margin-top: 18px; }
+  .onb p.d { font-size: 22px; line-height: 1.5; margin-top: 14px; }
+  .grow { flex: 1; }
+  .kakao { background: var(--spring-yellow); border-color: var(--spring-yellow); color: var(--ink); }
+  .face { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; margin: 30px 0 0; }
+  .opts { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+  .opts .btn { min-height: 68px; font-size: 23px; justify-content: space-between; border-color: var(--night-silver); }
+  .opts .btn.on { border: 3px solid var(--night-navy); }
+  .opts .btn svg { width: 28px; height: 28px; }
+  .two { display: flex; gap: 10px; }
+  .two .btn { flex: 1; }
+  .sample { font-size: 28px; font-weight: 700; line-height: 1.4; border: 2px solid var(--night-silver); border-radius: 18px; padding: 20px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="board">
+  <h1>안 C — 큰글씨 간편 모드</h1>
+  <p class="lede">어르신에게 맞춘 간편 모드를 기본 모양으로 삼은 안이에요. 사진은 한 장씩 크게 보고 [이전]/[다음] 버튼으로 넘겨요(스와이프 대안). 이야기 탭도 아이보리 배경에 남색 띠만 둬서 탭을 바꿀 때 눈부심이 없어요(DESIGN §6과 다름 — Q-STORYBG). 문구는 존칭("~세요/~셨어요", Q-HONOR 비교용). 색·글자 값은 초안 그대로, 확정 아니에요.</p>
+
+  <div class="row" id="tabs">
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="screen">
+          <div class="head"><h2>오늘</h2><span class="who">지우</span></div>
+          <div class="photo big" data-scene="park"></div>
+          <p class="cap1">놀이터에서 혼자 미끄럼틀 탔어요</p>
+          <p class="by">엄마가 오늘 오후 3시에 올렸어요</p>
+          <span class="btn block like"><span class="icon" data-i="heart"></span>좋아요 보내기</span>
+          <div class="nav"><span class="btn"><span class="icon" data-i="left"></span>이전 사진</span><span class="btn">다음 사진<span class="icon" data-i="right"></span></span></div>
+          <div class="count">오늘 사진 3장 중 1번째</div>
+        </div>
+        <div class="tabs" data-tabs="today"></div>
+      </div>
+      <p class="cap"><b>오늘</b> — 사진 한 장 + 한 줄 + 행동 하나. 마일스톤·필터는 이 모드에서 빼고 사진 사이에 끼워 보여줘요. 부모 화면은 안 A나 B를 따로 쓰는 2모드 구성이 전제.</p>
+    </div>
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="screen">
+          <div class="head"><h2>이야기</h2></div>
+          <div class="band">
+            <div class="k"><span data-i="starFill"></span>지우 엄마가 여쭤봤어요</div>
+            <div class="q">어린 시절 살던 동네는 어떠셨어요?</div>
+            <span class="btn gold block elder"><span class="icon" data-i="pen"></span>글로 답하기</span>
+            <span class="btn ghost-night block elder">가족에게 대신 써 달라고 하기</span>
+          </div>
+          <div class="sub">남기신 이야기</div>
+          <ul class="list">
+            <li>시집오던 날 탄 버스<span class="st"><span data-i="starFill"></span>별 3</span></li>
+            <li>처음 끓여 본 된장찌개<span class="st wait">쓰는 중</span></li>
+            <li>부산 이모 집 바다<span class="st"><span data-i="starFill"></span>별 5</span></li>
+          </ul>
+        </div>
+        <div class="tabs" data-tabs="story"></div>
+      </div>
+      <p class="cap"><b>이야기</b> — 남색은 질문 띠에만. "대필 부탁"을 두 번째 버튼으로 드러내 어르신이 직접 안 써도 되게(PRD §4.3 대필). 정원 은유는 빼고 목록으로.</p>
+    </div>
+    <div>
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="screen">
+          <div class="head"><h2>우리</h2></div>
+          <div class="dd"><div class="k">다음 가족 일</div><div class="t">할머니 생신 · 12일 남음</div><div class="w">10월 13일 월요일</div></div>
+          <ul class="rows">
+            <li><span class="ico" data-i="us"></span>가족 보기<span class="go" data-i="right"></span></li>
+            <li><span class="ico" data-i="cal"></span>가족 달력<span class="go" data-i="right"></span></li>
+            <li><span class="ico"><span style="font-size:20px;font-weight:800">가</span></span>글자 크기<span class="v">크게</span></li>
+            <li><span class="ico" data-i="gear"></span>설정<span class="go" data-i="right"></span></li>
+          </ul>
+        </div>
+        <div class="tabs" data-tabs="us"></div>
+      </div>
+      <p class="cap"><b>우리</b> — D-day 하나 + 큰 줄 넷. 글자 크기를 바로 바꿀 수 있게 맨 위 단계에 둠. "D-12" 대신 "12일 남음"으로 읽기 쉽게.</p>
+    </div>
+  </div>
+
+  <div class="row" id="onb">
+    <div>
+      <div class="phone"><div class="status"><span>9:41</span><span></span></div>
+        <div class="screen onb">
+          <div class="top"><span></span><span class="stepk">1단계 · 2단계 남았어요</span></div>
+          <h3>할머니, 지우 엄마가<br>초대했어요</h3>
+          <div class="face" data-scene="park"></div>
+          <p class="d">손주 지우 사진을 보시려면 카카오로 들어오세요.</p>
+          <div class="grow"></div>
+          <span class="btn kakao block elder" style="min-height:64px;font-size:22px">카카오로 들어가기</span>
+        </div>
+      </div>
+      <p class="cap"><b>1. 초대 + 로그인</b> — 초대할 때 엄마가 적은 "할머니"를 부르며 시작. (카카오 버튼은 자리 표시)</p>
+    </div>
+    <div>
+      <div class="phone"><div class="status"><span>9:41</span><span></span></div>
+        <div class="screen onb">
+          <div class="top"><span class="btn"><span data-i="left"></span>이전</span><span class="stepk">2단계 · 1단계 남았어요</span></div>
+          <h3>이 글씨가<br>잘 보이세요?</h3>
+          <div class="sample">지우가 오늘 처음 걸었어요</div>
+          <div class="two" style="margin-top:14px"><span class="btn elder">더 작게</span><span class="btn elder">더 크게</span></div>
+          <div class="grow"></div>
+          <span class="btn primary block elder" style="min-height:64px;font-size:22px">네, 잘 보여요</span>
+        </div>
+      </div>
+      <p class="cap"><b>2. 글자 크기</b> — 질문에 "네"로 답하는 구조. 부를 이름은 초대 값을 그대로 쓰고 묻지 않음(나중에 우리 탭에서).</p>
+    </div>
+    <div>
+      <div class="phone"><div class="status"><span>9:41</span><span></span></div>
+        <div class="screen onb">
+          <div class="top"><span class="btn"><span data-i="left"></span>이전</span><span class="stepk">3단계 · 마지막</span></div>
+          <h3>새 사진이 오면<br>알려드릴까요?</h3>
+          <p class="d">휴대폰에 알림이 와요. 나중에 언제든 끌 수 있어요.</p>
+          <div class="opts">
+            <span class="btn on">네, 알려 주세요<span data-i="check"></span></span>
+            <span class="btn">나중에 할게요</span>
+          </div>
+          <div class="grow"></div>
+          <span class="btn primary block elder" style="min-height:64px;font-size:22px">사진 보러 가기</span>
+        </div>
+      </div>
+      <p class="cap"><b>3. 알림</b> — 브라우저 권한 창 전에 우리 화면에서 먼저 묻기(iOS는 홈 화면 추가 후에만 — PRD §4.6, 이 화면은 Android 기준).</p>
+    </div>
+  </div>
+</div>
+<script src="mock.js"></script>
+</body>
+</html>

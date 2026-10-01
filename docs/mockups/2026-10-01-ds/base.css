@@ -1,0 +1,51 @@
+/* 봄별 Phase DS 목업 공통 — 값은 DESIGN.md §3·§4 초안 그대로(확정 아님). 새 값 도입 금지. */
+@font-face {
+  font-family: "Pretendard Variable";
+  font-weight: 45 920;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/variable/woff2/PretendardVariable.woff2") format("woff2-variations");
+}
+:root {
+  --paper: #F7F1E6; --ink: #2C2621; --ink-muted: #6F6860;
+  --night-navy: #232B4D; --night-indigo: #34406B; --night-silver: #C7CEDD;
+  --starlight-gold: #E8C77A;
+  --spring-pink: #F2A7B3; --spring-green: #A9C88C; --spring-yellow: #F4CB6E; --spring-sky: #A8D8E8;
+  --touch: 48px; --touch-elder: 56px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif; background: #E9E4DA; color: var(--ink); -webkit-font-smoothing: antialiased; word-break: keep-all; }
+/* 보드(목업 바깥) — 설명용, 앱 UI 아님 */
+.board { padding: 32px; }
+.board h1 { font-size: 22px; margin-bottom: 4px; }
+.board .lede { font-size: 14px; color: #4a443e; margin-bottom: 20px; max-width: 1200px; line-height: 1.5; }
+.row { display: flex; gap: 28px; align-items: flex-start; padding: 8px 4px 16px; width: max-content; }
+.cap { font-size: 13px; color: #4a443e; margin: 10px 2px 0; max-width: 390px; line-height: 1.45; }
+.cap b { color: var(--ink); }
+/* 폰 프레임 */
+.phone { width: 390px; height: 844px; background: var(--paper); border-radius: 36px; overflow: hidden; position: relative; outline: 1px solid rgba(44,38,33,.18); display: flex; flex-direction: column; }
+.status { height: 44px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 26px; font-size: 14px; font-weight: 600; }
+.screen { flex: 1; overflow: hidden; padding: 0 20px; display: flex; flex-direction: column; }
+.night { background: var(--night-navy); color: var(--paper); }
+/* 하단 탭 */
+.tabs { flex: none; display: flex; border-top: 1px solid var(--night-silver); background: var(--paper); padding-bottom: 20px; }
+.night .tabs { background: var(--night-navy); border-top-color: var(--night-indigo); }
+.tab { flex: 1; min-height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--ink-muted); }
+.tab svg { width: 24px; height: 24px; }
+.tab.on { color: var(--ink); }
+.night .tab { color: var(--night-silver); }
+.night .tab.on { color: var(--starlight-gold); }
+.tab.on::after { content: ""; width: 20px; height: 3px; border-radius: 2px; background: currentColor; }
+/* 공통 요소 */
+.btn { min-height: var(--touch); border-radius: 14px; font: inherit; font-size: 17px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 20px; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); }
+.btn.primary { background: var(--night-navy); color: var(--paper); border-color: var(--night-navy); }
+.btn.gold { background: var(--starlight-gold); color: var(--night-navy); border-color: var(--starlight-gold); }
+.btn.ghost-night { background: transparent; color: var(--paper); border-color: var(--night-silver); }
+.btn.block { width: 100%; }
+.btn.elder { min-height: var(--touch-elder); font-size: 20px; }
+.chip { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 20px; border: 1.5px solid var(--night-silver); font-size: 15px; font-weight: 600; color: var(--ink); background: transparent; }
+.chip.on { border-color: var(--ink); }
+.photo { position: relative; overflow: hidden; border-radius: 16px; }
+.photo svg { display: block; width: 100%; height: 100%; }
+.meta { font-size: 14px; color: var(--ink-muted); }
+.icon { width: 22px; height: 22px; flex: none; }
+.note { position: absolute; left: 12px; right: 12px; bottom: 12px; font-size: 11px; color: var(--ink-muted); }
