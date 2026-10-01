@@ -41,7 +41,24 @@
 
 | ID | 결과 | 날짜 |
 |---|---|---|
-| S-1 ~ S-8 | 미수행 | — |
+| S-1 | **통과(쿼리 왕복)** — 원격 쓰기·마이그레이션 경로는 미결 | 2026-10-01 |
+| S-2 ~ S-8 | 미수행 | — |
+
+### S-1 상세 (브랜치 `spike/s1-opennext-prisma`, main 머지 금지)
+
+- 버전: Next.js 16.3.8, `@opennextjs/cloudflare` 1.20.7, Prisma 7.10.0(`prisma-client` 생성기, `runtime = "workerd"`, `@prisma/adapter-pg`), tRPC 11.19, wrangler 4.145. 주의: npm `prisma@latest`가 8.0.0-rc를 가리켜 7.10.0으로 고정. `prisma init`이 `.agents/ .claude/ .windsurf/ skills-lock.json`(Prisma 에이전트 스킬)을 자동 생성하므로 커밋하지 않고 지운다.
+- 패턴: 요청마다 `PrismaClient`(adapter-pg, `max: 1`) 생성, 연결 문자열은 `getCloudflareContext().env.HYPERDRIVE.connectionString`. 로컬은 wrangler `localConnectionString`으로 Docker Postgres.
+- **로컬**: `opennextjs-cloudflare build` → `wrangler dev` → tRPC `ping`(읽기)·`write`(쓰기) 왕복 성공(Docker `postgres:17` = 17.11).
+- **원격**: Hyperdrive `bombyeol-spike-s1`(id `073ee1da206c4cf984dca3e2eed8034b`)를 **Supabase 직결(IPv6) 문자열 그대로** 생성 성공 → Worker `bombyeol-spike-s1`(https://bombyeol-spike-s1.seungwoo7050.workers.dev) 배포 → `dbVersion` 200, Supabase **PostgreSQL 17.11** 확인(로컬과 동일 버전). 응답 0.4~2.3s(첫 호출 콜드).
+  - 결론: Hyperdrive는 Supabase 직결 IPv6를 받는다 → **앱 런타임에는 풀러 문자열 불필요.** DB 공급자 Supabase로 S-1 기준 통과.
+  - 배포된 `*.workers.dev`는 클라우드 VM에서 curl로 도달 가능 → 배포 스모크를 세션 안에서 자동 수행할 수 있다.
+- **미결**: Supabase에 스키마 적용 경로(원격 `SpikePing` 테이블 없음 → `ping`은 "table does not exist" 500, 즉 DB 도달은 확인). CLOUD_SESSION §2.1대로 **CI(GitHub Actions) 마이그레이션**을 Phase 0에서 구성 — 이때 필요한 비밀값(이름·IPv4 풀러 필요 여부)은 그 시점에 ENV_MANIFEST에 먼저 적고 요청.
+- **S-4 사전 신호**: 배포 출력 `Total Upload 54,672 KiB / gzip 18,092 KiB`, Startup 20ms. 빈 앱인데도 크다(Prisma·Next 서버 번들). 요금제 한도 대비 판단은 S-4에서.
+- 생성한 Cloudflare 리소스(정리 대상, 스파이크 종료 후 삭제 여부 사용자 확인): Hyperdrive `bombyeol-spike-s1`, Worker `bombyeol-spike-s1`.
+
+### 사고 기록 (2026-10-01, 로컬 한정, 복구 완료)
+
+create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r .`로 리포 루트에 복사해 `.git/config`·`HEAD`·로컬 `main` 참조·인덱스·`info/exclude`를 덮어썼다. 원격·docs 브랜치 피해 없음. 사용자 승인 후 remote 설정·`main`(9744db2, origin/main과 일치)·HEAD·인덱스·`.gitignore`·exclude 복구, fsck 정상. 재발 방지: 스캐폴드는 `--disable-git`으로 만들거나 `.git`을 빼고 복사한다.
 
 ## 미완료 검증 항목
 
@@ -65,3 +82,4 @@
 - 2026-10-01(첫 클라우드 세션): 부트스트랩 실행, V-1~V-5 검증(위 표). S-1 착수는 사용자 확인 대기(Phase S 키 미설정).
 - 2026-10-01: 사용자가 Phase S 키 주입 → 키 확인(위 표). Cloudflare 정상, Supabase DB는 VM에서 직접 도달 불가로 S-1 방식 조정 제안. S-1 착수 사용자 확인 대기.
 - 2026-10-01: 작업 위치 규칙 합의(CLOUD_SESSION §2.1) — 클라우드 기본, Supabase 마이그레이션은 CI, 실사용 확인은 사용자 기기. S-1 리소스(Hyperdrive 1, 시험 Worker 1) 생성 승인받음.
+- 2026-10-01: S-1 수행 — 로컬·원격(Hyperdrive→Supabase) tRPC 왕복 통과. 로컬 .git 덮어쓰기 사고 발생·복구(위 사고 기록). 다음: S-2 착수 여부 사용자 확인, Supabase 마이그레이션 CI 경로는 Phase 0.

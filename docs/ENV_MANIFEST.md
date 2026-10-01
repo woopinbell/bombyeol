@@ -13,7 +13,7 @@ Phase별로 필요한 키를 **이름·형식·발급처·등급**으로 미리 
 |---|---|---|---|---|
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API 토큰(범위 제한: Workers·R2·Hyperdrive 편집 등 필요한 권한만) | dash.cloudflare.com → My Profile → API Tokens | A(전용 dev 계정/제한 토큰) | wrangler 표준명(착수 시 문서 재확인) |
 | `CLOUDFLARE_ACCOUNT_ID` | 32자 hex | 대시보드 우측/R2 개요 | A | 표준명 |
-| `DATABASE_URL` | `postgresql://...`(개발용 DB). 현재 **Supabase 직결** `db.<ref>.supabase.co:5432`(IPv6 전용) | Supabase → Project → Connect | A | 이름은 Prisma 표준. 공급자 Supabase(2026-10-01 사용자 선택, S-1 결과로 확정). 클라우드 VM에서는 직접 접속 불가(PROGRESS 참고) — Hyperdrive용으로 풀러 문자열이 필요하면 S-1에서 추가 |
+| `DATABASE_URL` | `postgresql://...`(개발용 DB). 현재 **Supabase 직결** `db.<ref>.supabase.co:5432`(IPv6 전용) | Supabase → Project → Connect | A | 이름은 Prisma 표준. 공급자 Supabase(2026-10-01 사용자 선택, S-1 결과로 확정). 클라우드 VM에서는 직접 접속 불가. S-1: Hyperdrive는 이 직결 문자열로 동작(풀러 불필요). 앱 런타임은 이 값을 직접 읽지 않고 Hyperdrive 바인딩을 쓴다 — 이 변수는 Hyperdrive 생성·마이그레이션용 |
 
 ## Phase 0~1 (부트스트랩·인증)
 
