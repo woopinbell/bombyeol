@@ -14,14 +14,22 @@
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf:deploy:staging": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --env staging",
     "cf:deploy:production": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --env production",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "postinstall": "prisma generate",
+    "db:up": "docker compose up -d --wait postgres",
+    "db:migrate": "node scripts/with-local-db.mjs prisma migrate dev",
+    "db:reset": "node scripts/with-local-db.mjs prisma migrate reset --force",
+    "db:studio": "node scripts/with-local-db.mjs prisma studio"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "1.20.7",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "lucide-react": "^1.49.0",
     "next": "16.3.8",
+    "pg": "8.23.1",
     "radix-ui": "^1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -31,12 +39,14 @@
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "^20",
+    "@types/pg": "8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "eslint-config-prettier": "10.1.8",
     "prettier": "3.9.9",
+    "prisma": "7.10.0",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
     "wrangler": "4.145.0"

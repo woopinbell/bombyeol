@@ -12,6 +12,15 @@
   },
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol-local" }],
   "observability": { "enabled": true },
+  // 로컬은 localConnectionString(docker-compose Postgres)으로 연결한다. id는 로컬에서 쓰이지 않는 자리표시.
+  // staging·production의 Hyperdrive는 리소스 생성 승인 후 각 env 블록에 실제 id로 추가한다.
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "00000000000000000000000000000000",
+      "localConnectionString": "postgresql://postgres:postgres@localhost:5432/bombyeol",
+    },
+  ],
   "env": {
     // 비프로덕션: 개발 중 배포 스모크·사용자 기기 확인용(개발용 키·DB만).
     "staging": {

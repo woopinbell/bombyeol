@@ -16,3 +16,6 @@ next-env.d.ts
 npm-debug.log*
 .vercel
 .dev.vars*
+
+# prisma
+/src/generated/
