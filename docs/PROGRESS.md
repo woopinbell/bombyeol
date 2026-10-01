@@ -4,13 +4,36 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 2): **Phase 2 미디어 서버 커밋 완료, 스테이징 배포, R2 토큰 대기** — 아래 "현재 상태 — Phase 2".
+- 단계(2026-10-01, Phase 3): **Phase 3 오늘(봄) 서버 커밋 완료(오늘 탭 화면 제외), main 미머지·PR 미생성(사용자 확인 대기)** — 아래 "현재 상태 — Phase 3".
+- (이전) 단계(2026-10-01, Phase 2): **Phase 2 미디어 서버 커밋 완료, 스테이징 배포, R2 토큰 대기** — 아래 "현재 상태 — Phase 2".
 - (이전) 단계(2026-10-01, Phase 1): **Phase 1 서버 커밋 완료(온보딩 UI 제외), 스테이징 배포됨** — 아래 "현재 상태 — Phase 1".
 - (이전) 단계(2026-10-01, Phase 0 세션): **Phase 0 코드 커밋 완료(디자인 토큰 이식 제외)** — 작업 브랜치 `claude/cloud-session-phase-0-72a2lc`에 9커밋 푸시, **main 머지 완료(PR woopinbell/bombyeol#2, 머지 커밋 06591ce)**. 스테이징 배포·Hyperdrive 생성·CI 마이그레이션 시크릿은 사용자 승인/등록 대기(아래 "다음 할 일").
 - (이전) 단계(2026-10-01 갱신): **스택 확정 — 스파이크 S-1~S-8 전부 통과, ARCHITECTURE 확정(사용자 승인). 다음은 Phase 0.** 스파이크 Cloudflare 리소스(Worker·Hyperdrive·R2 버킷)는 삭제 완료. main은 여전히 초기 커밋뿐.
 - (이전 기록) 기반 문서 작성 완료, 리포 부트스트랩 완료(2026-10-01). GitHub private 리포 `woopinbell/bombyeol` 생성, `main`(빈 초기 커밋 9744db2)·`docs`(고아, 8621748) 푸시 완료. 클라우드 환경은 사용자가 claude.ai/code에서 만든다(허용 도메인 Custom, 개발용 키만). 첫 세션 프롬프트는 `docs/CLOUD_SESSION.md` §4.
 - 결정 완료(사용자): 식별자 `bombyeol` / 서버리스 재선정 / 웹·PWA 우선 후 Android / 새 GitHub private 리포 + `docs` 고아 브랜치 / 비용 방어는 설계 제약 / 개인정보 초기 설계 / 텍스트 우선·음성 후속 / 가족 1 Space 안에 여러 아이 / 카카오+Google 로그인 / Cloudflare 검토 / next-intl(한국어만 출시) / 임신 기록·고인 처리 V1 포함 / PDF 다운로드 프리미엄 / 웹푸시 + 카카오톡 공유 / devlog는 docs 브랜치에만 / hamkke 절대 원칙 4종 계승.
 - 미해결: `OPEN_QUESTIONS.md` (특히 **Q-PAY 결제 공급자 재결정**).
+
+## 현재 상태 — Phase 3 (2026-10-01)
+
+- 작업 브랜치 `claude/gracious-wright-1xpzcj`(main 808de8f에서 시작)에 **9커밋 푸시**: prisma(Pet·Moment·MomentMedia·Milestone) → child → refactor(media) → pet → moment 피드 → milestone → 일기 → prisma(Reaction) → reaction. **main 미머지, PR 미생성**(사용자 확인 후). 오늘 탭 화면(`feat(today)`)은 Phase DS 이후.
+- 로컬 검증: format·lint·typecheck·Vitest **133건** 통과(93 → 133), OpenNext 빌드 통과, `wrangler deploy --dry-run --env staging` 번들 13.33 MiB(gzip 3.6 MiB, 한도 64 MiB). 빌드 로그의 `Failed to copy node_modules/{is-docker,…}` 14줄은 CLI 도구 의존성(런타임 미사용) 경고로 exit 0 — 이전 Phase에서도 나왔는지는 미확인.
+- **스테이징 미반영**: 마이그레이션 `20261001115403_today`·`20261001120647_reaction`은 스테이징 DB에 아직 적용하지 않았고 배포도 안 했다(사용자 확인 대기).
+- 설계 요약(COMMIT_PLAN Phase 3 설계 메모와 같음):
+  - 대상 선택 `subject = child | pet | family`(`src/server/subjects.ts`). 기록 권한: 아이 = parent만, 반려동물·가족 = parent·grandparent, relative = 열람·반응만. 프로필(아이·반려동물) 관리 = parent.
+  - Moment `kind = media | diary`(PRD §6 갱신). 첨부 `MomentMedia` 최대 10, 썸네일은 클라이언트가 만든 이미지 자산. **자산은 한 곳에만 붙는다**(unique + `requireAttachableAssets`, 동시 요청은 P2002 → `ASSET_IN_USE`). 붙은 자산은 `media.delete` 불가, Moment 삭제·커버 교체 때 `removeAsset`(R2 먼저 → DB)으로 함께 지움(G-05). 중간 실패 시 기록이 남아 재시도 가능.
+  - 피드 `moment.list`: (takenAt, id) 커서, 대상 필터, 짧은 TTL 읽기 URL, 반응 요약(좋아요·댓글 수·내 좋아요). `pet.list`도 커버 읽기 URL.
+  - 마일스톤 프리셋 `src/lib/milestones.ts`(kind별 zod 값 스키마, strict). "처음" 기록은 대상당 하나(advisory lock), 아이 나이 기반 제안(`milestone.suggestions`). 반려동물 의료는 메모까지만(PRD §4.2.1).
+  - 아이 `child.update`·`child.markBorn`(태명·예정일 유지, 동시 전환 1회만). 미래 날짜는 하루 여유로 거부.
+  - Reaction: 대상별 FK(momentId·milestoneId) + 체크 제약, 대상 삭제 시 cascade. 좋아요 토글은 advisory lock.
+  - 새 상한·리밋(모두 `plan.ts` **초안**): 반려동물 무료 3·프리미엄 10(G-11), 글 기록(마일스톤·일기) 사용자당 300/일, 좋아요 300/시간, 댓글 60/시간(G-07), Moment 첨부 10, 본문 2000자, 댓글 500자.
+- 남긴 것(의도적으로 이번 범위 밖): 아이·반려동물 삭제(Phase 7 삭제 연쇄), 반려동물 기념 전환(Phase 4 memorial — 스키마 `status`·`passedAt`만 있음), 댓글 수정, 반응 알림(Phase 6).
+
+### 다음 할 일 (Phase 3 이후)
+
+1. **사용자 확인**: Phase 3 PR 생성·main 머지 여부. 머지 커밋 방식(squash 금지).
+2. **사용자 확인**: 스테이징 반영 — `Migrate staging DB` 워크플로를 작업 브랜치 기준으로 실행 + `npm run cf:deploy:staging`(기존 Worker 갱신, 새 리소스 없음). 승인하면 진행.
+3. 결정 필요(급하지 않음): 위 권한 정책(조부모의 반려동물·가족 사진 기록 허용, relative 열람·반응만)과 새 상한 수치(Q-PRICE).
+4. 다음 개발: Phase 4 이야기(별) 서버 — `chore(prisma): StoryPrompt·StoryEntry·MemorialProfile`부터. Reaction에 `storyEntryId`·"별 하나" kind 추가 필요.
 
 ## 현재 상태 — Phase 2 (2026-10-01)
 
@@ -255,3 +278,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: R2 토큰 등록(사용자) → 스테이징 스모크 R2 왕복 통과. 다음: Phase 2 PR.
 - 2026-10-01: Phase 2 PR woopinbell/bombyeol#4 생성. 사용자 규칙 추가: Phase 종료마다 세션 지속/이동 권고 보고(CLOUD_SESSION §5).
 - 2026-10-01: PR woopinbell/bombyeol#4 CI 통과 후 사용자 머지. 이 세션은 여기서 종료 권장 — Phase 3는 새 세션(§4.1 프롬프트, "오늘 할 일: Phase 3(서버 먼저, UI 제외)").
+- 2026-10-01(Phase 3 세션): 부트스트랩 후 Phase 3 서버 9커밋(스키마 → child → refactor(media) → pet → moment 피드 → milestone → 일기 → Reaction 스키마 → reaction), 테스트 133건. COMMIT_PLAN 설계 메모·PRD §6 데이터 모델 갱신. 대기: PR·머지, 스테이징 반영 승인.

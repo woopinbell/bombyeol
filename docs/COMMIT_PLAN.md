@@ -69,7 +69,7 @@
 - [x] `feat(media): Space 사용량 집계 및 한도 판정(plan.ts) 구현` [G-03, G-15]
 - [x] `test(media): 크기 초과·타 Space 자산·pending 참조·한도 경계 테스트` [G-01~05]
 - [x] (추가) `fix(infra): Worker 환경 타입 생성에서 로컬 .env 변수 제외`, `chore(infra): 배포 스모크 내부 경로 추가`
-- [ ] (추가) 읽기용 서명 URL 조회 — Phase 3 피드에서 함께(저장소 `presignGet`은 준비됨) → `feat(moment)` 피드 커밋에 포함
+- [x] (추가) 읽기용 서명 URL 조회 — `feat(moment)` 피드·`pet.list` 응답에 포함(Phase 3)
 
 ## Phase 3 — 오늘(봄)
 
@@ -80,15 +80,16 @@
 > - 피드 조회 응답에 읽기용 서명 URL(짧은 TTL)을 넣는다(Phase 2의 남은 항목).
 > - 아이·반려동물 삭제는 Phase 7(삭제 연쇄)에서 함께 한다.
 
-- [ ] `chore(prisma): Pet·Moment·Milestone 스키마 정의`(Child는 Phase 1에서 정의) — Moment·Milestone은 child/pet 중 하나만 참조(체크 제약), `MomentMedia` 포함
-- [ ] `feat(child): 아이 프로필 관리(태명→출생 전환 포함) 구현`
-- [ ] `feat(pet): 반려동물 프로필 관리(입양일·생일 추정·종) 구현` [G-11: 아이·반려동물 수 상한]
-- [ ] `feat(moment): 사진·영상 피드 구현(아이·반려동물·가족 전체 대상, 썸네일 클라이언트 생성)` [G-01~04 재사용]
-- [ ] `feat(milestone): 마일스톤 기록 구현(아이·반려동물 프리셋)`
-- [ ] `feat(moment): 부모 일기 구현`
-- [ ] `chore(prisma): Reaction 스키마 정의`
-- [ ] `feat(reaction): 좋아요·댓글 구현` [G-07]
-- [ ] `feat(today): 오늘 탭 화면 구성`
+- [x] `chore(prisma): Pet·Moment·Milestone 스키마 정의`(Child는 Phase 1에서 정의) — Moment·Milestone은 child/pet 중 하나만 참조(체크 제약), `MomentMedia` 포함
+- [x] `feat(child): 아이 프로필 관리(태명→출생 전환 포함) 구현`
+- [x] (추가) `refactor(media): 자산 삭제 순서(R2 먼저→DB)를 공용 함수로 분리` — 반려동물 커버 교체·Moment 삭제에서 재사용
+- [x] `feat(pet): 반려동물 프로필 관리(입양일·생일 추정·종) 구현` [G-11: 아이·반려동물 수 상한]
+- [x] `feat(moment): 사진·영상 피드 구현(아이·반려동물·가족 전체 대상, 썸네일 클라이언트 생성)` [G-01~04 재사용, G-05 삭제 연쇄]
+- [x] `feat(milestone): 마일스톤 기록 구현(아이·반려동물 프리셋)` — 나이 기반 제안, "처음" 기록은 대상당 하나, 글 기록 리밋(G-07)
+- [x] `feat(moment): 부모 일기 구현` — 글 수정(작성자만) 포함
+- [x] `chore(prisma): Reaction 스키마 정의`
+- [x] `feat(reaction): 좋아요·댓글 구현` [G-07]
+- [ ] `feat(today): 오늘 탭 화면 구성` — **Phase DS 토큰 확정 후**(서버 API는 준비됨)
 
 ## Phase 4 — 이야기(별)
 

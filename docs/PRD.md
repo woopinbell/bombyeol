@@ -113,14 +113,15 @@ Member(id, spaceId, userId, role, relationLabel, joinedAt)    // unique(spaceId,
 Invite(id, spaceId, code, role, expiresAt, usedAt?, createdById)
 InviteCodeAttempt(id, userId, ip, createdAt)                  // 실패 기록만
 Child(id, spaceId, name?, nickname?, dueDate?, birthDate?, status) // expecting|born
-Pet(id, spaceId, name, species, breed?, birthDate?, birthDateEstimated, adoptedAt?, passedAt?, status, coverMediaId?) // living|memorial
+Pet(id, spaceId, name, species(dog|cat|other), speciesLabel?, breed?, birthDate?, birthDateEstimated, adoptedAt?, passedAt?, status, coverAssetId?) // living|memorial
 PregnancyRecord(id, childId, weekAt, kind, note?, mediaId?, visibility, createdById)
-Moment(id, spaceId, childId?, petId?, kind(photo|video|text), body?, takenAt, createdById) // childId·petId는 동시에 채우지 않는다(둘 다 비면 가족 전체)
+Moment(id, spaceId, childId?, petId?, kind(media|diary), body?, takenAt, createdById) // childId·petId는 동시에 채우지 않는다(둘 다 비면 가족 전체, 체크 제약)
+MomentMedia(momentId, position, assetId UNIQUE, thumbnailAssetId? UNIQUE) // 첨부 최대 10, 자산은 한 곳에만
 MediaAsset(id, spaceId, key, kind, bytes, contentType, status(pending|confirmed|deleted), createdAt, confirmedAt?) // G-02·G-05
-Milestone(id, childId?, petId?, kind, valueJson, recordedAt, createdById) // 정확히 하나만 채운다
+Milestone(id, spaceId, childId?, petId?, kind, value(Json), recordedAt, createdById) // 정확히 하나만 채운다(체크 제약), kind는 src/lib/milestones.ts 프리셋
 StoryPrompt(id, category, textKey, ageHint?)                  // 큐레이션(코드/JSON), 번역은 키
 StoryEntry(id, spaceId, authorMemberId, scribeMemberId?, promptId?, mediaId?, body, storyDate?, createdAt)
-Reaction(id, spaceId, targetType, targetId, memberId, kind, body?, createdAt) // 별 하나·댓글
+Reaction(id, spaceId, momentId?, milestoneId?, kind(like|comment), body?, createdById, createdAt) // 대상별 FK 중 정확히 하나(체크 제약). 이야기·별 하나는 Phase 4에서 storyEntryId·kind 추가
 FamilyEvent(id, spaceId, title, startsAt, allDay, recurring, kind)
 MemorialProfile(id, spaceId, memberId?, petId?, name, relationLabel, passedAt?, note?)  // 기념 상태(사람 또는 반려동물)
 Subscription(id, spaceId UNIQUE, provider, providerSubscriptionId, status, currentPeriodEnd, ...) // G-09: spaceId 기준 upsert
