@@ -4,12 +4,32 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01 갱신): **스택 확정 — 스파이크 S-1~S-8 전부 통과, ARCHITECTURE 확정(사용자 승인). 다음은 Phase 0.** 스파이크 Cloudflare 리소스(Worker·Hyperdrive·R2 버킷)는 삭제 완료. main은 여전히 초기 커밋뿐.
+- 단계(2026-10-01, Phase 0 세션): **Phase 0 코드 커밋 완료(디자인 토큰 이식 제외)** — 작업 브랜치 `claude/cloud-session-phase-0-72a2lc`에 9커밋 푸시, **main 머지는 사용자 확인 대기**. 스테이징 배포·Hyperdrive 생성·CI 마이그레이션 시크릿은 사용자 승인/등록 대기(아래 "다음 할 일").
+- (이전) 단계(2026-10-01 갱신): **스택 확정 — 스파이크 S-1~S-8 전부 통과, ARCHITECTURE 확정(사용자 승인). 다음은 Phase 0.** 스파이크 Cloudflare 리소스(Worker·Hyperdrive·R2 버킷)는 삭제 완료. main은 여전히 초기 커밋뿐.
 - (이전 기록) 기반 문서 작성 완료, 리포 부트스트랩 완료(2026-10-01). GitHub private 리포 `woopinbell/bombyeol` 생성, `main`(빈 초기 커밋 9744db2)·`docs`(고아, 8621748) 푸시 완료. 클라우드 환경은 사용자가 claude.ai/code에서 만든다(허용 도메인 Custom, 개발용 키만). 첫 세션 프롬프트는 `docs/CLOUD_SESSION.md` §4.
 - 결정 완료(사용자): 식별자 `bombyeol` / 서버리스 재선정 / 웹·PWA 우선 후 Android / 새 GitHub private 리포 + `docs` 고아 브랜치 / 비용 방어는 설계 제약 / 개인정보 초기 설계 / 텍스트 우선·음성 후속 / 가족 1 Space 안에 여러 아이 / 카카오+Google 로그인 / Cloudflare 검토 / next-intl(한국어만 출시) / 임신 기록·고인 처리 V1 포함 / PDF 다운로드 프리미엄 / 웹푸시 + 카카오톡 공유 / devlog는 docs 브랜치에만 / hamkke 절대 원칙 4종 계승.
 - 미해결: `OPEN_QUESTIONS.md` (특히 **Q-PAY 결제 공급자 재결정**).
 
-## 다음 할 일 (2026-10-01 갱신)
+## 다음 할 일 (2026-10-01, Phase 0 세션 종료 시점)
+
+Phase 0 코드는 `claude/cloud-session-phase-0-72a2lc`에 있다(main 미머지). 커밋: repo → tooling(ESLint/Prettier) → tooling(Tailwind·shadcn) → infra → prisma → testing → i18n → env → ci. 로컬 검증: format·lint·typecheck·Vitest 6건·`next build`·OpenNext 빌드·`wrangler dev`(로컬 Hyperdrive → Docker PG 17.11 왕복) 통과. GitHub CI는 PR 또는 main push에서만 돈다 — **아직 한 번도 실행되지 않음(미검증)**.
+
+사용자 결정·작업 대기:
+1. **main 머지 여부**(PR 생성 포함) — 머지 커밋, squash 금지(WORKFLOW §3). PR을 만들면 CI 첫 실행으로 워크플로 검증.
+2. **GitHub Actions 시크릿 `STAGING_DATABASE_URL`** 등록(Supabase Session pooler IPv4 문자열, ENV_MANIFEST "Phase 0 — CI·로컬"). 등록 후 `Migrate staging DB` 워크플로 수동 실행으로 풀러 경로 확인.
+3. **스테이징 리소스 생성 승인**: Hyperdrive `bombyeol-staging`(DATABASE_URL 직결로 생성) + Worker `bombyeol-staging` 배포(`npm run cf:deploy:staging`). 승인되면 Hyperdrive id를 `wrangler.jsonc`의 `env.staging.hyperdrive`에 추가하는 커밋 → 배포 스모크. URL은 `bombyeol-staging.<계정 서브도메인>.workers.dev` 예상 → 카카오·Google redirect URI 갱신 필요(Phase 1 전).
+4. 원격 임시 브랜치 **`tmp-v2-pushtest` 삭제**(GitHub 웹 Branches 화면). V-2 시험용으로 기존 docs 커밋(df7b358)을 가리킬 뿐 새 커밋은 없다. 클라우드 세션의 `git push --delete`는 원격이 연결을 끊어 실패했다.
+5. 다음 개발: Phase 1(`chore(prisma): User/Space/Member/Invite 스키마`부터). UI 화면 커밋은 Phase DS 이후.
+
+Phase 0 세션에서 얻은 주의사항:
+- **`prettier --write .`가 루트 링크 `docs`·`image-asset`을 따라가 docs 브랜치 파일까지 재포맷**했다(되돌림 완료). `.prettierignore`·ESLint ignore·tsconfig exclude에 `.docs/ docs CLAUDE.md image-asset`을 넣어 해결. 새 도구를 추가할 때도 링크 제외를 확인한다.
+- Prisma `runtime = "workerd"` 클라이언트는 `*.wasm?module`을 import해 Node에서 그대로 안 돈다 → `vitest.config.ts`의 로더 플러그인으로 같은 클라이언트를 테스트에서 사용(별도 Node 생성기 없음).
+- 클라우드 환경 `DATABASE_URL`은 Supabase이므로 로컬 작업은 항상 `npm run db:*`/`npm test`(내부적으로 `scripts/with-local-db.mjs`)로 실행한다. `npx vitest` 직접 실행 시 globalSetup이 원격 URL을 거부한다.
+- `wrangler.jsonc`의 `hyperdrive`는 env 상속이 안 되는 키라 `CloudflareEnv.HYPERDRIVE`가 optional 타입 → `createPrisma()`가 없으면 명시적으로 throw.
+- Docker 데몬은 세션 시작 시 꺼져 있을 수 있다 → `dockerd &` 후 `npm run db:up`.
+
+## (이전) 다음 할 일 (2026-10-01 갱신)
+
 
 **Phase 0 착수** — 새 클라우드 세션 권장(아래 "새 세션 시작 프롬프트"는 `CLOUD_SESSION.md` §4). 스파이크에서 얻은 Phase 0 반영 사항:
 - 스캐폴드: `create-next-app`은 **`--disable-git`** 으로, 임시 폴더에서 만들면 `.git` 제외 복사(사고 기록 참고). 생성되는 `AGENTS.md`/`CLAUDE.md`는 리포의 CLAUDE.md 링크와 충돌하므로 처리 방침 결정(Next가 `next dev` 때 다시 만든다는 안내가 있음 — main에 `AGENTS.md`만 두고 루트 `CLAUDE.md`는 docs 링크 유지 권장).
@@ -38,6 +58,16 @@
 | V-5 | **통과(재열기 반영됨)** | 2026-10-01 사용자가 환경변수 추가 후 같은 세션을 이어가자 새 값이 보였다(VM 파일 `.docs/` 등은 그대로 유지). 단 반영되지 않는 경우를 대비해 안 보이면 새 세션으로 재개 |
 
 부가 확인: Node 22.22, npm 10.9, Docker 29.3 사용 가능. 프록시 경유로 `api.cloudflare.com`, `kauth.kakao.com` 실제 응답 200 확인(S-8 사전 확인). (최초엔 Phase S 키 미설정 → 아래 "Phase S 키 확인" 참고.) 세션 VM 시계는 UTC(문서 날짜는 KST 기준).
+
+### 재검증 (Phase 0 세션, 2026-10-01)
+
+| ID | 결과 | 비고 |
+|---|---|---|
+| V-1 | 통과 | refspec `+refs/heads/*`, 얕은 clone 아님. `git fetch origin docs` 정상 |
+| V-2 | 통과(push) | 시험용 커밋 없이 기존 docs 커밋을 새 브랜치 `tmp-v2-pushtest`로 push → 성공(비 `claude/*` 이름 허용). 단 **원격 브랜치 삭제 push는 실패**(원격이 연결 끊음) → 임시 브랜치가 남음, 사용자 삭제 필요. docs 브랜치 실제 push는 이 세션의 문서 커밋으로 확인 |
+| V-3 | 자동 로드 안 됨(기존과 동일) | 첫 프롬프트로 직접 읽는 방식 유지 |
+| V-4 | 가능 | `add_repo` 도구 존재(사용 안 함) |
+| V-5 | 해당 없음 | 이 세션에서 환경변수 변경 없음. Phase 0~1·S 키 존재 확인(값 미출력) |
 
 ## Phase S 키 확인 (2026-10-01, 값은 출력하지 않고 확인)
 
@@ -166,3 +196,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: Firebase·R2 키 확인. S-3 presign 비교 통과, S-5 서버 측 통과·배포, S-4 재측정. 실기기 푸시 수신 확인 요청.
 - 2026-10-01: S-5 실기기 통과 → 스파이크 전부 통과. 사용자 승인으로 ARCHITECTURE 확정, 스파이크 리소스(Worker·Hyperdrive·R2 버킷) 삭제(기존 `hamkke` 버킷은 유지). Phase 0은 새 세션 권장.
 - 2026-10-01: PR woopinbell/bombyeol#1(spike→main)이 실수로 머지됐으나, 사용자가 로컬에서 main을 9744db2로 되돌림(확인 완료). 원격 브랜치는 `main`(9744db2), `docs`, `spike/s1-opennext-prisma`(참고용, 머지 금지) 3개. Phase 0은 새 세션에서 main 기준 작업 브랜치로 시작.
+- 2026-10-01(Phase 0 세션): 부트스트랩·V-1~V-5 재검증(위 "재검증"), 스파이크는 이미 통과라 재실행 안 함. Phase 0 9커밋(디자인 토큰 제외 + CI 추가)을 `claude/cloud-session-phase-0-72a2lc`에 푸시. COMMIT_PLAN·ENV_MANIFEST 갱신. 대기: main 머지, `STAGING_DATABASE_URL` 시크릿, 스테이징 리소스 생성 승인, `tmp-v2-pushtest` 삭제.

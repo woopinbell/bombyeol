@@ -21,7 +21,7 @@
 
 ## 현재 상태
 
-스택 확정(2026-10-01, 스파이크 S-1~S-8 통과). 다음 시작점은 `docs/COMMIT_PLAN.md` **Phase 0**(디자인 토큰 이식 제외). main에는 아직 개발 코드가 없다(스파이크 코드는 `spike/s1-opennext-prisma` 참고용, 머지 금지). 실제 상태는 항상 `docs/PROGRESS.md`가 우선한다.
+스택 확정(2026-10-01, 스파이크 S-1~S-8 통과). Phase 0(디자인 토큰 이식 제외)은 작업 브랜치 `claude/cloud-session-phase-0-72a2lc`에 커밋됨 — main 머지는 사용자 확인 대기. 다음은 Phase 1. 스파이크 코드는 `spike/s1-opennext-prisma` 참고용(머지 금지). 개발 코드 쪽 에이전트 규칙은 main의 `AGENTS.md`(Next.js가 관리하는 블록 — 코드 작성 전 `node_modules/next/dist/docs/` 확인)도 함께 읽는다. 실제 상태는 항상 `docs/PROGRESS.md`가 우선한다.
 
 ## 브랜치 구조 (사용자 결정, 2026-10-01)
 

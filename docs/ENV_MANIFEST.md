@@ -15,6 +15,13 @@ Phase별로 필요한 키를 **이름·형식·발급처·등급**으로 미리 
 | `CLOUDFLARE_ACCOUNT_ID` | 32자 hex | 대시보드 우측/R2 개요 | A | 표준명 |
 | `DATABASE_URL` | `postgresql://...`(개발용 DB). 현재 **Supabase 직결** `db.<ref>.supabase.co:5432`(IPv6 전용) | Supabase → Project → Connect | A | 이름은 Prisma 표준. 공급자 Supabase(2026-10-01 사용자 선택, S-1 결과로 확정). 클라우드 VM에서는 직접 접속 불가. S-1: Hyperdrive는 이 직결 문자열로 동작(풀러 불필요). 앱 런타임은 이 값을 직접 읽지 않고 Hyperdrive 바인딩을 쓴다 — 이 변수는 Hyperdrive 생성·마이그레이션용 |
 
+## Phase 0 — CI·로컬 (2026-10-01 추가)
+
+| 변수 | 어디에 | 형식 | 발급처 | 등급 | 상태 |
+|---|---|---|---|---|---|
+| `STAGING_DATABASE_URL` | **GitHub Actions 리포 시크릿**(클라우드 환경 아님) | Supabase **Session pooler(IPv4)** 연결 문자열 `postgresql://postgres.<ref>:<비밀번호>@aws-0-<region>.pooler.supabase.com:5432/postgres` | Supabase → Project → Connect → Session pooler | A(개발 DB) | 우리 명명. `.github/workflows/migrate-staging.yml`이 `DATABASE_URL`로 넘겨 `prisma migrate deploy`. 호스티드 러너가 IPv6를 못 써서 직결 대신 풀러(미검증 — 첫 실행으로 확인) |
+| `LOCAL_DATABASE_URL` | 로컬 `.env`(선택) | `postgresql://postgres:postgres@localhost:5432/bombyeol` | docker-compose 기본값 | — | 우리 명명. 비우면 기본값. `scripts/with-local-db.mjs`가 로컬 호스트가 아니면 거부 |
+
 ## Phase 0~1 (부트스트랩·인증)
 
 > 2026-10-01: S-2용으로 아래 5개 키가 클라우드 환경에 등록됨(개발 앱, 등급 A). 배포 Worker에는 `wrangler secret put`으로 별도 등록해야 한다.

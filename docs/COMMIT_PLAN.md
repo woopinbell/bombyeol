@@ -14,14 +14,14 @@
 
 `ARCHITECTURE.md` §9. 결과는 `PROGRESS.md`에 기록하고 통과 시 문서를 "확정"으로 갱신. 이 Phase는 main 히스토리에 남지 않는다.
 
-- [ ] S-1 OpenNext(CF Workers) + Prisma(pg, Hyperdrive) 왕복, DB 공급자 결정
-- [ ] S-2 Auth.js 카카오·Google 로그인·세션 (Workers)
-- [ ] S-3 R2 업로드 크기 강제 방식 결정
-- [ ] S-4 Worker 번들 크기·요금제 확인
-- [ ] S-5 FCM HTTP v1 발송
-- [ ] S-6 레이트 리밋 방식 결정
-- [ ] S-7 클라이언트 PDF(한글 폰트) 가능성
-- [ ] S-8 클라우드 세션 외부 호스트 도달성·`CLOUD_SESSION.md` V-1~V-5 검증
+- [x] S-1 OpenNext(CF Workers) + Prisma(pg, Hyperdrive) 왕복, DB 공급자 결정
+- [x] S-2 Auth.js 카카오·Google 로그인·세션 (Workers)
+- [x] S-3 R2 업로드 크기 강제 방식 결정
+- [x] S-4 Worker 번들 크기·요금제 확인
+- [x] S-5 FCM HTTP v1 발송
+- [x] S-6 레이트 리밋 방식 결정
+- [x] S-7 클라이언트 PDF(한글 폰트) 가능성
+- [x] S-8 클라우드 세션 외부 호스트 도달성·`CLOUD_SESSION.md` V-1~V-5 검증
 
 ## Phase DS — 봄별 디자인 스프린트 (Kaddie 디자인이 자리 잡은 뒤, 코드 UI 전)
 
@@ -32,15 +32,18 @@
 
 ## Phase 0 — 부트스트랩 (스파이크 통과 후)
 
-- [ ] `chore(repo): Next.js(App Router) + TypeScript 프로젝트 초기화` — 착수 전 `node_modules/next/dist/docs/` 확인
-- [ ] `chore(tooling): ESLint/Prettier 설정`
-- [ ] `chore(tooling): Tailwind CSS 및 shadcn/ui(Radix) 초기화`
+> 2026-10-01 진행(브랜치 `claude/cloud-session-phase-0-72a2lc`). 순서 조정: i18n 하드코딩 검사 테스트가 Vitest를 전제하므로 `chore(testing)`을 `chore(i18n)` 앞으로 옮겼고, Phase 0에 `chore(ci)`를 추가했다(Supabase 마이그레이션은 CI 전용, `CLOUD_SESSION.md` §2.1).
+
+- [x] `chore(repo): Next.js(App Router) + TypeScript 프로젝트 초기화` — Next 16.3.8, `node_modules/next/dist/docs/` 확인. main에 `AGENTS.md`(Next 관리 블록)만 두고 루트 `CLAUDE.md`는 docs 링크 유지
+- [x] `chore(tooling): ESLint/Prettier 설정`
+- [x] `chore(tooling): Tailwind CSS 및 shadcn/ui(Radix) 초기화` — Tailwind 4.3, shadcn 4.21(radix-nova). shadcn 기본 팔레트·폰트·예제 버튼은 넣지 않음(토큰은 Phase DS 이후)
 - [ ] `chore(design-system): DESIGN.md 확정 토큰 이식` — **Phase DS 완료 후에만 착수**. 색·간격·모션 곡선 이름 정의, 대비 검증 단위 테스트, 손글씨 폰트는 확정 시에만
-- [ ] `chore(infra): Cloudflare Workers(OpenNext) 배포 구성` — wrangler 설정, 바인딩(Hyperdrive/R2), 비프로덕션·프로덕션 환경 분리
-- [ ] `chore(prisma): Prisma 초기화 및 서버리스 Postgres 연결` — 요청 단위 클라이언트 생성 패턴
-- [ ] `chore(i18n): next-intl 구조 및 문구 파일 초기화(ko)` — 하드코딩 검사 테스트 포함
-- [ ] `chore(testing): Vitest 설정` (로컬 Postgres 통합 테스트 가드)
-- [ ] `chore(env): .env.example 작성 및 로컬 .env 시크릿 생성` — `ENV_MANIFEST.md`의 Phase 0~1 항목만
+- [x] `chore(infra): Cloudflare Workers(OpenNext) 배포 구성` — wrangler 최상위=로컬, `env.staging`(bombyeol-staging)·`env.production`(bombyeol). 번들 3.9 MiB(빈 앱). **실제 배포·Hyperdrive 생성은 사용자 승인 대기**, R2 바인딩은 Phase 2(버킷 생성과 함께)
+- [x] `chore(prisma): Prisma 초기화 및 서버리스 Postgres 연결` — 요청 단위 클라이언트, 로컬 Hyperdrive `localConnectionString`, docker-compose `postgres:17.11`, 로컬 DB 가드 스크립트
+- [x] `chore(testing): Vitest 설정` (로컬 Postgres 통합 테스트 가드) — Vitest 5, workerd용 Prisma 클라이언트를 Node에서 쓰도록 `.wasm?module` 로더 플러그인
+- [x] `chore(i18n): next-intl 구조 및 문구 파일 초기화(ko)` — 하드코딩 검사 테스트 포함
+- [x] `chore(env): .env.example 작성 및 로컬 .env 시크릿 생성` — `ENV_MANIFEST.md`의 Phase 0~1 항목만
+- [x] `chore(ci): 검사 CI 및 스테이징 DB 마이그레이션 워크플로 구성` — 검사(포맷·린트·타입·테스트·OpenNext 빌드) + `prisma migrate deploy`(시크릿 `STAGING_DATABASE_URL` 대기)
 
 ## Phase 1 — 인증·Space·초대 (모든 기능의 전제)
 
