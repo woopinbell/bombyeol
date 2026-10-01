@@ -14,6 +14,12 @@
       "service": "bombyeol-spike-s1"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "bombyeol-spike-s3"
+    }
+  ],
   "ratelimits": [
     {
       "name": "RL_SPIKE",
