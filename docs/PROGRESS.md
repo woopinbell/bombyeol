@@ -136,3 +136,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: S-1 수행 — 로컬·원격(Hyperdrive→Supabase) tRPC 왕복 통과. 로컬 .git 덮어쓰기 사고 발생·복구(위 사고 기록). 다음: S-2 착수 여부 사용자 확인, Supabase 마이그레이션 CI 경로는 Phase 0.
 - 2026-10-01: S-3(Worker 프록시)·S-4(기준선)·S-6·S-7·S-8 수행. R2 시험 버킷 생성(승인). 로컬 dockerd가 중간에 종료돼 재기동. 다음: S-2(카카오·Google 키), S-5(Firebase), S-3 presign(R2 키) 대기.
 - 2026-10-01: S-2 키 확인·구현·배포 → 사용자 실로그인 확인으로 통과. 다음: S-5(Firebase 키·실기기), S-3 presign(R2 키), 이후 S-4 재측정.
+- 2026-10-01(결정): 개발 중 완전 무료 유지. Workers Paid는 공개 베타 직전(또는 1102 관측 시) 재결정 — ARCHITECTURE §10. 계정 플랜은 사용자 대시보드 확인(API로는 usage_model=standard만 보여 구분 불가).
