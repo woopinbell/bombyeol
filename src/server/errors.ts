@@ -49,12 +49,20 @@ export function notFound(reason: "SUBJECT_NOT_FOUND" | "ITEM_NOT_FOUND") {
 }
 
 export type InputFailure =
-  "NAME_REQUIRED" | "DATE_IN_FUTURE" | "USE_MARK_BORN" | "CHILD_ALREADY_BORN";
+  | "NAME_REQUIRED"
+  | "DATE_IN_FUTURE"
+  | "USE_MARK_BORN"
+  | "CHILD_ALREADY_BORN"
+  | "MILESTONE_KIND_INVALID"
+  | "MILESTONE_VALUE_INVALID"
+  | "MILESTONE_EXISTS";
+
+const conflicts: readonly InputFailure[] = ["CHILD_ALREADY_BORN", "MILESTONE_EXISTS"];
 
 /** 스키마로 표현하기 어려운 입력 규칙 위반 */
 export function inputError(reason: InputFailure) {
   return new TRPCError({
-    code: reason === "CHILD_ALREADY_BORN" ? "CONFLICT" : "BAD_REQUEST",
+    code: conflicts.includes(reason) ? "CONFLICT" : "BAD_REQUEST",
     message: reason,
   });
 }

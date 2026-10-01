@@ -15,6 +15,8 @@ export const RATE_LIMITS = {
   uploadIssuePerUser: { limit: 120, windowSec: 60 * 60 },
   /** G-04: 업로드 URL 발급(Space당) */
   uploadIssuePerSpace: { limit: 500, windowSec: 24 * 60 * 60 },
+  /** G-07: 글 기록(마일스톤·일기) 작성(사용자당) — 파일 없는 쓰기도 폭주를 막는다 */
+  recordWritePerUser: { limit: 300, windowSec: 24 * 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 /** G-11: 계정 단위 상한(요금제와 무관) */

@@ -3,12 +3,18 @@ import type { MemberRole, PrismaClient } from "@/generated/prisma/client";
 import { notFound } from "@/server/errors";
 import { entityId } from "@/server/routers/inputs";
 
+const childSubject = z.object({ type: z.literal("child"), childId: entityId });
+const petSubject = z.object({ type: z.literal("pet"), petId: entityId });
+
 /** 기록 대상: 아이 / 반려동물 / 가족 전체 */
 export const subjectInput = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("child"), childId: entityId }),
-  z.object({ type: z.literal("pet"), petId: entityId }),
+  childSubject,
+  petSubject,
   z.object({ type: z.literal("family") }),
 ]);
+
+/** 마일스톤처럼 한 구성원(아이·반려동물)만 대상이 되는 기록 */
+export const memberSubjectInput = z.discriminatedUnion("type", [childSubject, petSubject]);
 
 export type SubjectInput = z.infer<typeof subjectInput>;
 
