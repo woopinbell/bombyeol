@@ -6,6 +6,7 @@ export type LimitReason =
   | "MEMBERSHIP_LIMIT"
   | "CHILD_LIMIT"
   | "PET_LIMIT"
+  | "ASK_OPEN_LIMIT"
   | "MEMBER_ROLE_LIMIT"
   | "INVITE_ACTIVE_LIMIT"
   | "FILE_TOO_LARGE"
@@ -59,9 +60,15 @@ export type InputFailure =
   | "BODY_REQUIRED"
   | "MEDIA_REQUIRED"
   | "PROMPT_INVALID"
-  | "NARRATOR_INVALID";
+  | "NARRATOR_INVALID"
+  | "QUESTION_REQUIRED"
+  | "ASK_ANSWERED";
 
-const conflicts: readonly InputFailure[] = ["CHILD_ALREADY_BORN", "MILESTONE_EXISTS"];
+const conflicts: readonly InputFailure[] = [
+  "CHILD_ALREADY_BORN",
+  "MILESTONE_EXISTS",
+  "ASK_ANSWERED",
+];
 
 /** 스키마로 표현하기 어려운 입력 규칙 위반 */
 export function inputError(reason: InputFailure) {

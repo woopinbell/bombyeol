@@ -23,6 +23,8 @@ export const RATE_LIMITS = {
   commentPerUser: { limit: 60, windowSec: 60 * 60 },
   /** G-07: 이야기 작성(사용자당, 대필 포함) */
   storyWritePerUser: { limit: 100, windowSec: 24 * 60 * 60 },
+  /** G-07: 물어보기(사용자당) */
+  storyAskPerUser: { limit: 30, windowSec: 24 * 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 /** G-11: 계정 단위 상한(요금제와 무관) */
@@ -96,6 +98,10 @@ export const STORY_POLICY = {
   titleMaxChars: 60,
   /** 이야기 속 시기(연) 하한 — DB 체크 제약(1850)과 맞춘다 */
   minYear: 1850,
+  /** 직접 쓴 질문 최대 글자 수 */
+  questionMaxChars: 200,
+  /** G-07: 어르신 한 분께 동시에 열려 있는(답 없는) 물어보기 수 */
+  openAsksPerMember: 30,
   /** 목록 한 번에 가져오는 수 */
   pageSize: 20,
 } as const;

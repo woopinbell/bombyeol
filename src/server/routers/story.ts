@@ -9,11 +9,12 @@ import {
   type StoryPromptKey,
 } from "@/lib/story-prompts";
 import { inputError, limitError, notFound } from "@/server/errors";
+import { lockKey } from "@/server/locks";
 import { removeAsset, requireAttachableAssets, withAttachConflict } from "@/server/media/assets";
 import { hitRateLimit } from "@/server/rate-limit";
 import { mediaKeys } from "@/server/storage/types";
 import type { Context } from "@/server/trpc/context";
-import { spaceProcedure } from "@/server/trpc/procedures";
+import { parentProcedure, spaceProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
 import { entityId } from "./inputs";
 
@@ -26,6 +27,26 @@ const storyYear = z
   .min(STORY_POLICY.minYear)
   .refine((y) => y <= new Date().getUTCFullYear(), { message: "DATE_IN_FUTURE" });
 
+const question = z.string().trim().min(1).max(STORY_POLICY.questionMaxChars);
+
+const askSelect = {
+  id: true,
+  promptKey: true,
+  question: true,
+  entryId: true,
+  createdAt: true,
+  askedBy: { select: { id: true, name: true } },
+  toMember: { select: { id: true, relationLabel: true, user: { select: { name: true } } } },
+} satisfies Prisma.StoryAskSelect;
+
+function toAsk(row: Prisma.StoryAskGetPayload<{ select: typeof askSelect }>) {
+  const { toMember, ...rest } = row;
+  return {
+    ...rest,
+    to: { memberId: toMember.id, label: toMember.relationLabel, name: toMember.user.name },
+  };
+}
+
 const storySelect = {
   id: true,
   title: true,
@@ -35,6 +56,7 @@ const storySelect = {
   storyYear: true,
   petId: true,
   photo: { select: { id: true, status: true } },
+  ask: { select: { id: true, promptKey: true, question: true } },
   narratorMemberId: true,
   narratorName: true,
   narratorLabel: true,
@@ -113,6 +135,17 @@ async function resolvePet(ctx: SpaceCtx, petId: string | null | undefined) {
   return pet.id;
 }
 
+/** 답할 물어보기: 같은 Space이고 아직 답이 없어야 한다 */
+async function findOpenAsk(ctx: SpaceCtx, askId: string) {
+  const ask = await ctx.prisma.storyAsk.findFirst({
+    where: { id: askId, spaceId: ctx.member.spaceId },
+    select: { id: true, toMemberId: true, promptKey: true, entryId: true },
+  });
+  if (!ask) throw notFound("ITEM_NOT_FOUND");
+  if (ask.entryId) throw inputError("ASK_ANSWERED");
+  return ask;
+}
+
 /** 수정: 쓴 사람 또는 화자 본인. 삭제는 여기에 parent를 더한다 */
 async function findStory(ctx: SpaceCtx, storyId: string) {
   const story = await ctx.prisma.storyEntry.findFirst({
@@ -160,11 +193,13 @@ export const storyRouter = router({
   /**
    * 이야기 쓰기. 질문 카드에 답하거나(promptKey → 카테고리는 카드를 따른다) 자유롭게 쓴다.
    * narratorMemberId가 내가 아니면 대필 — 작성자(화자)·대필자를 함께 기록한다. 글 쓰기 리밋(G-07).
+   * askId를 주면 그 물어보기에 대한 답 — 화자는 질문받은 어르신, 카드는 물어보기를 따르고 물어보기가 닫힌다.
    */
   create: spaceProcedure
     .input(
       z.object({
         narratorMemberId: entityId.optional(),
+        askId: entityId.optional(),
         promptKey: z.string().min(1).max(64).optional(),
         category: categoryInput.optional(),
         title: title.optional(),
@@ -176,10 +211,14 @@ export const storyRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { narrator, scribing } = await resolveNarrator(ctx, input.narratorMemberId);
-      if (input.promptKey && !isStoryPromptKey(input.promptKey)) {
-        throw inputError("PROMPT_INVALID");
-      }
+      const ask = input.askId ? await findOpenAsk(ctx, input.askId) : null;
+      const { narrator, scribing } = await resolveNarrator(
+        ctx,
+        input.narratorMemberId ?? ask?.toMemberId,
+      );
+      if (ask && narrator.id !== ask.toMemberId) throw inputError("NARRATOR_INVALID");
+      const promptKey = ask ? ask.promptKey : (input.promptKey ?? null);
+      if (promptKey && !isStoryPromptKey(promptKey)) throw inputError("PROMPT_INVALID");
       const petId = await resolvePet(ctx, input.petId);
       await checkPhoto(ctx, input.photoAssetId);
       const ok = await hitRateLimit(
@@ -196,26 +235,40 @@ export const storyRouter = router({
           })
         : null;
       const row = await withAttachConflict(() =>
-        ctx.prisma.storyEntry.create({
-          data: {
-            spaceId: ctx.member.spaceId,
-            narratorMemberId: narrator.id,
-            narratorName: narrator.user.name,
-            narratorLabel: narrator.relationLabel,
-            scribeMemberId: scribing ? ctx.member.id : null,
-            scribeName: scribe?.name ?? null,
-            promptKey: input.promptKey ?? null,
-            category: input.promptKey
-              ? STORY_PROMPTS[input.promptKey as StoryPromptKey]
-              : (input.category ?? null),
-            title: input.title,
-            body: input.body,
-            storyYear: input.storyYear,
-            petId,
-            photoAssetId: input.photoAssetId,
-            createdById: ctx.userId,
-          },
-          select: storySelect,
+        ctx.prisma.$transaction(async (tx) => {
+          const created = await tx.storyEntry.create({
+            data: {
+              spaceId: ctx.member.spaceId,
+              narratorMemberId: narrator.id,
+              narratorName: narrator.user.name,
+              narratorLabel: narrator.relationLabel,
+              scribeMemberId: scribing ? ctx.member.id : null,
+              scribeName: scribe?.name ?? null,
+              promptKey,
+              category: promptKey
+                ? STORY_PROMPTS[promptKey as StoryPromptKey]
+                : (input.category ?? null),
+              title: input.title,
+              body: input.body,
+              storyYear: input.storyYear,
+              petId,
+              photoAssetId: input.photoAssetId,
+              createdById: ctx.userId,
+            },
+            select: { id: true },
+          });
+          if (ask) {
+            // 같은 물어보기에 동시에 답하면 하나만 이긴다
+            const { count } = await tx.storyAsk.updateMany({
+              where: { id: ask.id, entryId: null },
+              data: { entryId: created.id },
+            });
+            if (count === 0) throw inputError("ASK_ANSWERED");
+          }
+          return tx.storyEntry.findUniqueOrThrow({
+            where: { id: created.id },
+            select: storySelect,
+          });
         }),
       );
       return toStory(ctx, row);
@@ -313,6 +366,94 @@ export const storyRouter = router({
             ? { createdAt: last.createdAt, id: last.id }
             : null,
       };
+    }),
+
+  /**
+   * 물어보기(PRD §4.3): parent가 어르신(grandparent)께 질문 카드나 직접 쓴 질문을 보낸다.
+   * 같은 카드를 이미 보내 답을 기다리는 중이면 그 물어보기를 돌려준다. 알림은 Phase 6,
+   * 카카오톡 공유는 클라이언트가 링크로 보낸다(서버 비용 0). 리밋·열린 물어보기 상한(G-07).
+   */
+  ask: parentProcedure
+    .input(
+      z.object({
+        toMemberId: entityId,
+        promptKey: z.string().min(1).max(64).optional(),
+        question: question.optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const spaceId = ctx.member.spaceId;
+      if (!input.promptKey === !input.question) throw inputError("QUESTION_REQUIRED");
+      if (input.promptKey && !isStoryPromptKey(input.promptKey)) {
+        throw inputError("PROMPT_INVALID");
+      }
+      const to = await ctx.prisma.member.findFirst({
+        where: { id: input.toMemberId, spaceId },
+        select: { id: true, role: true },
+      });
+      if (!to) throw notFound("SUBJECT_NOT_FOUND");
+      if (to.role !== "grandparent") throw inputError("NARRATOR_INVALID");
+      const ok = await hitRateLimit(
+        ctx.prisma,
+        `story-ask:${ctx.userId}`,
+        RATE_LIMITS.storyAskPerUser,
+      );
+      if (!ok) throw limitError("RATE_LIMITED");
+
+      const row = await ctx.prisma.$transaction(async (tx) => {
+        await lockKey(tx, `story-ask:${to.id}`);
+        if (input.promptKey) {
+          const existing = await tx.storyAsk.findFirst({
+            where: { toMemberId: to.id, promptKey: input.promptKey, entryId: null },
+            select: askSelect,
+          });
+          if (existing) return existing;
+        }
+        const open = await tx.storyAsk.count({ where: { toMemberId: to.id, entryId: null } });
+        if (open >= STORY_POLICY.openAsksPerMember) throw limitError("ASK_OPEN_LIMIT");
+        return tx.storyAsk.create({
+          data: {
+            spaceId,
+            askedById: ctx.userId,
+            toMemberId: to.id,
+            promptKey: input.promptKey,
+            question: input.question,
+          },
+          select: askSelect,
+        });
+      });
+      return toAsk(row);
+    }),
+
+  /**
+   * 답을 기다리는 물어보기(모든 멤버, 오래된 순). 어르신당 상한이 있어 페이지 없이 돌려준다.
+   * 답한 물어보기는 이야기 쪽(story.list·get의 ask)에서 보인다.
+   */
+  asks: spaceProcedure
+    .input(z.object({ toMemberId: entityId.optional() }))
+    .query(async ({ ctx, input }) => {
+      const rows = await ctx.prisma.storyAsk.findMany({
+        where: { spaceId: ctx.member.spaceId, toMemberId: input.toMemberId, entryId: null },
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+        select: askSelect,
+      });
+      return rows.map(toAsk);
+    }),
+
+  /** 물어보기 거두기: 보낸 사람 또는 parent. 답한 이야기는 그대로 남는다 */
+  cancelAsk: spaceProcedure
+    .input(z.object({ askId: entityId }))
+    .mutation(async ({ ctx, input }) => {
+      const ask = await ctx.prisma.storyAsk.findFirst({
+        where: { id: input.askId, spaceId: ctx.member.spaceId },
+        select: { id: true, askedById: true },
+      });
+      if (!ask) throw notFound("ITEM_NOT_FOUND");
+      if (ask.askedById !== ctx.userId && ctx.member.role !== "parent") {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      await ctx.prisma.storyAsk.deleteMany({ where: { id: ask.id } });
+      return { ok: true };
     }),
 
   /** 이야기 하나(모든 멤버) */
