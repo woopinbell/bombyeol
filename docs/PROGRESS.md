@@ -226,3 +226,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: 사용자 승인으로 스테이징 Hyperdrive·Worker 생성·배포, 인증 시크릿 등록. Phase 1 서버 9커밋(스키마 → tRPC → 카카오 → Google → 프로시저 → Space·아이 → 초대 발급 → 수락·brute-force → 통합 테스트). 대기: `STAGING_DATABASE_URL`, redirect URI 등록, PR.
 - 2026-10-01: 스테이징 마이그레이션(작업 브랜치 기준) 적용, Prisma 외부 모듈 배포 오류 수정·재배포. 사용자 실로그인 확인 대기.
 - 2026-10-01: 스테이징 실로그인(Google·카카오) 사용자 확인 통과. `user.me` 추가, 빈 이름 채움 수정. 다음: Phase 1 PR(사용자 확인).
+- 2026-10-01: Phase 1 PR woopinbell/bombyeol#3 생성(13커밋), CI 대기. Phase 2는 PR 머지 후 같은 작업 브랜치를 main에서 다시 따서 진행. 필요: 스테이징 R2 버킷 생성 승인, R2 S3 토큰(Worker 시크릿으로 사용자가 직접 등록).
