@@ -70,7 +70,8 @@ export type InputFailure =
   | "PHOTO_NOT_ALLOWED"
   | "EVENT_RANGE_INVALID"
   | "CONSENT_REQUIRED"
-  | "CONSENT_VERSION_STALE";
+  | "CONSENT_VERSION_STALE"
+  | "CONFIRM_MISMATCH";
 
 const conflicts: readonly InputFailure[] = [
   "CHILD_ALREADY_BORN",

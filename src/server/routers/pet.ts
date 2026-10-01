@@ -4,6 +4,8 @@ import { MEDIA_POLICY, TIER_LIMITS, tierOf } from "@/lib/plan";
 import { inputError, limitError, notFound } from "@/server/errors";
 import { lockKey } from "@/server/locks";
 import { removeAsset, requireAttachableAssets, withAttachConflict } from "@/server/media/assets";
+import { momentAssetIds } from "@/server/media/attached";
+import { markPurging } from "@/server/media/purge";
 import { mediaKeys } from "@/server/storage/types";
 import { parentProcedure, spaceProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
@@ -91,6 +93,30 @@ export const petRouter = router({
         await removeAsset(ctx.prisma, ctx.storage, spaceId, current.cover);
       }
       return pet;
+    }),
+
+  /**
+   * 반려동물 삭제(parent, 되돌릴 수 없음). 이름을 다시 입력해야 한다. 그 반려동물의 사진·일기·
+   * 마일스톤·기념 정보와 커버를 함께 지운다(파일은 purging → 정리 Cron, G-05).
+   * 반려동물에 붙인 이야기는 가족의 기억이라 남긴다(petId만 비워짐). 별이 된 반려동물은 기념 상태로 두는 것을 권한다(화면).
+   */
+  delete: parentProcedure
+    .input(z.object({ petId: entityId, confirmName: personName }))
+    .mutation(async ({ ctx, input }) => {
+      const spaceId = ctx.member.spaceId;
+      const pet = await ctx.prisma.pet.findFirst({
+        where: { id: input.petId, spaceId },
+        select: { id: true, name: true, coverAssetId: true },
+      });
+      if (!pet) throw notFound("SUBJECT_NOT_FOUND");
+      if (input.confirmName !== pet.name) throw inputError("CONFIRM_MISMATCH");
+      return ctx.prisma.$transaction(async (tx) => {
+        const moments = await momentAssetIds(tx, { petId: pet.id });
+        const assetIds = pet.coverAssetId ? [...moments, pet.coverAssetId] : moments;
+        const purging = await markPurging(tx, spaceId, assetIds);
+        await tx.pet.deleteMany({ where: { id: pet.id, spaceId } });
+        return { ok: true, purgingFiles: purging };
+      });
     }),
 
   /** 반려동물 목록(모든 멤버). 커버는 짧은 TTL 읽기 URL로 준다 */

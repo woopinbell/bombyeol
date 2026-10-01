@@ -3,6 +3,8 @@ import type { Prisma } from "@/generated/prisma/client";
 import { TIER_LIMITS, tierOf } from "@/lib/plan";
 import { inputError, limitError, notFound } from "@/server/errors";
 import { lockKey } from "@/server/locks";
+import { momentAssetIds } from "@/server/media/attached";
+import { markPurging } from "@/server/media/purge";
 import { parentProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
 import { entityId, isNotFuture, isoDate, personName } from "./inputs";
@@ -115,5 +117,31 @@ export const childRouter = router({
       });
       if (count === 0) throw inputError("CHILD_ALREADY_BORN");
       return findChild(ctx.prisma, ctx.member.spaceId, input.childId);
+    }),
+
+  /**
+   * 아이 삭제(parent, 되돌릴 수 없음). 화면에 보이는 이름(이름 또는 태명)을 다시 입력해야 한다.
+   * 그 아이의 사진·일기·마일스톤·임신 기록을 함께 지우고, 붙은 파일은 purging으로 넘겨
+   * 정리 Cron이 R2에서 지운다(G-05). 아이 정보 동의 철회도 이 경로로 처리한다(PRIVACY §2.4).
+   */
+  delete: parentProcedure
+    .input(z.object({ childId: entityId, confirmName: personName }))
+    .mutation(async ({ ctx, input }) => {
+      const spaceId = ctx.member.spaceId;
+      const child = await findChild(ctx.prisma, spaceId, input.childId);
+      if (input.confirmName !== (child.name ?? child.nickname)) {
+        throw inputError("CONFIRM_MISMATCH");
+      }
+      return ctx.prisma.$transaction(async (tx) => {
+        const moments = await momentAssetIds(tx, { childId: child.id });
+        const pregnancy = await tx.pregnancyRecord.findMany({
+          where: { childId: child.id, photoAssetId: { not: null } },
+          select: { photoAssetId: true },
+        });
+        const assetIds = [...moments, ...pregnancy.map((p) => p.photoAssetId as string)];
+        const purging = await markPurging(tx, spaceId, assetIds);
+        await tx.child.deleteMany({ where: { id: child.id, spaceId } });
+        return { ok: true, purgingFiles: purging };
+      });
     }),
 });
