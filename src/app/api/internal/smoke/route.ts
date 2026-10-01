@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createPrisma } from "@/server/db";
 import { isInternalRequest } from "@/server/internal-auth";
-import { fcmSenderFromEnv } from "@/server/push/fcm";
+import { fcmConfigFromEnv, probeFcm } from "@/server/push/fcm";
 import { storageFromEnv } from "@/server/storage/from-env";
 
 /**
@@ -55,22 +55,9 @@ export async function POST(req: Request) {
     checks.r2 = `fail: ${(error as Error).message.slice(0, 120)}`;
   }
 
-  // 가짜 등록 토큰으로 보낸다 — 실제 알림은 나가지 않고, 키·토큰 교환·FCM 호출이 정상이면
-  // FCM이 토큰을 무효로 판정해 invalid_token(기대값)이 된다. error는 키·교환·호출 중 어딘가의 실패.
-  const sender = fcmSenderFromEnv(env);
-  if (!sender) {
-    checks.fcm = "not configured";
-  } else {
-    try {
-      checks.fcm = await sender.send("bombyeol-smoke-invalid-token", {
-        title: "smoke",
-        body: "smoke",
-        link: new URL("/", req.url).toString(),
-        data: { type: "smoke" },
-      });
-    } catch (error) {
-      checks.fcm = `fail: ${(error as Error).name}`;
-    }
-  }
+  // 가짜 등록 토큰으로 보낸다 — 실제 알림은 나가지 않는다. 기대값 invalid_token(키·토큰 교환·FCM 호출 정상),
+  // 아니면 멈춘 단계(key·token·send)를 값 없이 보여준다.
+  const fcm = fcmConfigFromEnv(env);
+  checks.fcm = fcm ? await probeFcm(fcm, new URL("/", req.url).toString()) : "not configured";
   return Response.json(checks);
 }
