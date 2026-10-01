@@ -32,6 +32,7 @@ model User {
   petsAdded      Pet[]
   moments        Moment[]
   milestones     Milestone[]
+  reactions      Reaction[]
 }
 
 model Account {
@@ -72,6 +73,7 @@ model Space {
   pets       Pet[]
   moments    Moment[]
   milestones Milestone[]
+  reactions  Reaction[]
   media      MediaAsset[]
   usage      UsageCounter[]
 
@@ -221,6 +223,7 @@ model Moment {
   pet       Pet?          @relation(fields: [petId], references: [id], onDelete: Cascade)
   createdBy User          @relation(fields: [createdById], references: [id])
   media     MomentMedia[]
+  reactions Reaction[]
 
   @@index([spaceId, takenAt(sort: Desc), id(sort: Desc)])
   @@index([childId, takenAt(sort: Desc)])
@@ -255,13 +258,45 @@ model Milestone {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  space     Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  child     Child? @relation(fields: [childId], references: [id], onDelete: Cascade)
-  pet       Pet?   @relation(fields: [petId], references: [id], onDelete: Cascade)
-  createdBy User   @relation(fields: [createdById], references: [id])
+  space     Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  child     Child?     @relation(fields: [childId], references: [id], onDelete: Cascade)
+  pet       Pet?       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdBy User       @relation(fields: [createdById], references: [id])
+  reactions Reaction[]
 
   @@index([childId, recordedAt(sort: Desc)])
   @@index([petId, recordedAt(sort: Desc)])
+}
+
+// ---------------------------------------------------------------------------
+// 반응 — 좋아요·댓글(가족 멤버만). 대상은 정확히 하나(체크 제약), 이야기(StoryEntry)는 Phase 4에서 추가.
+// 다형 targetId 대신 대상별 FK를 둬서 대상 삭제 시 반응이 함께 지워진다.
+// ---------------------------------------------------------------------------
+
+enum ReactionKind {
+  like
+  comment
+}
+
+model Reaction {
+  id          String       @id @default(cuid())
+  spaceId     String
+  momentId    String?
+  milestoneId String?
+  kind        ReactionKind
+  body        String? // comment만(체크 제약)
+  createdById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  space     Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  moment    Moment?    @relation(fields: [momentId], references: [id], onDelete: Cascade)
+  milestone Milestone? @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  createdBy User       @relation(fields: [createdById], references: [id])
+
+  @@index([momentId, kind, createdAt])
+  @@index([milestoneId, kind, createdAt])
+  @@index([createdById])
 }
 
 // ---------------------------------------------------------------------------

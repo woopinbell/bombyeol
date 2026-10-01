@@ -52,4 +52,36 @@ describe("오늘(봄) 스키마 체크 제약", () => {
       prisma.milestone.create({ data: { ...base, childId: child.id, petId: pet.id } }),
     ).rejects.toThrow();
   });
+
+  it("Reaction은 대상이 정확히 하나이고 댓글만 본문을 가진다", async () => {
+    const { user, space } = await family();
+    const moment = await prisma.moment.create({
+      data: {
+        spaceId: space.id,
+        kind: "diary",
+        body: "글",
+        takenAt: new Date(),
+        createdById: user.id,
+      },
+    });
+    const base = { spaceId: space.id, createdById: user.id };
+    await expect(
+      prisma.reaction.create({ data: { ...base, momentId: moment.id, kind: "like" } }),
+    ).resolves.toBeTruthy();
+    await expect(
+      prisma.reaction.create({
+        data: { ...base, momentId: moment.id, kind: "comment", body: "축하해" },
+      }),
+    ).resolves.toBeTruthy();
+    await expect(prisma.reaction.create({ data: { ...base, kind: "like" } })).rejects.toThrow();
+    await expect(
+      prisma.reaction.create({ data: { ...base, momentId: moment.id, kind: "comment" } }),
+    ).rejects.toThrow();
+    await expect(
+      prisma.reaction.create({ data: { ...base, momentId: moment.id, kind: "like", body: "x" } }),
+    ).rejects.toThrow();
+    // 대상을 지우면 반응도 지워진다
+    await prisma.moment.delete({ where: { id: moment.id } });
+    expect(await prisma.reaction.count()).toBe(0);
+  });
 });
