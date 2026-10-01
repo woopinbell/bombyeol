@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import { MEDIA_POLICY } from "@/lib/plan";
-import { periodKey } from "@/server/routers/media";
+import { periodKey } from "@/server/media/usage";
 import { mediaKeys, type MediaStorage } from "@/server/storage/types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;

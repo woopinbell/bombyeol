@@ -1,6 +1,5 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import type { Prisma } from "@/generated/prisma/client";
 import {
   MEDIA_CONTENT_TYPES,
   MEDIA_POLICY,
@@ -12,31 +11,21 @@ import {
 import { limitError, mediaError } from "@/server/errors";
 import { lockKey } from "@/server/locks";
 import { hitRateLimit } from "@/server/rate-limit";
+import { fitsStorage, openPendingWhere, periodKey, spaceUsage } from "@/server/media/usage";
 import { mediaKeys } from "@/server/storage/types";
 import { spaceProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
 
 const allContentTypes = [...MEDIA_CONTENT_TYPES.image, ...MEDIA_CONTENT_TYPES.video] as const;
 
-/** UTC 날짜 키(UsageCounter.periodKey) */
-export function periodKey(now: Date) {
-  return now.toISOString().slice(0, 10);
-}
-
-/** 아직 버려지지 않은 pending 업로드(pendingTtl 안) */
-export function openPendingWhere(spaceId: string, now: Date): Prisma.MediaAssetWhereInput {
-  return {
-    spaceId,
-    status: "pending",
-    createdAt: { gt: new Date(now.getTime() - MEDIA_POLICY.pendingTtlSec * 1000) },
-  };
-}
-
 export const mediaRouter = router({
   /**
    * 업로드 요청: 형식·크기(G-01), Space 총량(G-03), 발급 횟수·미확정 수(G-04)를 검사하고
    * Content-Length·Content-Type을 서명한 업로드 URL을 발급한다.
    */
+  /** Space 저장 사용량과 한도(화면의 "저장 공간" 표시용) */
+  usage: spaceProcedure.query(({ ctx }) => spaceUsage(ctx.prisma, ctx.member.spaceId)),
+
   requestUpload: spaceProcedure
     .input(
       z.object({
@@ -63,18 +52,9 @@ export const mediaRouter = router({
       const now = new Date();
       const asset = await ctx.prisma.$transaction(async (tx) => {
         await lockKey(tx, `space-media:${spaceId}`);
-        const [pendingCount, used] = await Promise.all([
-          tx.mediaAsset.count({ where: openPendingWhere(spaceId, now) }),
-          tx.mediaAsset.aggregate({
-            where: { OR: [{ spaceId, status: "confirmed" }, openPendingWhere(spaceId, now)] },
-            _sum: { bytes: true },
-          }),
-        ]);
-        if (pendingCount >= MEDIA_POLICY.pendingPerSpace) throw limitError("PENDING_LIMIT");
-        // 진행 중 업로드도 총량에 넣는다: URL만 여러 개 받아 한도를 넘기는 우회 차단(G-03·G-04)
-        if ((used._sum.bytes ?? 0) + input.bytes > limits.storageBytes) {
-          throw limitError("STORAGE_LIMIT");
-        }
+        const usage = await spaceUsage(tx, spaceId, now);
+        if (usage.pendingCount >= MEDIA_POLICY.pendingPerSpace) throw limitError("PENDING_LIMIT");
+        if (!fitsStorage(usage, input.bytes)) throw limitError("STORAGE_LIMIT");
         const created = await tx.mediaAsset.create({
           data: {
             spaceId,
