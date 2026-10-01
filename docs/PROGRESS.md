@@ -4,7 +4,7 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 3): **Phase 3 오늘(봄) 서버 커밋 완료(오늘 탭 화면 제외), main 미머지·PR 미생성(사용자 확인 대기)** — 아래 "현재 상태 — Phase 3".
+- 단계(2026-10-01, Phase 3): **Phase 3 오늘(봄) 서버 main 머지 완료(PR woopinbell/bombyeol#5, 머지 커밋 3b0d90d), 스테이징 마이그레이션·배포 완료. ⚠️ 스테이징 R2 시크릿 `R2_ACCESS_KEY_ID` 재등록 필요(사용자)** — 아래 "현재 상태 — Phase 3".
 - (이전) 단계(2026-10-01, Phase 2): **Phase 2 미디어 서버 커밋 완료, 스테이징 배포, R2 토큰 대기** — 아래 "현재 상태 — Phase 2".
 - (이전) 단계(2026-10-01, Phase 1): **Phase 1 서버 커밋 완료(온보딩 UI 제외), 스테이징 배포됨** — 아래 "현재 상태 — Phase 1".
 - (이전) 단계(2026-10-01, Phase 0 세션): **Phase 0 코드 커밋 완료(디자인 토큰 이식 제외)** — 작업 브랜치 `claude/cloud-session-phase-0-72a2lc`에 9커밋 푸시, **main 머지 완료(PR woopinbell/bombyeol#2, 머지 커밋 06591ce)**. 스테이징 배포·Hyperdrive 생성·CI 마이그레이션 시크릿은 사용자 승인/등록 대기(아래 "다음 할 일").
@@ -15,9 +15,11 @@
 
 ## 현재 상태 — Phase 3 (2026-10-01)
 
-- 작업 브랜치 `claude/gracious-wright-1xpzcj`(main 808de8f에서 시작)에 **9커밋 푸시**: prisma(Pet·Moment·MomentMedia·Milestone) → child → refactor(media) → pet → moment 피드 → milestone → 일기 → prisma(Reaction) → reaction. **main 미머지, PR 미생성**(사용자 확인 후). 오늘 탭 화면(`feat(today)`)은 Phase DS 이후.
+- 작업 브랜치 `claude/gracious-wright-1xpzcj`(main 808de8f에서 시작) 9커밋: prisma(Pet·Moment·MomentMedia·Milestone) → child → refactor(media) → pet → moment 피드 → milestone → 일기 → prisma(Reaction) → reaction. **사용자 승인 후 PR woopinbell/bombyeol#5 CI 통과 → 머지 커밋으로 main 머지(3b0d90d).** 작업 브랜치는 머지된 main으로 다시 맞춤. 오늘 탭 화면(`feat(today)`)은 Phase DS 이후.
 - 로컬 검증: format·lint·typecheck·Vitest **133건** 통과(93 → 133), OpenNext 빌드 통과, `wrangler deploy --dry-run --env staging` 번들 13.33 MiB(gzip 3.6 MiB, 한도 64 MiB). 빌드 로그의 `Failed to copy node_modules/{is-docker,…}` 14줄은 CLI 도구 의존성(런타임 미사용) 경고로 exit 0 — 이전 Phase에서도 나왔는지는 미확인.
-- **스테이징 미반영**: 마이그레이션 `20261001115403_today`·`20261001120647_reaction`은 스테이징 DB에 아직 적용하지 않았고 배포도 안 했다(사용자 확인 대기).
+- 스테이징: main push로 `Migrate staging DB`가 자동 실행돼 `today`·`reaction` 적용(All migrations applied). Worker 배포(13.33 MiB, Startup 19ms, Cron 유지). 스모크: health 200, 새 경로(moment·pet·milestone·reaction) 비로그인 401, 없는 경로 404, 내부 스모크 DB ok.
+- **⚠️ 스테이징 R2 회귀(배포로 발생)**: 내부 스모크 `r2: fail: R2 설정이 없습니다`. 원인 — Phase 2 때 `R2_ACCESS_KEY_ID`가 Secret이 아니라 **대시보드 일반 환경변수(plaintext var)** 로 들어가 있었고(버전 a16eb641 `Add secret…` 메시지인데 바인딩은 Environment Variable), `wrangler deploy`는 vars를 `wrangler.jsonc` 내용으로 바꾸므로 이번 배포에서 빠졌다. 지금 Secret 목록: R2_ACCOUNT_ID·R2_SECRET_ACCESS_KEY만 있음. Claude의 Secret 재등록은 세션 권한 정책(Secret-Store Writes)으로 거부됨 → **사용자가 `npx wrangler secret put R2_ACCESS_KEY_ID --env staging`으로 Secret 등록**(값은 Cloudflare R2 API 토큰의 Access Key ID, 대화에 붙여넣지 않기). 등록 후 `node scripts/smoke-staging.mjs`로 r2 ok 확인.
+- 교훈: Worker 값은 전부 `wrangler secret put`으로(대시보드 "변수"로 넣으면 다음 배포에서 지워진다). 배포 후 내부 스모크까지 확인한다.
 - 설계 요약(COMMIT_PLAN Phase 3 설계 메모와 같음):
   - 대상 선택 `subject = child | pet | family`(`src/server/subjects.ts`). 기록 권한: 아이 = parent만, 반려동물·가족 = parent·grandparent, relative = 열람·반응만. 프로필(아이·반려동물) 관리 = parent.
   - Moment `kind = media | diary`(PRD §6 갱신). 첨부 `MomentMedia` 최대 10, 썸네일은 클라이언트가 만든 이미지 자산. **자산은 한 곳에만 붙는다**(unique + `requireAttachableAssets`, 동시 요청은 P2002 → `ASSET_IN_USE`). 붙은 자산은 `media.delete` 불가, Moment 삭제·커버 교체 때 `removeAsset`(R2 먼저 → DB)으로 함께 지움(G-05). 중간 실패 시 기록이 남아 재시도 가능.
@@ -30,8 +32,8 @@
 
 ### 다음 할 일 (Phase 3 이후)
 
-1. **사용자 확인**: Phase 3 PR 생성·main 머지 여부. 머지 커밋 방식(squash 금지).
-2. **사용자 확인**: 스테이징 반영 — `Migrate staging DB` 워크플로를 작업 브랜치 기준으로 실행 + `npm run cf:deploy:staging`(기존 Worker 갱신, 새 리소스 없음). 승인하면 진행.
+1. ~~PR·main 머지~~ 완료(PR woopinbell/bombyeol#5, 3b0d90d).
+2. ~~스테이징 반영~~ 마이그레이션·배포 완료. **남은 것: 사용자가 `R2_ACCESS_KEY_ID`를 스테이징 Worker Secret으로 재등록**(위 회귀) → 스모크 r2 ok 확인.
 3. ~~결정 필요~~ **사용자 승인(2026-10-01)**: 권한 정책(아이 기록 parent만, 반려동물·가족 사진 grandparent 허용, relative 열람·반응만)과 상한 수치를 결제 전 운영값으로 확정(OPEN_QUESTIONS Q-PRICE에 기록).
 4. 다음 개발: Phase 4 이야기(별) 서버 — `chore(prisma): StoryPrompt·StoryEntry·MemorialProfile`부터. Reaction에 `storyEntryId`·"별 하나" kind 추가 필요.
 
@@ -279,3 +281,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: Phase 2 PR woopinbell/bombyeol#4 생성. 사용자 규칙 추가: Phase 종료마다 세션 지속/이동 권고 보고(CLOUD_SESSION §5).
 - 2026-10-01: PR woopinbell/bombyeol#4 CI 통과 후 사용자 머지. 이 세션은 여기서 종료 권장 — Phase 3는 새 세션(§4.1 프롬프트, "오늘 할 일: Phase 3(서버 먼저, UI 제외)").
 - 2026-10-01(Phase 3 세션): 부트스트랩 후 Phase 3 서버 9커밋(스키마 → child → refactor(media) → pet → moment 피드 → milestone → 일기 → Reaction 스키마 → reaction), 테스트 133건. COMMIT_PLAN 설계 메모·PRD §6 데이터 모델 갱신. 대기: PR·머지, 스테이징 반영 승인.
+- 2026-10-01(Phase 3 세션): 사용자 "전부 승인" → PR woopinbell/bombyeol#5 생성·CI 통과·머지(3b0d90d), 스테이징 마이그레이션 자동 적용·배포·스모크. R2_ACCESS_KEY_ID(평문 var)가 배포로 사라져 R2 스모크 실패 — 사용자 Secret 재등록 대기. 권한 정책·상한 수치 승인 기록.
