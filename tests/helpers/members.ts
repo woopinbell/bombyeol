@@ -1,4 +1,5 @@
 import type { MemberRole, PrismaClient } from "@/generated/prisma/client";
+import type { PushDispatcher } from "@/server/push/dispatch";
 import type { MediaStorage } from "@/server/storage/types";
 import { callerFor } from "./trpc";
 
@@ -8,8 +9,9 @@ export async function addMember(
   spaceId: string,
   role: MemberRole,
   storage?: MediaStorage,
+  push?: PushDispatcher,
 ) {
   const user = await prisma.user.create({ data: { name: role } });
   await prisma.member.create({ data: { spaceId, userId: user.id, role } });
-  return callerFor(prisma, user.id, "203.0.113.50", storage);
+  return callerFor(prisma, user.id, "203.0.113.50", storage, push);
 }

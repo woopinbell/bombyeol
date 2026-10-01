@@ -10,6 +10,7 @@ import { MEDIA_POLICY, PREGNANCY_POLICY, RATE_LIMITS } from "@/lib/plan";
 import { gestationalAge } from "@/lib/pregnancy";
 import { requireConsent } from "@/server/consents";
 import { inputError, limitError, notFound } from "@/server/errors";
+import { notify } from "@/server/push/events";
 import { removeAsset, requireAttachableAssets, withAttachConflict } from "@/server/media/assets";
 import { hitRateLimit } from "@/server/rate-limit";
 import { mediaKeys, type MediaStorage } from "@/server/storage/types";
@@ -158,7 +159,7 @@ export async function retractPregnancyRecords(
 /**
  * 임신 기록(태명 시절, PRD §4.2) — 건강 정보(PRIVACY §3).
  * 쓰기는 임신 정보에 동의한 parent. 기본은 parents_only, 가족 공개는 쓴 사람이 항목마다 고른다.
- * 반응(좋아요·댓글)은 붙이지 않는다(노출면 최소화). 알림 문구 규칙은 Phase 6.
+ * 반응(좋아요·댓글)은 붙이지 않는다(노출면 최소화). 새 기록 알림은 민감하지 않은 고정 문구로만.
  */
 export const pregnancyRouter = router({
   /** 기록 남기기(parent, 임신 동의 필요). 초음파는 사진 한 장 필수, 메모는 글 필수. 글 기록 리밋(G-07) */
@@ -207,6 +208,8 @@ export const pregnancyRouter = router({
           select: recordSelect,
         }),
       );
+      // 문구는 "새 소식이 있어요"뿐, 수신자는 발송 시점 visibility로(PRIVACY §3)
+      notify(ctx.push, { type: "pregnancy", spaceId, actorId: ctx.userId, recordId: row.id });
       return toRecord(ctx.storage, spaceId, child.dueDate, row);
     }),
 

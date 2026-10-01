@@ -39,6 +39,7 @@ model User {
   consents       Consent[]
   pregnancy      PregnancyRecord[]
   familyEvents   FamilyEvent[]
+  pushTokens     PushToken[]
 }
 
 model Account {
@@ -512,6 +513,24 @@ model FamilyEvent {
 
   @@index([spaceId, startsAt])
   @@index([spaceId, recurrence])
+}
+
+// ---------------------------------------------------------------------------
+// 웹푸시(FCM) 기기 토큰 — 기기(브라우저)마다 하나. 같은 토큰은 마지막으로 등록한 계정에만 붙는다.
+// 사용자가 사라지면 함께 지운다(G-06 연쇄). 보관: 오래 갱신되지 않은 토큰은 정리 Cron이 지운다(G-17).
+// ---------------------------------------------------------------------------
+
+model PushToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, lastSeenAt(sort: Desc)])
+  @@index([lastSeenAt])
 }
 
 // ---------------------------------------------------------------------------

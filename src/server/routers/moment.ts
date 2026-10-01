@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { MomentKind, Prisma } from "@/generated/prisma/client";
 import { MEDIA_POLICY, MOMENT_POLICY, RATE_LIMITS } from "@/lib/plan";
 import { inputError, limitError, mediaError, notFound } from "@/server/errors";
+import { notify } from "@/server/push/events";
 import { removeAsset, requireAttachableAssets, withAttachConflict } from "@/server/media/assets";
 import { mediaKeys, type MediaStorage } from "@/server/storage/types";
 import { hitRateLimit } from "@/server/rate-limit";
@@ -109,6 +110,7 @@ async function createMoment(ctx: SpaceCtx, kind: MomentKind, input: CreateInput)
       select: momentSelect,
     }),
   );
+  notify(ctx.push, { type: "moment", spaceId, actorId: ctx.userId, momentId: moment.id });
   return withReadUrls(ctx.storage, spaceId, moment);
 }
 

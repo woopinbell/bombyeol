@@ -29,6 +29,8 @@ export const RATE_LIMITS = {
   storyAskPerUser: { limit: 30, windowSec: 24 * 60 * 60 },
   /** G-07: 가족 캘린더 일정 쓰기·고치기(사용자당) */
   eventWritePerUser: { limit: 100, windowSec: 24 * 60 * 60 },
+  /** G-07: 푸시 토큰 등록(사용자당) — 앱을 열 때마다 갱신하므로 여유 있게 */
+  pushRegisterPerUser: { limit: 30, windowSec: 24 * 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 /** G-11: 계정 단위 상한(요금제와 무관) */
@@ -136,6 +138,26 @@ export const EVENT_POLICY = {
   upcomingDays: 30,
   /** 우리 탭 카드: 요청할 수 있는 최대 날 수 */
   upcomingMaxDays: 90,
+} as const;
+
+/** 웹푸시 정책(요금제 무관, ARCHITECTURE §7). FCM은 무료지만 Workers 하위 요청·소음을 막는다 */
+export const PUSH_POLICY = {
+  /** G-11: 사용자당 기기 토큰 수. 넘으면 가장 오래 안 쓴 토큰부터 지운다 */
+  tokensPerUser: 10,
+  /** G-17: 이 날 수 동안 갱신(재등록)되지 않은 토큰은 정리 Cron이 지운다 */
+  tokenStaleDays: 60,
+  /** FCM 등록 토큰 최대 길이(문자) */
+  tokenMaxChars: 4096,
+  /** 수신자 한 명에게 시간당 보내는 알림 수(가족 안의 폭주로부터 어르신 보호) */
+  perRecipientPerHour: 20,
+  /** 이벤트 하나에서 수신자당 보내는 기기 수(최근에 쓴 기기부터) */
+  tokensPerRecipient: 3,
+  /** 이벤트 하나의 최대 발송 수 — Workers 무료 플랜 하위 요청 50개 안(토큰 교환 1회 포함) */
+  maxSendsPerEvent: 40,
+  /** 좋아요·별 하나 알림: 같은 대상에 이 시간(초)에 한 번(누가 눌렀든) */
+  heartCooldownSec: 6 * 60 * 60,
+  /** 댓글 알림: 같은 대상에 이 시간(초)에 한 번 */
+  commentCooldownSec: 30 * 60,
 } as const;
 
 /**

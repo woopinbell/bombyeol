@@ -10,4 +10,7 @@ interface CloudflareEnv {
   R2_ACCOUNT_ID?: string;
   R2_ACCESS_KEY_ID?: string;
   R2_SECRET_ACCESS_KEY?: string;
+  FIREBASE_ADMIN_PROJECT_ID?: string;
+  FIREBASE_ADMIN_CLIENT_EMAIL?: string;
+  FIREBASE_ADMIN_PRIVATE_KEY?: string;
 }

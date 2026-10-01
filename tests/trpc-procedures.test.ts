@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { noPush } from "@/server/push/dispatch";
 import { createCallerFactory, router } from "@/server/trpc/init";
 import { parentProcedure, protectedProcedure, spaceProcedure } from "@/server/trpc/procedures";
 import { createTestPrisma, resetDb } from "./helpers/db";
@@ -15,7 +16,7 @@ const testRouter = router({
 });
 const createCaller = createCallerFactory(testRouter);
 const as = (userId: string | null) =>
-  createCaller({ prisma, userId, ip: "203.0.113.1", storage: new MemoryStorage() });
+  createCaller({ prisma, userId, ip: "203.0.113.1", storage: new MemoryStorage(), push: noPush });
 
 async function seed() {
   const [parent, grandma, stranger] = await Promise.all(
