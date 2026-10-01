@@ -15,7 +15,9 @@ export function storageFromEnv(env: CloudflareEnv = getCloudflareContext().env):
   };
   if (Object.values(config).every(Boolean)) return createR2Storage(config);
   const missing = (): never => {
-    throw new Error("R2 설정이 없습니다(R2_BUCKET_NAME·R2_ACCESS_KEY_ID·R2_SECRET_ACCESS_KEY).");
+    throw new Error(
+      "R2 설정이 없습니다(R2_ACCOUNT_ID·R2_BUCKET_NAME·R2_ACCESS_KEY_ID·R2_SECRET_ACCESS_KEY).",
+    );
   };
   return {
     presignPut: missing,
