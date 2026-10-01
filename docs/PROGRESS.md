@@ -4,7 +4,7 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 7): **Phase 7 삭제·개인정보 서버 7커밋, 작업 브랜치 `claude/clever-dijkstra-7qvhxv` 푸시 완료 — main 머지는 사용자 확인 대기**(UI 제외). 그 전에 FCM 스모크 점검 추가(PR woopinbell/bombyeol#9 머지) — 아래 "현재 상태 — Phase 7".
+- 단계(2026-10-01, Phase 7): **Phase 7 삭제·개인정보 서버 main 머지 완료(PR woopinbell/bombyeol#10, 머지 커밋 ea6a25e), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외). 그 전에 FCM 스모크 점검 추가(PR woopinbell/bombyeol#9 머지) — 아래 "현재 상태 — Phase 7".
 - (이전) 단계(2026-10-01, Phase 6): **Phase 6 알림 서버 main 머지 완료(PR woopinbell/bombyeol#8, 머지 커밋 934c55d), 스테이징 마이그레이션·배포·스모크 통과**(UI·공유·PWA 제외) — 아래 "현재 상태 — Phase 6".
 - (이전) 단계(2026-10-01, Phase 5): **Phase 5 우리·임신 기록 서버 main 머지 완료(PR woopinbell/bombyeol#7, 머지 커밋 6c7b55b), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 5".
 - (이전) 단계(2026-10-01, Phase 4): **Phase 4 이야기(별) 서버 main 머지 완료(PR woopinbell/bombyeol#6, 머지 커밋 fc94348), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 4".
@@ -20,7 +20,8 @@
 ## 현재 상태 — Phase 7 (2026-10-01)
 
 - 먼저 한 일(사용자 지시): 내부 스모크에 `fcm` 점검 추가 → PR woopinbell/bombyeol#9 CI 통과·머지(28bbee9). 스테이징 버전 f9a76478(같은 코드). 스모크 결과 `fcm: key: InvalidCharacterError (begin=y escaped=n newline=n quoted=n body=1626)` — **사용자가 등록한 `FIREBASE_ADMIN_PRIVATE_KEY` 값의 형식 문제**(코드는 클라우드 환경 키로 `invalid_token` 정상 확인). 재등록 방법은 ENV_MANIFEST Phase 6. 다른 항목(db·R2)은 전부 정상.
-- 작업 브랜치 `claude/clever-dijkstra-7qvhxv`(main 28bbee9 위) 7커밋, 푸시 완료: `chore(prisma)` DeletionRequest(+MediaStatus `purging`) → `feat(privacy)` 아이·반려동물 삭제 → Space 삭제(유예·파기) → 계정 삭제 → 데이터 내보내기 → `fix(privacy)` 초대 입력 실패 기록 삭제 → `test(privacy)` 잔존 데이터 0. **main 머지 전 사용자 확인 필요**(COMMIT_PLAN Phase 7 메모 ①~⑥). PR 아직 없음.
+- 작업 브랜치 `claude/clever-dijkstra-7qvhxv`(main 28bbee9 위) 7커밋, 푸시 완료: `chore(prisma)` DeletionRequest(+MediaStatus `purging`) → `feat(privacy)` 아이·반려동물 삭제 → Space 삭제(유예·파기) → 계정 삭제 → 데이터 내보내기 → `fix(privacy)` 초대 입력 실패 기록 삭제 → `test(privacy)` 잔존 데이터 0. **사용자가 ①~⑥ 전부 승인 → PR woopinbell/bombyeol#10 CI 통과(4분) → 머지 커밋으로 main 머지(ea6a25e).** 작업 브랜치는 머지된 main으로 맞춤.
+- 스테이징: main push로 `Migrate staging DB` 자동 실행 성공(`deletion`·`media_purging` 적용). Worker 배포(버전 f3842fdf, Startup 31ms, Cron 유지). 스모크: health 200, 새 경로(`user.deleteAccount`·`space.requestDeletion`·`space.deletionStatus`·`child.delete`·`archive.media·records`) 비로그인 401, 내부 스모크 db·R2 전부 ok, `fcm`은 여전히 `key: InvalidCharacterError`(사용자 키 재등록 대기). 배포 직후 몇 초는 이전 버전이 응답해 `archive.*`가 404였다 — 재확인 401.
 - 로컬 검증: format·lint·typecheck·Vitest **289건** 통과(264 → 289), OpenNext 빌드, `wrangler deploy --dry-run --env staging` 13.51 MiB(gzip 3.64 MiB). 뮤테이션 점검: 초대 실패 기록 삭제를 빼면 잔존 데이터 테스트가 `InviteCodeAttempt: 1`로 실패.
 - 새 마이그레이션 2개: `20261001161920_deletion`(DeletionRequest + Space당 진행 중 요청 하나 부분 unique + 종류별 체크 제약), `20261001162057_media_purging`(MediaStatus `purging`). main 머지 시 `Migrate staging DB`가 자동 적용.
 - 새 API: `child.delete`·`pet.delete`(이름 재입력), `space.requestDeletion`(Space 이름 재입력)·`cancelDeletion`·`deletionStatus`, `user.deleteAccount({confirm:true})`, `archive.media`·`archive.records`(parent, 페이지). 정리 Cron에 Space 파기·purging 파일 삭제 단계 추가.
@@ -32,13 +33,20 @@
 - 남긴 것: 웹 삭제 페이지·설정 화면(UI), 구독 해지 연쇄(Phase 8 — `TODO(G-06)`), 동의 기록 보존 기간 법적 요건(A-12), 계정 삭제 화면의 "떠난 가족" 표시(UI — 서버는 이름 null).
 - 환경 메모: `npx prisma migrate dev`를 바로 부르면 클라우드 환경의 `DATABASE_URL`(Supabase)로 간다 — 이번에 한 번 그렇게 불렀다가 접속 실패로 아무 일도 없었다. **마이그레이션은 반드시 `npm run db:migrate -- ...`**. Prisma는 AI 에이전트의 `migrate reset`을 막는다(사용자 동의 필요) — 로컬 마이그레이션을 고쳐야 하면 새 마이그레이션을 더한다. 스크립트 실수로 컨테이너 루트에 `/migration.sql`(마이그레이션 SQL 조각, 비밀 없음)이 생겼고 안전 검사로 지우지 못했다 — 컨테이너와 함께 사라진다.
 
-### 확인 요청 (사용자, main 머지 전)
+### 확인 결과 (2026-10-01)
 
-COMMIT_PLAN Phase 7 메모 ①~⑥: ① 계정 삭제 시 콘텐츠는 Space에 남기고 사람만 지움(묘비 User) ② 임신 기록은 계정과 함께 삭제 ③ 마지막 parent 보호(`LAST_PARENT`)·혼자 남은 Space 즉시 파기 ④ Space 삭제 유예 30일·유예 중 읽기·내보내기·취소만 ⑤ 내보내기는 서버 목록 + 클라이언트 ZIP, parent만 ⑥ 아이·반려동물 삭제(반려동물 이야기는 남김).
+COMMIT_PLAN Phase 7 메모 ①~⑥ **전부 사용자 승인**: ① 계정 삭제 시 콘텐츠는 Space에 남기고 사람만 지움(묘비 User) ② 임신 기록은 계정과 함께 삭제 ③ 마지막 parent 보호(`LAST_PARENT`)·혼자 남은 Space 즉시 파기 ④ Space 삭제 유예 30일·유예 중 읽기·내보내기·취소만 ⑤ 내보내기는 서버 목록 + 클라이언트 ZIP, parent만 ⑥ 아이·반려동물 삭제(반려동물 이야기는 남김).
+
+### 세션 이동 권고 (2026-10-01, Phase 7 종료 시점)
+
+- **새 세션으로 옮긴다.** 진행 중 PR 없음(PR woopinbell/bombyeol#10 머지·구독 해제 완료). 이 세션은 Phase 6·7과 FCM 스모크까지 마쳐 컨텍스트가 크다.
+- 코드 상태: 작업 브랜치 `claude/clever-dijkstra-7qvhxv` = main ea6a25e. 새 세션은 main에서 자기 작업 브랜치를 딴다.
+- 새 세션 시작 시: `dockerd &` → `npm run db:up`, `npm ci`, 마이그레이션은 **`npm run db:migrate -- --name <이름>`만**(직접 `npx prisma migrate`는 원격 DB로 간다).
+- 다음 작업은 사용자 결정: Phase DS(디자인 스프린트 — Kaddie 상황) 또는 Phase 8(결제 — Q-PAY 결정 먼저). 서버만 남은 일로는 Phase 9 e2e(`test(e2e)`)가 화면 없이도 일부 가능.
 
 ### 다음 할 일 (Phase 7 이후)
 
-1. 사용자 확인 → PR → CI → 머지 → `Migrate staging DB`(마이그레이션 2개) → 스테이징 배포·스모크.
+1. ~~사용자 확인·PR·머지·스테이징 반영~~ 완료(PR woopinbell/bombyeol#10, ea6a25e, 버전 f3842fdf).
 2. 사용자: `FIREBASE_ADMIN_PRIVATE_KEY` 재등록(ENV_MANIFEST Phase 6) → 스모크 `fcm: invalid_token` 확인.
 3. 다음 개발 후보: Phase DS(Kaddie 디자인 상황에 따라 — 사용자 결정) 또는 Phase 8(Q-PAY 결정 필요).
 
