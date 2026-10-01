@@ -1,40 +1,18 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import type { PrismaClient } from "@/generated/prisma/client";
 import { CONSENT_VERSIONS } from "@/lib/consents";
 import { runCleanup } from "@/server/jobs/cleanup";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
+import { leftovers } from "./helpers/residual";
 import { callerFor } from "./helpers/trpc";
 
-// G-06: 삭제 후 잔존 데이터 0. 표 목록을 DB에서 직접 읽어 검사하므로, 앞으로 spaceId·userId 열을 가진
-// 모델이 늘어도 삭제 연쇄에서 빠지면 이 테스트가 잡는다.
+// G-06: 삭제 후 잔존 데이터 0. 표 목록을 DB에서 직접 읽어 검사하므로(helpers/residual), 앞으로 spaceId·userId
+// 열을 가진 모델이 늘어도 삭제 연쇄에서 빠지면 이 테스트가 잡는다.
 // 구독 해지 호출 검증은 Phase 8(Subscription 모델)에서 이 파일에 더한다 — TODO(G-06).
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
-
-/** 기록으로 남기는 것이 의도인 표(id만, 개인정보 없음) */
-const KEPT = new Set(["DeletionRequest"]);
-
-async function tablesWith(column: string) {
-  const rows = await prisma.$queryRaw<{ table_name: string }[]>`
-    select table_name from information_schema.columns
-    where table_schema = 'public' and column_name = ${column}`;
-  return rows.map((r) => r.table_name).filter((t) => !KEPT.has(t));
-}
-
-async function leftovers(db: PrismaClient, column: string, value: string) {
-  const found: Record<string, number> = {};
-  for (const table of await tablesWith(column)) {
-    const [{ n }] = await db.$queryRawUnsafe<{ n: bigint }[]>(
-      `select count(*) as n from "${table}" where "${column}" = $1`,
-      value,
-    );
-    if (Number(n) > 0) found[table] = Number(n);
-  }
-  return found;
-}
 
 /** 모델을 고루 채운 가족 */
 async function richFamily() {
