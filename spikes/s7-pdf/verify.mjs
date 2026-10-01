@@ -1,0 +1,14 @@
+import { PDFDocument } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
+import fs from "fs";
+const doc = await PDFDocument.create(); doc.registerFontkit(fontkit);
+const font = await doc.embedFont(fs.readFileSync("font.ttf"), { subset: true });
+const page = doc.addPage([595, 842]);
+const want = "할머니가 들려준 이야기 — 봄별 똠방각하 뷁 2026년";
+page.drawText(want, { x: 50, y: 780, size: 16, font });
+const bytes = await doc.save();
+const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+const pdf = await pdfjs.getDocument({ data: new Uint8Array(bytes) }).promise;
+const tc = await (await pdf.getPage(1)).getTextContent();
+const got = tc.items.map(i => i.str).join("");
+console.log("extracted:", got); console.log("match:", got.replace(/\s/g,"") === want.replace(/\s/g,""));
