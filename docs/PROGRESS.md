@@ -4,7 +4,7 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 5): **Phase 5 우리·임신 기록 서버 구현 완료(UI 제외), 작업 브랜치 푸시 — 설계 결정 ①~⑤ 사용자 확인 대기, main 미머지** — 아래 "현재 상태 — Phase 5".
+- 단계(2026-10-01, Phase 5): **Phase 5 우리·임신 기록 서버 main 머지 완료(PR woopinbell/bombyeol#7, 머지 커밋 6c7b55b), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 5".
 - (이전) 단계(2026-10-01, Phase 4): **Phase 4 이야기(별) 서버 main 머지 완료(PR woopinbell/bombyeol#6, 머지 커밋 fc94348), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 4".
 - (이전) 단계(2026-10-01, Phase 3): **Phase 3 오늘(봄) 서버 main 머지 완료(PR woopinbell/bombyeol#5, 머지 커밋 3b0d90d), 스테이징 마이그레이션·배포 완료, R2 Secret 3종 재등록 후 스모크 전부 통과** — 아래 "현재 상태 — Phase 3".
 - (이전) 단계(2026-10-01, Phase 2): **Phase 2 미디어 서버 커밋 완료, 스테이징 배포, R2 토큰 대기** — 아래 "현재 상태 — Phase 2".
@@ -17,7 +17,8 @@
 
 ## 현재 상태 — Phase 5 (2026-10-01)
 
-- 작업 브랜치 `claude/compassionate-knuth-whf5li`(main fc94348에서 시작) 8커밋, 푸시 완료: prisma(Consent·PregnancyRecord·FamilyEvent) → consent → pregnancy → test(pregnancy) parents_only 비노출 → refactor(memorial) 공용 기념일 계산 → calendar → family 멤버 관리 → family 다가오는 카드. **PR·main 머지는 아직 — 사용자 확인 대기(COMMIT_PLAN Phase 5 메모의 ①~⑤).** 우리 탭 화면(`feat(us)`)은 Phase DS 이후.
+- 작업 브랜치 `claude/compassionate-knuth-whf5li`(main fc94348에서 시작) 8커밋, 푸시 완료: prisma(Consent·PregnancyRecord·FamilyEvent) → consent → pregnancy → test(pregnancy) parents_only 비노출 → refactor(memorial) 공용 기념일 계산 → calendar → family 멤버 관리 → family 다가오는 카드. **사용자가 결정 ①~⑤ 승인 → PR woopinbell/bombyeol#7 CI 통과(3분 30초) → 머지 커밋으로 main 머지(6c7b55b).** 작업 브랜치는 머지된 main으로 맞춤. 우리 탭 화면(`feat(us)`)은 Phase DS 이후.
+- 스테이징: main push로 `Migrate staging DB` 자동 실행 성공(`us` 적용). Worker 배포(버전 9ea65ea3, 13.46 MiB, Startup 27ms, Cron 유지). 스모크: health 200, 내부 스모크 db ok·R2 PUT 크기/타입 위반 403·정확 PUT 200·head·copy·cleanup ok, 새 경로(`pregnancy.list·progress`, `calendar.list`, `family.upcoming·members`, `consent.status`) 비로그인 401, 없는 경로 404. 배포 직후 몇 초는 이전 버전이 응답해 새 경로가 404로 보였다 — 잠시 뒤 재확인하면 401.
 - 로컬 검증: format·lint·typecheck·Vitest **223건** 통과(181 → 223), OpenNext 빌드 통과, `wrangler deploy --dry-run --env staging` 13.46 MiB(gzip 3.62 MiB). visibility 필터를 빼면 비노출 테스트 8건 중 6건이 실패하는 것도 확인(테스트가 실제로 막는지 점검).
 - 새 마이그레이션 `20261001144552_us`: enum 4개, 테이블 3개, 체크 제약 4개(Consent 범위 — 약관·처리방침은 spaceId 없음/아이·임신은 있음, 초음파 ↔ 사진, 메모 글 필수, 일정 끝 ≥ 시작). main 머지 시 `Migrate staging DB`가 자동 적용.
 - 새 API(전부 서버, tRPC): `consent.status·grantAccount·grantSpace·withdraw`, `pregnancy.create·update·delete·list·get·progress`, `calendar.create·update·delete·list`, `family.members·upcoming·updateLabel·changeRole·remove·leave`.
@@ -31,17 +32,20 @@
 - 남긴 것(의도적으로 범위 밖): 가입 동의 전체 게이트(온보딩), 아이 정보 동의 철회·아이 삭제(Phase 7), 임신 관련 알림 문구(Phase 6 — "새 소식이 있어요"), 임신 기록 반응(두지 않음 — 확인 요청 ③), 사람 생일 자동 카드(멤버 생일 필드 없음 — 캘린더에 `birthday`로 등록), DST 경계의 반복 일정 현지 시각 보정.
 - 환경 메모: 이 VM에서 Docker Hub가 `429 Too Many Requests`로 `postgres:17.11` pull을 거부했다 → `docker pull mirror.gcr.io/library/postgres:17.11 && docker tag mirror.gcr.io/library/postgres:17.11 postgres:17.11` 후 `npm run db:up`으로 해결. 마이그레이션 생성 후 `npx prisma generate`를 따로 돌려야 클라이언트가 갱신됐다.
 
-### 확인 요청 (Phase 5 머지 전)
+### 확인 결과 (2026-10-01)
 
-COMMIT_PLAN Phase 5 메모의 ①~⑤: ① 가입 동의 게이트를 온보딩 때 걸기 ② 철회 시 "지우기/공개 거두기" 선택 ③ 임신 기록 권한(쓴 사람만 고치기·공개, 다른 parent는 좁히기만, 반응 없음) ④ 아이 프로필(태명·예정일)은 가족에게 계속 보임 ⑤ 만든 사람 보호·나가기 불가. 승인되면 PR → CI → 머지 커밋 → 스테이징 마이그레이션·스모크(Phase 3·4와 같은 방식).
+- COMMIT_PLAN Phase 5 메모의 ①~⑤ **전부 사용자 승인**: ① 가입 동의 게이트는 온보딩 때 ② 철회 시 지우기/공개 거두기 선택 ③ 임신 기록 권한(쓴 사람만 고치기·공개, 다른 parent는 좁히기만, 반응 없음) ④ 아이 프로필(태명·예정일)은 가족에게 보임 ⑤ 만든 사람 보호·나가기 불가.
 
-### 세션 이동 권고 (2026-10-01, Phase 5 구현 시점)
+### 세션 이동 권고 (2026-10-01, Phase 5 종료 시점)
 
-- **확인·PR·머지·스테이징 반영까지는 이 세션에서 계속**(구현 맥락이 있고, 환경 변경 필요 없음 — Phase 5에 새 키 없음). Phase 6(알림)부터는 새 세션 권장: FCM 키(ENV_MANIFEST Phase 6 항목)로 환경변수를 바꿔야 할 가능성이 높다.
+- **새 세션으로 옮긴다.** 진행 중 PR 없음(PR woopinbell/bombyeol#7 머지·구독 해제 완료). Phase 6(알림)은 FCM 키가 필요할 수 있어(ENV_MANIFEST Phase 6) 환경변수를 바꾸면 새 세션이 필요하다.
+- 코드 상태: 작업 브랜치 `claude/compassionate-knuth-whf5li` = main 6c7b55b. 새 세션은 main에서 자기 작업 브랜치를 딴다.
+- 새 세션 시작 시: Docker 데몬(`dockerd &`), Docker Hub 429면 GCR 미러(위 환경 메모), `npm ci`, 스키마 변경 후 `npx prisma generate`.
+- 새 세션 첫 프롬프트(`CLOUD_SESSION.md` §4.1, 3번만 채움): "오늘 할 일: Phase 6(알림) 서버 먼저, UI 제외. 필요한 키는 ENV_MANIFEST 기준 이름부터 알려주고 멈춰. 알림 문구에 민감 정보 금지(PRIVACY §3), 수신자 멤버십·임신 visibility 재확인."
 
 ### 다음 할 일 (Phase 5 이후)
 
-1. 사용자 확인(①~⑤) → PR·CI·main 머지(머지 커밋) → 스테이징 마이그레이션 자동 적용 확인·배포·스모크(`pregnancy.list`·`calendar.list`·`family.upcoming` 비로그인 401 등).
+1. ~~사용자 확인·PR·머지·스테이징 반영~~ 완료(PR woopinbell/bombyeol#7, 6c7b55b, 버전 9ea65ea3).
 2. 다음 개발: Phase 6(알림) — 키 필요 여부는 ENV_MANIFEST 확인 후 이름부터 알리고 멈춘다.
 3. (Phase 3에서 이어짐) 브라우저 직접 업로드 CORS는 UI 이후 사용자 기기.
 

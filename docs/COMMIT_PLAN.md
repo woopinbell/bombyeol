@@ -113,7 +113,7 @@
 
 ## Phase 5 — 우리·임신 기록
 
-> 2026-10-01 서버 설계(세션 제안 — 구현 완료, 브랜치 `claude/compassionate-knuth-whf5li`. **머지 전 사용자 확인 대기**: 아래 ①~⑤. 수치는 `plan.ts` 초안):
+> 2026-10-01 서버 설계(세션 제안 → ①~⑤ **사용자 승인**, PR woopinbell/bombyeol#7 머지. 수치는 `plan.ts` 초안):
 > - **동의(Consent)**: 추가 전용 기록 `Consent(userId, spaceId?, kind, version, grantedAt, withdrawnAt?)`. kind = `terms`·`privacy`(사용자 단위, spaceId 없음) / `child_data`(법정대리인 동의)·`pregnancy`(Space 단위). 현재 문구 버전은 코드 카탈로그 `src/lib/consents.ts` 한 곳 — 버전이 바뀌면 옛 동의는 "유효하지 않음"이 되어 다시 받는다. 유효 = 철회 안 됨 + 현재 버전. 같은 동의를 다시 누르면 기존 행을 돌려준다(advisory lock).
 > - **서버 강제 범위(이번)**: **임신 동의만 강제** — 임신 기록 쓰기·고치기는 쓰는 사람의 유효한 `pregnancy` 동의가 있어야 한다(`CONSENT_REQUIRED`). 동의는 parent만 할 수 있다(임신 기록을 쓰는 사람). `terms`·`privacy`·`child_data`는 이번엔 **기록·조회(`consent.status`로 빠진 동의 목록)만** 하고, 로그인 후 모든 API를 막는 게이트는 온보딩 화면 커밋(Phase 1 `feat(onboarding)`)에서 함께 건다(지금 걸면 화면 없이 모든 API가 막힌다). → **확인 요청 ①**
 > - **철회**: 이번엔 `pregnancy`만 철회 가능(약관·처리방침 철회 = 계정 삭제는 Phase 7, 아이 정보 철회 = 아이 삭제도 Phase 7). 철회 시 옵션 `deleteRecords`: 참이면 그 Space에서 **내가 쓴** 임신 기록과 초음파 파일을 지운다(R2 먼저, G-05). 거짓이면 기록은 남기되 **내가 쓴 기록을 전부 `parents_only`로 되돌린다**(동의를 거뒀으니 가족 공개도 거둔다 — 보수적). 철회 후에는 새 기록·수정 불가. → **확인 요청 ②**
