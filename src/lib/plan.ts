@@ -9,6 +9,8 @@ export type PlanTier = "free" | "premium";
 export const RATE_LIMITS = {
   /** G-07: 로그인 시작·콜백 요청(IP당) */
   authPerIp: { limit: 30, windowSec: 60 * 60 },
+  /** G-07: 초대 발급(사용자당) */
+  inviteIssuePerUser: { limit: 20, windowSec: 24 * 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 /** G-11: 계정 단위 상한(요금제와 무관) */
@@ -19,6 +21,14 @@ export const ACCOUNT_LIMITS = {
   deletedSpaceCooldownDays: 30,
   /** 한 사용자가 속할 수 있는 Space 수(양가 조부모 등) */
   membershipsPerUser: 6,
+} as const;
+
+/** 초대코드 정책 */
+export const INVITE_POLICY = {
+  /** 유효 시간 */
+  ttlHours: 72,
+  /** G-11: Space당 동시에 유효한(미사용·미회수·미만료) 초대 수 */
+  activePerSpace: 10,
 } as const;
 
 type TierLimits = {
