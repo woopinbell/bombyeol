@@ -29,6 +29,9 @@ model User {
   invitesUsed    Invite[]     @relation("InviteUsedBy")
   childrenAdded  Child[]
   mediaUploaded  MediaAsset[]
+  petsAdded      Pet[]
+  moments        Moment[]
+  milestones     Milestone[]
 }
 
 model Account {
@@ -62,12 +65,15 @@ model Space {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  createdBy User           @relation("SpaceCreatedBy", fields: [createdById], references: [id])
-  members   Member[]
-  invites   Invite[]
-  children  Child[]
-  media     MediaAsset[]
-  usage     UsageCounter[]
+  createdBy  User           @relation("SpaceCreatedBy", fields: [createdById], references: [id])
+  members    Member[]
+  invites    Invite[]
+  children   Child[]
+  pets       Pet[]
+  moments    Moment[]
+  milestones Milestone[]
+  media      MediaAsset[]
+  usage      UsageCounter[]
 
   @@index([createdById])
 }
@@ -139,10 +145,123 @@ model Child {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  space     Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  createdBy User  @relation(fields: [createdById], references: [id])
+  space      Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdBy  User        @relation(fields: [createdById], references: [id])
+  moments    Moment[]
+  milestones Milestone[]
 
   @@index([spaceId])
+}
+
+// ---------------------------------------------------------------------------
+// 반려동물 — 계정 없는 가족 구성원(PRD §4.2.1). 기념 상태 전환은 Phase 4(memorial).
+// ---------------------------------------------------------------------------
+
+enum PetSpecies {
+  dog
+  cat
+  other
+}
+
+enum PetStatus {
+  living
+  memorial
+}
+
+model Pet {
+  id                 String     @id @default(cuid())
+  spaceId            String
+  name               String
+  species            PetSpecies
+  speciesLabel       String? // other일 때 자유 입력(토끼·햄스터 등)
+  breed              String?
+  birthDate          DateTime?  @db.Date
+  birthDateEstimated Boolean    @default(false)
+  adoptedAt          DateTime?  @db.Date
+  passedAt           DateTime?  @db.Date
+  status             PetStatus  @default(living)
+  coverAssetId       String?    @unique
+  createdById        String
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  space      Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdBy  User        @relation(fields: [createdById], references: [id])
+  cover      MediaAsset? @relation("PetCover", fields: [coverAssetId], references: [id])
+  moments    Moment[]
+  milestones Milestone[]
+
+  @@index([spaceId])
+}
+
+// ---------------------------------------------------------------------------
+// 오늘(봄) — Moment는 사진·영상 기록(media) 또는 부모 일기(diary).
+// 대상: childId·petId 중 최대 하나(둘 다 비면 가족 전체) — 마이그레이션의 체크 제약으로 강제.
+// ---------------------------------------------------------------------------
+
+enum MomentKind {
+  media
+  diary
+}
+
+model Moment {
+  id          String     @id @default(cuid())
+  spaceId     String
+  childId     String?
+  petId       String?
+  kind        MomentKind
+  body        String?
+  takenAt     DateTime // 촬영·기록 시각(피드 정렬 기준)
+  createdById String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  space     Space         @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  child     Child?        @relation(fields: [childId], references: [id], onDelete: Cascade)
+  pet       Pet?          @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdBy User          @relation(fields: [createdById], references: [id])
+  media     MomentMedia[]
+
+  @@index([spaceId, takenAt(sort: Desc), id(sort: Desc)])
+  @@index([childId, takenAt(sort: Desc)])
+  @@index([petId, takenAt(sort: Desc)])
+}
+
+// Moment 첨부. 자산 하나는 한 곳에만 붙는다(unique) — 삭제 연쇄(G-05)와 사용량 계산을 단순하게.
+model MomentMedia {
+  momentId         String
+  position         Int
+  assetId          String  @unique
+  thumbnailAssetId String? @unique // 클라이언트가 만든 썸네일(이미지 자산)
+
+  moment    Moment      @relation(fields: [momentId], references: [id], onDelete: Cascade)
+  asset     MediaAsset  @relation("MomentAsset", fields: [assetId], references: [id])
+  thumbnail MediaAsset? @relation("MomentThumbnail", fields: [thumbnailAssetId], references: [id])
+
+  @@id([momentId, position])
+}
+
+// 마일스톤 — 키·몸무게·첫 걸음 등. 값은 kind별 스키마(zod)로 검증한 JSON.
+// 대상: childId·petId 중 정확히 하나 — 체크 제약.
+model Milestone {
+  id          String   @id @default(cuid())
+  spaceId     String
+  childId     String?
+  petId       String?
+  kind        String // 프리셋 키(src/lib/milestones.ts) 또는 custom
+  value       Json
+  recordedAt  DateTime @db.Date
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  space     Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  child     Child? @relation(fields: [childId], references: [id], onDelete: Cascade)
+  pet       Pet?   @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdBy User   @relation(fields: [createdById], references: [id])
+
+  @@index([childId, recordedAt(sort: Desc)])
+  @@index([petId, recordedAt(sort: Desc)])
 }
 
 // ---------------------------------------------------------------------------
@@ -186,8 +305,11 @@ model MediaAsset {
   confirmedAt  DateTime?
   deletedAt    DateTime?
 
-  space      Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  uploadedBy User  @relation(fields: [uploadedById], references: [id])
+  space       Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  uploadedBy  User         @relation(fields: [uploadedById], references: [id])
+  petCover    Pet?         @relation("PetCover")
+  momentMedia MomentMedia? @relation("MomentAsset")
+  momentThumb MomentMedia? @relation("MomentThumbnail")
 
   @@index([spaceId, status])
   @@index([status, createdAt])
