@@ -40,6 +40,24 @@ printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
 - hamkke의 교훈: 클라우드 환경변수 `DATABASE_URL`이 **실제 DB**를 가리키면 로컬 테스트·마이그레이션이 실수로 실DB에 닿는다. 봄별은 클라우드 환경에 **개발/테스트용 값만** 넣고, 테스트·e2e는 로컬 Docker Postgres를 쓰며 원격 DB면 스스로 거부하는 가드를 둔다.
 - Docker는 클라우드 VM에서 사용 가능(문서 확인). 로컬 Postgres는 `docker compose`로 띄운다.
 
+## 2.1 작업 위치 규칙 (사용자 결정, 2026-10-01)
+
+배경: 클라우드 VM은 IPv6 미지원·프록시 밖 TCP 차단이라 Supabase(직결 IPv6)에 직접 닿지 않는다(`PROGRESS.md` "Phase S 키 확인"). 기준은 **기능별이 아니라 작업 성격별**로 나눈다.
+
+| 어디서 | 하는 일 |
+|---|---|
+| **클라우드 세션(기본)** | 거의 모든 개발 커밋, 로컬 Docker Postgres 기반 단위·통합·e2e, Cloudflare 배포·리소스 조작(API), 문서 |
+| **CI(GitHub Actions)** | Supabase 마이그레이션 적용(IPv4 풀러 문자열, S-1에서 확정), 배포 후 스모크 테스트 |
+| **사용자 기기(배포 URL로 확인)** | 실제 카카오·Google 로그인, 실기기 푸시 수신, PWA 설치, 디자인 육안 확인 |
+| **로컬 Claude 세션(예외)** | 실제 DB 직접 접근이 꼭 필요한 디버깅(느린 쿼리·연결 문제)만 |
+
+운영 규칙:
+1. Supabase는 **일반 Postgres로만** 쓴다(RLS·Supabase Auth·Storage 미사용). 로컬 Docker Postgres는 Supabase와 같은 메이저 버전으로 고정.
+2. **Phase 완료 조건에 배포 스모크**(스테이징 Worker → Hyperdrive → Supabase 핵심 쿼리 왕복)를 넣는다. 검증을 몰아서 하지 않는다.
+3. 같은 기능을 두 위치에서 나눠 하지 않는다. 어디서 하든 상태의 기준은 git + `PROGRESS.md`.
+4. 이 VM에서 검증하지 못한 항목은 `PROGRESS.md` "미완료 검증"에 반드시 기록한다.
+5. 로컬 세션은 실DB에 닿으므로 "원격 DB면 테스트·마이그레이션 거부" 가드를 우회하지 않는다.
+
 ## 3. API 키·환경변수 절차 (질문 7의 답)
 
 ### 3.1 짧은 답
