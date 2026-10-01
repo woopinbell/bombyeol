@@ -4,7 +4,7 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase 0 세션): **Phase 0 코드 커밋 완료(디자인 토큰 이식 제외)** — 작업 브랜치 `claude/cloud-session-phase-0-72a2lc`에 9커밋 푸시, **main 머지는 사용자 확인 대기**. 스테이징 배포·Hyperdrive 생성·CI 마이그레이션 시크릿은 사용자 승인/등록 대기(아래 "다음 할 일").
+- 단계(2026-10-01, Phase 0 세션): **Phase 0 코드 커밋 완료(디자인 토큰 이식 제외)** — 작업 브랜치 `claude/cloud-session-phase-0-72a2lc`에 9커밋 푸시, **main 머지 완료(PR woopinbell/bombyeol#2, 머지 커밋 06591ce)**. 스테이징 배포·Hyperdrive 생성·CI 마이그레이션 시크릿은 사용자 승인/등록 대기(아래 "다음 할 일").
 - (이전) 단계(2026-10-01 갱신): **스택 확정 — 스파이크 S-1~S-8 전부 통과, ARCHITECTURE 확정(사용자 승인). 다음은 Phase 0.** 스파이크 Cloudflare 리소스(Worker·Hyperdrive·R2 버킷)는 삭제 완료. main은 여전히 초기 커밋뿐.
 - (이전 기록) 기반 문서 작성 완료, 리포 부트스트랩 완료(2026-10-01). GitHub private 리포 `woopinbell/bombyeol` 생성, `main`(빈 초기 커밋 9744db2)·`docs`(고아, 8621748) 푸시 완료. 클라우드 환경은 사용자가 claude.ai/code에서 만든다(허용 도메인 Custom, 개발용 키만). 첫 세션 프롬프트는 `docs/CLOUD_SESSION.md` §4.
 - 결정 완료(사용자): 식별자 `bombyeol` / 서버리스 재선정 / 웹·PWA 우선 후 Android / 새 GitHub private 리포 + `docs` 고아 브랜치 / 비용 방어는 설계 제약 / 개인정보 초기 설계 / 텍스트 우선·음성 후속 / 가족 1 Space 안에 여러 아이 / 카카오+Google 로그인 / Cloudflare 검토 / next-intl(한국어만 출시) / 임신 기록·고인 처리 V1 포함 / PDF 다운로드 프리미엄 / 웹푸시 + 카카오톡 공유 / devlog는 docs 브랜치에만 / hamkke 절대 원칙 4종 계승.
@@ -15,7 +15,7 @@
 Phase 0 코드는 `claude/cloud-session-phase-0-72a2lc`에 있다(main 미머지). 커밋: repo → tooling(ESLint/Prettier) → tooling(Tailwind·shadcn) → infra → prisma → testing → i18n → env → ci. 로컬 검증: format·lint·typecheck·Vitest 6건·`next build`·OpenNext 빌드·`wrangler dev`(로컬 Hyperdrive → Docker PG 17.11 왕복) 통과. GitHub CI(PR 또는 main push에서만 실행)는 PR woopinbell/bombyeol#2에서 첫 실행 **통과**(2026-10-01, 1분 45초, Postgres 서비스 컨테이너 포함).
 
 사용자 결정·작업 대기:
-1. **PR woopinbell/bombyeol#2 머지 여부** — CI 통과·충돌 없음. 머지 커밋으로(squash 금지, WORKFLOW §3).
+1. ~~PR woopinbell/bombyeol#2 머지~~ 완료(2026-10-01, 머지 커밋 06591ce). Phase 1은 main에서 새로 딴 작업 브랜치로.
 2. **GitHub Actions 시크릿 `STAGING_DATABASE_URL`** 등록(Supabase Session pooler IPv4 문자열, ENV_MANIFEST "Phase 0 — CI·로컬"). 등록 후 `Migrate staging DB` 워크플로 수동 실행으로 풀러 경로 확인.
 3. **스테이징 리소스 생성 승인**: Hyperdrive `bombyeol-staging`(DATABASE_URL 직결로 생성) + Worker `bombyeol-staging` 배포(`npm run cf:deploy:staging`). 승인되면 Hyperdrive id를 `wrangler.jsonc`의 `env.staging.hyperdrive`에 추가하는 커밋 → 배포 스모크. URL은 `bombyeol-staging.<계정 서브도메인>.workers.dev` 예상 → 카카오·Google redirect URI 갱신 필요(Phase 1 전).
 4. 원격 임시 브랜치 **`tmp-v2-pushtest` 삭제**(GitHub 웹 Branches 화면). V-2 시험용으로 기존 docs 커밋(df7b358)을 가리킬 뿐 새 커밋은 없다. 클라우드 세션의 `git push --delete`는 원격이 연결을 끊어 실패했다.
@@ -197,3 +197,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: S-5 실기기 통과 → 스파이크 전부 통과. 사용자 승인으로 ARCHITECTURE 확정, 스파이크 리소스(Worker·Hyperdrive·R2 버킷) 삭제(기존 `hamkke` 버킷은 유지). Phase 0은 새 세션 권장.
 - 2026-10-01: PR woopinbell/bombyeol#1(spike→main)이 실수로 머지됐으나, 사용자가 로컬에서 main을 9744db2로 되돌림(확인 완료). 원격 브랜치는 `main`(9744db2), `docs`, `spike/s1-opennext-prisma`(참고용, 머지 금지) 3개. Phase 0은 새 세션에서 main 기준 작업 브랜치로 시작.
 - 2026-10-01(Phase 0 세션): 부트스트랩·V-1~V-5 재검증(위 "재검증"), 스파이크는 이미 통과라 재실행 안 함. Phase 0 9커밋(디자인 토큰 제외 + CI 추가)을 `claude/cloud-session-phase-0-72a2lc`에 푸시. COMMIT_PLAN·ENV_MANIFEST 갱신. 대기: main 머지, `STAGING_DATABASE_URL` 시크릿, 스테이징 리소스 생성 승인, `tmp-v2-pushtest` 삭제.
+- 2026-10-01: PR woopinbell/bombyeol#2 CI 통과 후 사용자가 머지 커밋으로 머지(06591ce).
