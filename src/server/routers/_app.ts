@@ -1,4 +1,6 @@
 import { publicProcedure, router } from "@/server/trpc/init";
+import { childRouter } from "./child";
+import { spaceRouter } from "./space";
 
 export const appRouter = router({
   // 배포 스모크: Worker → Hyperdrive → Postgres 왕복(CLOUD_SESSION §2.1)
@@ -6,6 +8,8 @@ export const appRouter = router({
     await ctx.prisma.$queryRaw`select 1`;
     return { ok: true };
   }),
+  space: spaceRouter,
+  child: childRouter,
 });
 
 export type AppRouter = typeof appRouter;
