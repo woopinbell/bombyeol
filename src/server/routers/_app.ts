@@ -1,6 +1,7 @@
 import { publicProcedure, router } from "@/server/trpc/init";
 import { childRouter } from "./child";
 import { inviteRouter } from "./invite";
+import { mediaRouter } from "./media";
 import { spaceRouter } from "./space";
 import { userRouter } from "./user";
 
@@ -14,6 +15,7 @@ export const appRouter = router({
   space: spaceRouter,
   child: childRouter,
   invite: inviteRouter,
+  media: mediaRouter,
 });
 
 export type AppRouter = typeof appRouter;

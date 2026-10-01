@@ -7,6 +7,9 @@ export type LimitReason =
   | "CHILD_LIMIT"
   | "MEMBER_ROLE_LIMIT"
   | "INVITE_ACTIVE_LIMIT"
+  | "FILE_TOO_LARGE"
+  | "STORAGE_LIMIT"
+  | "PENDING_LIMIT"
   | "RATE_LIMITED";
 
 export type InviteFailure = "INVITE_INVALID" | "ALREADY_MEMBER";

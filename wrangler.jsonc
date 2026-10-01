@@ -27,7 +27,8 @@
       "name": "bombyeol-staging",
       "workers_dev": true,
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol-staging" }],
-      "vars": { "APP_ENV": "staging" },
+      // R2_ACCOUNT_ID·R2_ACCESS_KEY_ID·R2_SECRET_ACCESS_KEY는 Secret으로 등록한다(ENV_MANIFEST Phase 2).
+      "vars": { "APP_ENV": "staging", "R2_BUCKET_NAME": "bombyeol-staging-media" },
       // Supabase 개발 DB(직결) — 2026-10-01 생성
       // localConnectionString은 배포 명령의 로컬 단계(getPlatformProxy)용이며 배포 Worker에는 쓰이지 않는다.
       "hyperdrive": [
@@ -46,5 +47,5 @@
       "vars": { "APP_ENV": "production" },
     },
   },
-  "vars": { "APP_ENV": "local" },
+  "vars": { "APP_ENV": "local", "R2_BUCKET_NAME": "" },
 }
