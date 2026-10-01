@@ -12,10 +12,10 @@
 
 ## 다음 할 일 (2026-10-01, Phase 0 세션 종료 시점)
 
-Phase 0 코드는 `claude/cloud-session-phase-0-72a2lc`에 있다(main 미머지). 커밋: repo → tooling(ESLint/Prettier) → tooling(Tailwind·shadcn) → infra → prisma → testing → i18n → env → ci. 로컬 검증: format·lint·typecheck·Vitest 6건·`next build`·OpenNext 빌드·`wrangler dev`(로컬 Hyperdrive → Docker PG 17.11 왕복) 통과. GitHub CI는 PR 또는 main push에서만 돈다 — **아직 한 번도 실행되지 않음(미검증)**.
+Phase 0 코드는 `claude/cloud-session-phase-0-72a2lc`에 있다(main 미머지). 커밋: repo → tooling(ESLint/Prettier) → tooling(Tailwind·shadcn) → infra → prisma → testing → i18n → env → ci. 로컬 검증: format·lint·typecheck·Vitest 6건·`next build`·OpenNext 빌드·`wrangler dev`(로컬 Hyperdrive → Docker PG 17.11 왕복) 통과. GitHub CI(PR 또는 main push에서만 실행)는 PR woopinbell/bombyeol#2에서 첫 실행 **통과**(2026-10-01, 1분 45초, Postgres 서비스 컨테이너 포함).
 
 사용자 결정·작업 대기:
-1. **main 머지 여부**(PR 생성 포함) — 머지 커밋, squash 금지(WORKFLOW §3). PR을 만들면 CI 첫 실행으로 워크플로 검증.
+1. **PR woopinbell/bombyeol#2 머지 여부** — CI 통과·충돌 없음. 머지 커밋으로(squash 금지, WORKFLOW §3).
 2. **GitHub Actions 시크릿 `STAGING_DATABASE_URL`** 등록(Supabase Session pooler IPv4 문자열, ENV_MANIFEST "Phase 0 — CI·로컬"). 등록 후 `Migrate staging DB` 워크플로 수동 실행으로 풀러 경로 확인.
 3. **스테이징 리소스 생성 승인**: Hyperdrive `bombyeol-staging`(DATABASE_URL 직결로 생성) + Worker `bombyeol-staging` 배포(`npm run cf:deploy:staging`). 승인되면 Hyperdrive id를 `wrangler.jsonc`의 `env.staging.hyperdrive`에 추가하는 커밋 → 배포 스모크. URL은 `bombyeol-staging.<계정 서브도메인>.workers.dev` 예상 → 카카오·Google redirect URI 갱신 필요(Phase 1 전).
 4. 원격 임시 브랜치 **`tmp-v2-pushtest` 삭제**(GitHub 웹 Branches 화면). V-2 시험용으로 기존 docs 커밋(df7b358)을 가리킬 뿐 새 커밋은 없다. 클라우드 세션의 `git push --delete`는 원격이 연결을 끊어 실패했다.
