@@ -33,7 +33,7 @@ Phase별로 필요한 키를 **이름·형식·발급처·등급**으로 미리 
 | `AUTH_KAKAO_ID` | 카카오 앱 REST API 키 | developers.kakao.com → 내 애플리케이션 → 앱 키 | A(개발 앱) | 검증됨(Auth.js `AUTH_<PROVIDER>_ID`) |
 | `AUTH_KAKAO_SECRET` | 카카오 로그인 Client Secret | 카카오 로그인 → 보안 → Client Secret 발급·활성화 | A | 검증됨 |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | OAuth 클라이언트 ID/Secret | console.cloud.google.com → OAuth 클라이언트(웹) | A | 검증됨(hamkke 사용) |
-| 카카오 콘솔 설정(값 아님) | 플랫폼 Web 도메인, Redirect URI, 동의항목 | 카카오 개발자 콘솔 | — | 이메일 동의항목은 **비즈 앱 전환(개인 개발자 비즈 앱)** 필요, S-2에서 이메일 없이 갈지 결정 |
+| 카카오 콘솔 설정(값 아님) | 플랫폼 Web 도메인, Redirect URI, 동의항목 | 카카오 개발자 콘솔 | — | 2026-10-01 설정: 닉네임 필수·프로필 사진 선택(사진은 앱이 저장하지 않음), 이메일 미사용. 이메일 동의항목은 **비즈 앱 전환(개인 개발자 비즈 앱)** 필요, S-2에서 이메일 없이 갈지 결정 |
 | Google 콘솔 설정(값 아님) | 승인된 리디렉션 URI | Google Cloud Console | — | 개발·스테이징·프로덕션 URI 각각 |
 
 ## Phase 2 (미디어)

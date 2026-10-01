@@ -26,7 +26,7 @@
 ### 다음 할 일 (Phase 1 이후)
 
 1. ~~`STAGING_DATABASE_URL` 등록~~ 완료(사용자, 2026-10-01). **Supabase Session pooler(IPv4)로 GitHub 러너 → Supabase 마이그레이션 확인.** 주의: 수동 실행(workflow_dispatch)은 기본이 main이라 main에 없는 마이그레이션은 적용되지 않는다 — 첫 실행이 그래서 "No migration found". 작업 브랜치 기준으로 다시 실행해 `init` 적용(main 머지 전 스테이징 검증용).
-2. ~~redirect URI 등록~~ 완료(사용자). 스테이징 500의 실제 원인은 **OpenNext가 Turbopack의 스코프 패키지 해시 외부 이름(`@prisma/client-<hash>`)을 매핑하지 못한 것**(`No such module .../wasm-compiler-edge`, OpenNext 1.20.7 `discoverExternalModuleMappings`가 `.next/node_modules` 최상위 링크만 읽음). `next.config.ts`의 `transpilePackages: ["@prisma/client"]`로 번들 포함해 해결(`fix(infra)` 커밋). 확인: health 200, 비로그인 space.list 401, CSRF+POST 로그인 시작 → kauth/accounts.google 302(redirect_uri 정확). **남은 것: 사용자 브라우저 실로그인.** 교훈: 배포 후 health만이 아니라 인증 경로도 스모크한다.
+2. ~~redirect URI 등록~~ 완료(사용자). 스테이징 500의 실제 원인은 **OpenNext가 Turbopack의 스코프 패키지 해시 외부 이름(`@prisma/client-<hash>`)을 매핑하지 못한 것**(`No such module .../wasm-compiler-edge`, OpenNext 1.20.7 `discoverExternalModuleMappings`가 `.next/node_modules` 최상위 링크만 읽음). `next.config.ts`의 `transpilePackages: ["@prisma/client"]`로 번들 포함해 해결(`fix(infra)` 커밋). 확인: health 200, 비로그인 space.list 401, CSRF+POST 로그인 시작 → kauth/accounts.google 302(redirect_uri 정확). **사용자 브라우저 실로그인 통과(2026-10-01): Google·카카오 모두 → `user.me`로 provider 확인, `space.list` 빈 목록 200.** 카카오 콘솔 동의항목: 닉네임 필수, 프로필 사진 선택(사용자 설정) — 코드는 이름만 저장하고 사진은 저장하지 않는다(PRIVACY 최소 수집, 필요해지면 별도 결정). 이름 없이 가입한 계정은 다음 로그인 때 이름을 채운다(`fix(auth)`). 확인용 `/api/auth/session`은 userId만 보이므로 `/api/trpc/user.me`를 쓴다. 교훈: 배포 후 health만이 아니라 인증 경로도 스모크한다.
 3. Phase 1 PR 생성·머지(사용자 확인). 이후 Phase 2(미디어) — R2 버킷·토큰 신규 발급 필요(ENV_MANIFEST Phase 2), 버킷 생성은 승인 후.
 4. 결정 필요(사용자, 급하지 않음): 무료 relative 0명 유지 여부, 위 상한 수치(Q-PRICE). 카카오 이메일 미수집 확정.
 5. 정리 Cron(InviteCodeAttempt·RateCounter 보관 기간, G-17)은 Phase 2 Cron 커밋에서 함께.
@@ -225,3 +225,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: PR woopinbell/bombyeol#2 CI 통과 후 사용자가 머지 커밋으로 머지(06591ce).
 - 2026-10-01: 사용자 승인으로 스테이징 Hyperdrive·Worker 생성·배포, 인증 시크릿 등록. Phase 1 서버 9커밋(스키마 → tRPC → 카카오 → Google → 프로시저 → Space·아이 → 초대 발급 → 수락·brute-force → 통합 테스트). 대기: `STAGING_DATABASE_URL`, redirect URI 등록, PR.
 - 2026-10-01: 스테이징 마이그레이션(작업 브랜치 기준) 적용, Prisma 외부 모듈 배포 오류 수정·재배포. 사용자 실로그인 확인 대기.
+- 2026-10-01: 스테이징 실로그인(Google·카카오) 사용자 확인 통과. `user.me` 추가, 빈 이름 채움 수정. 다음: Phase 1 PR(사용자 확인).
