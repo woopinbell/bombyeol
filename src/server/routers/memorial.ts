@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
-import { nextAnniversary } from "@/lib/memorial";
+import { nextAnniversary } from "@/lib/anniversary";
 import { MEMORIAL_POLICY } from "@/lib/plan";
 import { inputError, notFound } from "@/server/errors";
 import { parentProcedure, spaceProcedure } from "@/server/trpc/procedures";

@@ -15,7 +15,7 @@ export const RATE_LIMITS = {
   uploadIssuePerUser: { limit: 120, windowSec: 60 * 60 },
   /** G-04: 업로드 URL 발급(Space당) */
   uploadIssuePerSpace: { limit: 500, windowSec: 24 * 60 * 60 },
-  /** G-07: 글 기록(마일스톤·일기) 작성(사용자당) — 파일 없는 쓰기도 폭주를 막는다 */
+  /** G-07: 글 기록(마일스톤·일기·임신 기록) 작성(사용자당) — 파일 없는 쓰기도 폭주를 막는다 */
   recordWritePerUser: { limit: 300, windowSec: 24 * 60 * 60 },
   /** G-07: 좋아요 토글(사용자당) */
   likePerUser: { limit: 300, windowSec: 60 * 60 },
@@ -27,6 +27,8 @@ export const RATE_LIMITS = {
   storyWritePerUser: { limit: 100, windowSec: 24 * 60 * 60 },
   /** G-07: 물어보기(사용자당) */
   storyAskPerUser: { limit: 30, windowSec: 24 * 60 * 60 },
+  /** G-07: 가족 캘린더 일정 쓰기·고치기(사용자당) */
+  eventWritePerUser: { limit: 100, windowSec: 24 * 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 /** G-11: 계정 단위 상한(요금제와 무관) */
@@ -106,6 +108,34 @@ export const STORY_POLICY = {
   openAsksPerMember: 30,
   /** 목록 한 번에 가져오는 수 */
   pageSize: 20,
+} as const;
+
+/** 임신 기록 정책(요금제 무관, PRIVACY §3) */
+export const PREGNANCY_POLICY = {
+  /** 메모 최대 글자 수 */
+  noteMaxChars: 1000,
+  /** 검진 일정은 미래 날짜를 받는다 — 출생 예정일(없으면 오늘) 뒤로 이 날 수까지 */
+  checkupMaxDaysAhead: 60,
+  /** 목록 한 번에 가져오는 수 */
+  pageSize: 30,
+} as const;
+
+/** 가족 캘린더 정책(요금제 무관) */
+export const EVENT_POLICY = {
+  /** G-11: Space당 일정 수(반복 일정은 하나로 센다) */
+  maxPerSpace: 500,
+  /** 제목 최대 글자 수 */
+  titleMaxChars: 40,
+  /** 메모 최대 글자 수 */
+  noteMaxChars: 500,
+  /** 일정 하나의 최대 길이(일) — 여행 같은 며칠짜리 모임까지 */
+  maxSpanDays: 31,
+  /** 한 번에 조회하는 최대 범위(일) */
+  maxRangeDays: 400,
+  /** 우리 탭 카드: 기본으로 앞으로 며칠 안의 생일·기념일을 보여주나 */
+  upcomingDays: 30,
+  /** 우리 탭 카드: 요청할 수 있는 최대 날 수 */
+  upcomingMaxDays: 90,
 } as const;
 
 /**

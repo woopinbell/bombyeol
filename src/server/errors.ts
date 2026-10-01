@@ -7,6 +7,7 @@ export type LimitReason =
   | "CHILD_LIMIT"
   | "PET_LIMIT"
   | "ASK_OPEN_LIMIT"
+  | "EVENT_LIMIT"
   | "MEMBER_ROLE_LIMIT"
   | "INVITE_ACTIVE_LIMIT"
   | "FILE_TOO_LARGE"
@@ -65,7 +66,11 @@ export type InputFailure =
   | "ASK_ANSWERED"
   | "MEMORIAL_SELF"
   | "ALREADY_MEMORIAL"
-  | "MEMORIAL_READ_ONLY";
+  | "MEMORIAL_READ_ONLY"
+  | "PHOTO_NOT_ALLOWED"
+  | "EVENT_RANGE_INVALID"
+  | "CONSENT_REQUIRED"
+  | "CONSENT_VERSION_STALE";
 
 const conflicts: readonly InputFailure[] = [
   "CHILD_ALREADY_BORN",
@@ -73,12 +78,20 @@ const conflicts: readonly InputFailure[] = [
   "ASK_ANSWERED",
   "ALREADY_MEMORIAL",
   "MEMORIAL_READ_ONLY",
+  "CONSENT_VERSION_STALE",
 ];
+
+/** 먼저 해야 할 일(동의 등)이 빠진 요청 */
+const preconditions: readonly InputFailure[] = ["CONSENT_REQUIRED"];
 
 /** 스키마로 표현하기 어려운 입력 규칙 위반 */
 export function inputError(reason: InputFailure) {
   return new TRPCError({
-    code: conflicts.includes(reason) ? "CONFLICT" : "BAD_REQUEST",
+    code: conflicts.includes(reason)
+      ? "CONFLICT"
+      : preconditions.includes(reason)
+        ? "PRECONDITION_FAILED"
+        : "BAD_REQUEST",
     message: reason,
   });
 }

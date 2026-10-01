@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { nextAnniversary } from "@/lib/memorial";
+import { nextAnniversary } from "@/lib/anniversary";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { callerFor } from "./helpers/trpc";

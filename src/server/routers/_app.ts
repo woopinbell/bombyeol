@@ -1,11 +1,15 @@
 import { publicProcedure, router } from "@/server/trpc/init";
+import { calendarRouter } from "./calendar";
 import { childRouter } from "./child";
+import { consentRouter } from "./consent";
+import { familyRouter } from "./family";
 import { inviteRouter } from "./invite";
 import { mediaRouter } from "./media";
 import { memorialRouter } from "./memorial";
 import { milestoneRouter } from "./milestone";
 import { momentRouter } from "./moment";
 import { petRouter } from "./pet";
+import { pregnancyRouter } from "./pregnancy";
 import { reactionRouter } from "./reaction";
 import { spaceRouter } from "./space";
 import { storyRouter } from "./story";
@@ -18,6 +22,7 @@ export const appRouter = router({
     return { ok: true };
   }),
   user: userRouter,
+  consent: consentRouter,
   space: spaceRouter,
   child: childRouter,
   invite: inviteRouter,
@@ -28,6 +33,9 @@ export const appRouter = router({
   reaction: reactionRouter,
   story: storyRouter,
   memorial: memorialRouter,
+  pregnancy: pregnancyRouter,
+  calendar: calendarRouter,
+  family: familyRouter,
 });
 
 export type AppRouter = typeof appRouter;

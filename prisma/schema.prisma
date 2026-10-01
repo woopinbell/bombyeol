@@ -36,6 +36,9 @@ model User {
   stories        StoryEntry[]
   storyAsks      StoryAsk[]
   memorials      MemorialProfile[]
+  consents       Consent[]
+  pregnancy      PregnancyRecord[]
+  familyEvents   FamilyEvent[]
 }
 
 model Account {
@@ -80,6 +83,9 @@ model Space {
   stories    StoryEntry[]
   storyAsks  StoryAsk[]
   memorials  MemorialProfile[]
+  pregnancy  PregnancyRecord[]
+  events     FamilyEvent[]
+  consents   Consent[]
   media      MediaAsset[]
   usage      UsageCounter[]
 
@@ -157,10 +163,11 @@ model Child {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  space      Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  createdBy  User        @relation(fields: [createdById], references: [id])
+  space      Space             @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdBy  User              @relation(fields: [createdById], references: [id])
   moments    Moment[]
   milestones Milestone[]
+  pregnancy  PregnancyRecord[]
 
   @@index([spaceId])
 }
@@ -402,6 +409,112 @@ model MemorialProfile {
 }
 
 // ---------------------------------------------------------------------------
+// 동의 기록(PRIVACY §2.4) — 누가·무엇에·언제·어느 버전에 동의했나. 추가 전용(철회는 withdrawnAt).
+// terms·privacy는 사용자 단위(spaceId 없음), child_data·pregnancy는 Space 단위. 현재 버전은 src/lib/consents.ts.
+// ---------------------------------------------------------------------------
+
+enum ConsentKind {
+  terms
+  privacy
+  child_data
+  pregnancy
+}
+
+model Consent {
+  id          String      @id @default(cuid())
+  userId      String
+  spaceId     String?
+  kind        ConsentKind
+  version     String
+  grantedAt   DateTime    @default(now())
+  withdrawnAt DateTime?
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  space Space? @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind, spaceId])
+}
+
+// ---------------------------------------------------------------------------
+// 임신 기록(태명 시절, PRD §4.2) — 건강 정보. visibility는 서버가 강제한다(PRIVACY §3):
+// parents_only(기본)는 parent에게만, family는 모든 멤버에게. 주차는 저장하지 않고 조회 시점에
+// 아이의 출생 예정일로 계산한다(예정일이 바뀌어도 맞도록).
+// ---------------------------------------------------------------------------
+
+enum PregnancyRecordKind {
+  ultrasound
+  checkup
+  kick
+  note
+}
+
+enum PregnancyVisibility {
+  parents_only
+  family
+}
+
+model PregnancyRecord {
+  id           String              @id @default(cuid())
+  spaceId      String
+  childId      String
+  kind         PregnancyRecordKind
+  date         DateTime            @db.Date // 기록·검진 날짜(검진은 예정일 수 있다)
+  note         String?
+  photoAssetId String?             @unique // 초음파 사진(한 장, 이미지 자산)
+  visibility   PregnancyVisibility @default(parents_only)
+  createdById  String
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  space     Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  child     Child       @relation(fields: [childId], references: [id], onDelete: Cascade)
+  photo     MediaAsset? @relation("PregnancyPhoto", fields: [photoAssetId], references: [id])
+  createdBy User        @relation(fields: [createdById], references: [id])
+
+  @@index([childId, date(sort: Desc), id(sort: Desc)])
+  @@index([spaceId, createdById])
+}
+
+// ---------------------------------------------------------------------------
+// 가족 캘린더(PRD §4.4) — 시각 있는 일정은 UTC 순간으로 저장하고 클라이언트가 현지 시각으로 보여준다.
+// 종일 일정은 그 날의 UTC 자정(날짜만 의미)으로 저장하고 시간대 변환 없이 날짜로 보여준다.
+// 매년 반복은 조회 시점에 펼친다(정시 push 없음).
+// ---------------------------------------------------------------------------
+
+enum FamilyEventKind {
+  gathering
+  birthday
+  anniversary
+  other
+}
+
+enum FamilyEventRecurrence {
+  none
+  yearly
+}
+
+model FamilyEvent {
+  id          String                @id @default(cuid())
+  spaceId     String
+  title       String
+  kind        FamilyEventKind
+  startsAt    DateTime
+  endsAt      DateTime?
+  allDay      Boolean               @default(false)
+  recurrence  FamilyEventRecurrence @default(none)
+  note        String?
+  createdById String
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  space     Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdBy User  @relation(fields: [createdById], references: [id])
+
+  @@index([spaceId, startsAt])
+  @@index([spaceId, recurrence])
+}
+
+// ---------------------------------------------------------------------------
 // 레이트 리밋 — DB 고정 창 카운터(S-6: 비용 게이트의 정확한 판정용). 정리 Cron 대상(G-17).
 // ---------------------------------------------------------------------------
 
@@ -442,12 +555,13 @@ model MediaAsset {
   confirmedAt  DateTime?
   deletedAt    DateTime?
 
-  space       Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  uploadedBy  User         @relation(fields: [uploadedById], references: [id])
-  petCover    Pet?         @relation("PetCover")
-  momentMedia MomentMedia? @relation("MomentAsset")
-  momentThumb MomentMedia? @relation("MomentThumbnail")
-  storyPhoto  StoryEntry?  @relation("StoryPhoto")
+  space       Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  uploadedBy  User             @relation(fields: [uploadedById], references: [id])
+  petCover    Pet?             @relation("PetCover")
+  momentMedia MomentMedia?     @relation("MomentAsset")
+  momentThumb MomentMedia?     @relation("MomentThumbnail")
+  storyPhoto  StoryEntry?      @relation("StoryPhoto")
+  pregnancy   PregnancyRecord? @relation("PregnancyPhoto")
 
   @@index([spaceId, status])
   @@index([status, createdAt])
