@@ -32,7 +32,7 @@
 
 1. **사용자 확인**: Phase 3 PR 생성·main 머지 여부. 머지 커밋 방식(squash 금지).
 2. **사용자 확인**: 스테이징 반영 — `Migrate staging DB` 워크플로를 작업 브랜치 기준으로 실행 + `npm run cf:deploy:staging`(기존 Worker 갱신, 새 리소스 없음). 승인하면 진행.
-3. 결정 필요(급하지 않음): 위 권한 정책(조부모의 반려동물·가족 사진 기록 허용, relative 열람·반응만)과 새 상한 수치(Q-PRICE).
+3. ~~결정 필요~~ **사용자 승인(2026-10-01)**: 권한 정책(아이 기록 parent만, 반려동물·가족 사진 grandparent 허용, relative 열람·반응만)과 상한 수치를 결제 전 운영값으로 확정(OPEN_QUESTIONS Q-PRICE에 기록).
 4. 다음 개발: Phase 4 이야기(별) 서버 — `chore(prisma): StoryPrompt·StoryEntry·MemorialProfile`부터. Reaction에 `storyEntryId`·"별 하나" kind 추가 필요.
 
 ## 현재 상태 — Phase 2 (2026-10-01)

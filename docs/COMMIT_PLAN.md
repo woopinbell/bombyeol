@@ -73,7 +73,7 @@
 
 ## Phase 3 — 오늘(봄)
 
-> 2026-10-01 서버 설계(세션 결정, 수치는 `plan.ts` 초안):
+> 2026-10-01 서버 설계(세션 제안 → **사용자 승인**, 수치는 `plan.ts` 결제 전 운영값):
 > - **Moment**: `kind = media | diary`(PRD 초안의 photo/video/text를 대체 — 사진·영상은 첨부 종류로 구분). 첨부는 `MomentMedia`(Moment당 최대 10, 순서·클라이언트 썸네일 자산). 대상은 아이/반려동물/가족 전체 중 하나(체크 제약). 자산 하나는 한 곳에만 붙는다(unique), 붙은 자산은 `media.delete`로 지울 수 없고(`ASSET_IN_USE`) Moment 삭제 시 R2 객체와 함께 지운다(G-05).
 > - **권한**: 아이 프로필·아이 대상 기록·일기는 `parent`(PRIVACY §4). 반려동물·가족 전체 대상 사진은 `parent`·`grandparent`. 반려동물 프로필 관리는 `parent`. 반응(좋아요·댓글)은 모든 멤버, 댓글 삭제는 작성자 또는 `parent`.
 > - **Reaction**: 다형 targetId 대신 대상별 nullable FK(momentId·milestoneId, 이야기는 Phase 4에서 추가) + 체크 제약. 좋아요 토글은 advisory lock으로 중복 방지(부분 unique 인덱스는 Prisma 드리프트 때문에 쓰지 않음).
