@@ -24,15 +24,18 @@ model User {
 
   accounts       Account[]
   memberships    Member[]
-  spacesCreated  Space[]      @relation("SpaceCreatedBy")
-  invitesCreated Invite[]     @relation("InviteCreatedBy")
-  invitesUsed    Invite[]     @relation("InviteUsedBy")
+  spacesCreated  Space[]           @relation("SpaceCreatedBy")
+  invitesCreated Invite[]          @relation("InviteCreatedBy")
+  invitesUsed    Invite[]          @relation("InviteUsedBy")
   childrenAdded  Child[]
   mediaUploaded  MediaAsset[]
   petsAdded      Pet[]
   moments        Moment[]
   milestones     Milestone[]
   reactions      Reaction[]
+  stories        StoryEntry[]
+  storyAsks      StoryAsk[]
+  memorials      MemorialProfile[]
 }
 
 model Account {
@@ -66,7 +69,7 @@ model Space {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  createdBy  User           @relation("SpaceCreatedBy", fields: [createdById], references: [id])
+  createdBy  User              @relation("SpaceCreatedBy", fields: [createdById], references: [id])
   members    Member[]
   invites    Invite[]
   children   Child[]
@@ -74,6 +77,9 @@ model Space {
   moments    Moment[]
   milestones Milestone[]
   reactions  Reaction[]
+  stories    StoryEntry[]
+  storyAsks  StoryAsk[]
+  memorials  MemorialProfile[]
   media      MediaAsset[]
   usage      UsageCounter[]
 
@@ -88,8 +94,12 @@ model Member {
   relationLabel String? // 할머니·외할아버지 등 자유 입력
   joinedAt      DateTime   @default(now())
 
-  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  space          Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storiesTold    StoryEntry[]     @relation("StoryNarrator")
+  storiesScribed StoryEntry[]     @relation("StoryScribe")
+  asksReceived   StoryAsk[]
+  memorial       MemorialProfile?
 
   @@unique([spaceId, userId])
   @@index([userId])
@@ -187,11 +197,13 @@ model Pet {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
-  space      Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  createdBy  User        @relation(fields: [createdById], references: [id])
-  cover      MediaAsset? @relation("PetCover", fields: [coverAssetId], references: [id])
+  space      Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdBy  User             @relation(fields: [createdById], references: [id])
+  cover      MediaAsset?      @relation("PetCover", fields: [coverAssetId], references: [id])
   moments    Moment[]
   milestones Milestone[]
+  stories    StoryEntry[]
+  memorial   MemorialProfile?
 
   @@index([spaceId])
 }
@@ -269,34 +281,124 @@ model Milestone {
 }
 
 // ---------------------------------------------------------------------------
-// 반응 — 좋아요·댓글(가족 멤버만). 대상은 정확히 하나(체크 제약), 이야기(StoryEntry)는 Phase 4에서 추가.
+// 반응 — 좋아요·별 하나·댓글(가족 멤버만). 대상(Moment·Milestone·StoryEntry)은 정확히 하나(체크 제약).
 // 다형 targetId 대신 대상별 FK를 둬서 대상 삭제 시 반응이 함께 지워진다.
+// 별 하나(star)는 이야기에 남기는 세대 교차 1비트 신호(PRD §2), 좋아요(like)는 오늘 기록용.
 // ---------------------------------------------------------------------------
 
 enum ReactionKind {
   like
   comment
+  star
 }
 
 model Reaction {
-  id          String       @id @default(cuid())
-  spaceId     String
-  momentId    String?
-  milestoneId String?
-  kind        ReactionKind
-  body        String? // comment만(체크 제약)
-  createdById String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id           String       @id @default(cuid())
+  spaceId      String
+  momentId     String?
+  milestoneId  String?
+  storyEntryId String?
+  kind         ReactionKind
+  body         String? // comment만(체크 제약)
+  createdById  String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
-  space     Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  moment    Moment?    @relation(fields: [momentId], references: [id], onDelete: Cascade)
-  milestone Milestone? @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
-  createdBy User       @relation(fields: [createdById], references: [id])
+  space     Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  moment    Moment?     @relation(fields: [momentId], references: [id], onDelete: Cascade)
+  milestone Milestone?  @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  story     StoryEntry? @relation(fields: [storyEntryId], references: [id], onDelete: Cascade)
+  createdBy User        @relation(fields: [createdById], references: [id])
 
   @@index([momentId, kind, createdAt])
   @@index([milestoneId, kind, createdAt])
+  @@index([storyEntryId, kind, createdAt])
   @@index([createdById])
+}
+
+// ---------------------------------------------------------------------------
+// 이야기(별) — 어르신의 기억(PRD §4.3). 질문 카드는 코드 카탈로그(src/lib/story-prompts.ts)이고
+// 문구는 messages의 키로 찾는다 — DB에는 promptKey만 남긴다(시드·번역 동기화 불필요).
+// 화자(narrator)·대필자(scribe)는 Member를 가리키되 이름 스냅샷을 함께 저장한다
+// (계정·멤버가 사라져도 이야기는 남는다, PRIVACY §5).
+// ---------------------------------------------------------------------------
+
+model StoryEntry {
+  id               String   @id @default(cuid())
+  spaceId          String
+  narratorMemberId String? // 이야기의 주인(어르신). 멤버가 사라지면 null, 스냅샷은 남는다
+  narratorName     String? // 스냅샷: 작성 시점 User.name
+  narratorLabel    String? // 스냅샷: 작성 시점 Member.relationLabel(할머니 등)
+  scribeMemberId   String? // 대필한 가족(화자와 다를 때만)
+  scribeName       String? // 스냅샷
+  promptKey        String? // 질문 카드 키(자유 이야기는 null)
+  category         String? // 카탈로그 카테고리 키(이야기 모음 분류)
+  title            String?
+  body             String
+  storyYear        Int? // 이야기 속 시기(연 단위, 옛 기억은 날짜가 흐릿하다)
+  petId            String? // 반려동물에 붙인 이야기(PRD §4.2.1)
+  photoAssetId     String?  @unique // 사진에 얽힌 이야기(한 장, 이미지 자산)
+  createdById      String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  space     Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  narrator  Member?     @relation("StoryNarrator", fields: [narratorMemberId], references: [id], onDelete: SetNull)
+  scribe    Member?     @relation("StoryScribe", fields: [scribeMemberId], references: [id], onDelete: SetNull)
+  pet       Pet?        @relation(fields: [petId], references: [id], onDelete: SetNull)
+  photo     MediaAsset? @relation("StoryPhoto", fields: [photoAssetId], references: [id])
+  createdBy User        @relation(fields: [createdById], references: [id])
+  reactions Reaction[]
+  ask       StoryAsk?
+
+  @@index([spaceId, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([narratorMemberId, createdAt(sort: Desc)])
+  @@index([petId])
+}
+
+// 물어보기 — 가족이 어르신께 질문 카드(또는 직접 쓴 질문)를 보낸다. 답한 이야기가 생기면 entryId로 닫힌다.
+// promptKey·question 중 정확히 하나(체크 제약).
+model StoryAsk {
+  id         String   @id @default(cuid())
+  spaceId    String
+  askedById  String
+  toMemberId String
+  promptKey  String?
+  question   String?
+  entryId    String?  @unique
+  createdAt  DateTime @default(now())
+
+  space    Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  askedBy  User        @relation(fields: [askedById], references: [id])
+  toMember Member      @relation(fields: [toMemberId], references: [id], onDelete: Cascade)
+  entry    StoryEntry? @relation(fields: [entryId], references: [id], onDelete: SetNull)
+
+  @@index([toMemberId, entryId])
+  @@index([spaceId, createdAt])
+}
+
+// 기념 상태(별이 되신 가족·반려동물, PRD §4.5). 행이 있으면 기념 상태 — 지우면 되돌린다.
+// 만들 때는 memberId·petId 중 정확히 하나. 멤버가 사라지면 memberId만 null이 되고 이름·관계 스냅샷이 남는다
+// (그래서 체크 제약은 "최대 하나").
+model MemorialProfile {
+  id            String    @id @default(cuid())
+  spaceId       String
+  memberId      String?   @unique
+  petId         String?   @unique
+  name          String?
+  relationLabel String?
+  passedAt      DateTime? @db.Date
+  note          String?
+  createdById   String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  space     Space   @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  member    Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  pet       Pet?    @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdBy User    @relation(fields: [createdById], references: [id])
+
+  @@index([spaceId])
 }
 
 // ---------------------------------------------------------------------------
@@ -345,6 +447,7 @@ model MediaAsset {
   petCover    Pet?         @relation("PetCover")
   momentMedia MomentMedia? @relation("MomentAsset")
   momentThumb MomentMedia? @relation("MomentThumbnail")
+  storyPhoto  StoryEntry?  @relation("StoryPhoto")
 
   @@index([spaceId, status])
   @@index([status, createdAt])
