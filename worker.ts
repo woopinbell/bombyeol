@@ -17,7 +17,7 @@ export default {
     }
     const req = new Request(`https://internal${INTERNAL_CLEANUP_PATH}`, {
       method: "POST",
-      headers: { authorization: `Bearer ${await internalToken(env.AUTH_SECRET)}` },
+      headers: { authorization: `Bearer ${await internalToken(env.AUTH_SECRET, "cleanup")}` },
     });
     ctx.waitUntil(
       nextWorker.fetch(req, env, ctx).then(async (res: Response) => {
