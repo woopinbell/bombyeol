@@ -28,6 +28,15 @@
       "workers_dev": true,
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol-staging" }],
       "vars": { "APP_ENV": "staging" },
+      // Supabase 개발 DB(직결) — 2026-10-01 생성
+      // localConnectionString은 배포 명령의 로컬 단계(getPlatformProxy)용이며 배포 Worker에는 쓰이지 않는다.
+      "hyperdrive": [
+        {
+          "binding": "HYPERDRIVE",
+          "id": "610ad8cefd3f49268ca0a581b488d80d",
+          "localConnectionString": "postgresql://postgres:postgres@localhost:5432/bombyeol",
+        },
+      ],
     },
     // 프로덕션: 시크릿은 사용자가 Cloudflare 대시보드/CLI로 직접 등록(등급 B).
     "production": {
