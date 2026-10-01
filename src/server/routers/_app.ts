@@ -2,6 +2,7 @@ import { publicProcedure, router } from "@/server/trpc/init";
 import { calendarRouter } from "./calendar";
 import { childRouter } from "./child";
 import { consentRouter } from "./consent";
+import { familyRouter } from "./family";
 import { inviteRouter } from "./invite";
 import { mediaRouter } from "./media";
 import { memorialRouter } from "./memorial";
@@ -34,6 +35,7 @@ export const appRouter = router({
   memorial: memorialRouter,
   pregnancy: pregnancyRouter,
   calendar: calendarRouter,
+  family: familyRouter,
 });
 
 export type AppRouter = typeof appRouter;
