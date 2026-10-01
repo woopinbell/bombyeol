@@ -47,7 +47,7 @@ COMMIT_PLAN Phase 7 메모 ①~⑥ **전부 사용자 승인**: ① 계정 삭�
 ### 다음 할 일 (Phase 7 이후)
 
 1. ~~사용자 확인·PR·머지·스테이징 반영~~ 완료(PR woopinbell/bombyeol#10, ea6a25e, 버전 f3842fdf).
-2. 사용자: `FIREBASE_ADMIN_PRIVATE_KEY` 재등록(ENV_MANIFEST Phase 6) → 스모크 `fcm: invalid_token` 확인.
+2. ~~사용자: `FIREBASE_ADMIN_PRIVATE_KEY` 재등록~~ 완료 — 스모크 전 항목 정상(`db` ok, R2 위반 403·정확 200·head·copy·cleanup ok, `fcm: invalid_token`). 스테이징 FCM 발송 경로 확인됨, 실기기 수신은 UI(서비스 워커) 이후.
 3. 다음 개발 후보: Phase DS(Kaddie 디자인 상황에 따라 — 사용자 결정) 또는 Phase 8(Q-PAY 결정 필요).
 
 ## 현재 상태 — Phase 6 (2026-10-01)
