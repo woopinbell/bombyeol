@@ -93,12 +93,20 @@
 
 ## Phase 4 — 이야기(별)
 
-- [ ] `chore(prisma): StoryPrompt·StoryEntry·MemorialProfile 스키마 정의`
-- [ ] `feat(story): 질문 카드 콘텐츠 시드 및 조회 구현`
-- [ ] `feat(story): 텍스트 답변 작성 및 가족 대필(작성자·대필자 병기) 구현` [G-07]
-- [ ] `feat(story): 사진에 얽힌 이야기 구현` [G-01~04]
-- [ ] `feat(story): 부모의 질문 보내기(물어보기) 구현`
-- [ ] `feat(story): 세대 교차 반응(별 하나·댓글) 구현`
+> 2026-10-01 서버 설계(세션 제안 — **사용자 확인 대기**, main 머지 전 확인. 수치는 `plan.ts`):
+> - **질문 카드는 DB 테이블이 아니라 코드 카탈로그**(`src/lib/story-prompts.ts`, 카테고리 10·카드 27, 문구는 `messages/ko.json`의 `story.*`). DB에는 `promptKey`만 — 시드 마이그레이션·번역 동기화가 필요 없다. PRD의 `StoryPrompt` 모델과 `ageHint`는 두지 않음. 키는 바꾸거나 지우지 않는다(문구만 수정).
+> - **StoryEntry**: 화자(`narratorMemberId`)·대필자(`scribeMemberId`)는 Member FK(SetNull) + 이름·관계 **스냅샷**(PRIVACY §5 `authorNameSnapshot`). 시기는 날짜 대신 `storyYear`(연 단위, 1850~올해), `title`·`category`(카드 답이면 카드 카테고리 고정), 반려동물에 붙이기(`petId`, PRD §4.2.1), 사진 한 장(`photoAssetId` unique, 이미지만).
+> - **권한**: 자기 이야기 = parent·grandparent, 대필 = parent·grandparent가 **grandparent의** 이야기를. relative는 열람·반응만. 수정 = 쓴 사람 또는 화자 본인, 삭제 = 여기에 parent.
+> - **물어보기(StoryAsk, 추가 모델)**: parent → grandparent, 카드 또는 직접 쓴 질문(정확히 하나, 체크 제약). 같은 카드가 열려 있으면 기존 것을 돌려줌. 답하면 `entryId`로 닫힘(동시 답은 하나만). 화자는 질문받은 어르신(가족이 받아 적기 가능). 알림은 Phase 6, 카카오톡 공유는 클라이언트 링크.
+> - **반응**: `Reaction.storyEntryId` + kind `star`. **좋아요는 오늘 기록(Moment·Milestone), 별 하나는 이야기에만**(토글, 사용자·대상당 하나). 댓글은 모든 대상. 이름·동작 최종안은 DESIGN 시안 단계(PRD §2).
+> - **리밋·상한(초안)**: 이야기 쓰기 100/일, 물어보기 30/일, 별 하나 300/시간(G-07), 어르신당 열린 물어보기 30, 본문 5000자·제목 60자·질문 200자.
+
+- [x] `chore(prisma): StoryEntry·StoryAsk·MemorialProfile 스키마 정의` — StoryPrompt는 코드 카탈로그(위 메모), Reaction에 storyEntryId·star 추가
+- [x] `feat(story): 질문 카드 콘텐츠 시드 및 조회 구현` — 코드 카탈로그 + `story.prompts`(어르신별 답한 카드 표시)
+- [x] `feat(story): 텍스트 답변 작성 및 가족 대필(작성자·대필자 병기) 구현` [G-07]
+- [x] `feat(story): 사진에 얽힌 이야기 구현` [G-01~04]
+- [x] `feat(story): 부모의 질문 보내기(물어보기) 구현`
+- [x] `feat(story): 세대 교차 반응(별 하나·댓글) 구현`
 - [ ] `feat(memorial): 기념 상태 전환(사람·반려동물)과 영구 보존 정책 구현` — 구독 만료와 무관 보존, `PRIVACY_AND_LEGAL.md` §5
 - [ ] `feat(story): 이야기 탭 화면 구성`
 
