@@ -11,6 +11,7 @@ import {
 import { limitError, mediaError } from "@/server/errors";
 import { lockKey } from "@/server/locks";
 import { hitRateLimit } from "@/server/rate-limit";
+import { removeAsset, unattachedAssetWhere } from "@/server/media/assets";
 import { fitsStorage, openPendingWhere, periodKey, spaceUsage } from "@/server/media/usage";
 import { mediaKeys } from "@/server/storage/types";
 import { spaceProcedure } from "@/server/trpc/procedures";
@@ -133,8 +134,7 @@ export const mediaRouter = router({
     }),
 
   /**
-   * 자산 삭제(G-05): 올린 사람 또는 parent만. R2 객체를 먼저 지우고 성공했을 때만 DB를 바꾼다
-   * (실패하면 그대로 오류 → 재시도. "DB만 지워지고 파일이 남는" 상태를 만들지 않는다).
+   * 자산 삭제(G-05): 올린 사람 또는 parent만. 순서 보장은 removeAsset.
    */
   delete: spaceProcedure
     .input(z.object({ assetId: z.string().min(1).max(64) }))
@@ -148,22 +148,13 @@ export const mediaRouter = router({
       if (asset.uploadedById !== ctx.userId && ctx.member.role !== "parent") {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
-
-      await ctx.storage.delete(mediaKeys.final(spaceId, asset.id));
-      await ctx.storage.delete(mediaKeys.pending(spaceId, asset.id));
-
-      const now = new Date();
-      const { count } = await ctx.prisma.mediaAsset.updateMany({
-        where: { id: asset.id, status: asset.status },
-        data: { status: "deleted", deletedAt: now },
+      // 기록에 붙은 자산은 그 기록을 지울 때 함께 지운다(기록에 깨진 파일이 남지 않게).
+      const attached = await ctx.prisma.mediaAsset.count({
+        where: { id: asset.id, NOT: unattachedAssetWhere },
       });
-      if (count === 1 && asset.status === "confirmed") {
-        await ctx.prisma.usageCounter.upsert({
-          where: { spaceId_periodKey: { spaceId, periodKey: periodKey(now) } },
-          create: { spaceId, periodKey: periodKey(now), bytesDeleted: asset.bytes },
-          update: { bytesDeleted: { increment: asset.bytes } },
-        });
-      }
+      if (attached) throw mediaError("ASSET_IN_USE");
+
+      await removeAsset(ctx.prisma, ctx.storage, spaceId, asset);
       return { ok: true };
     }),
 });
