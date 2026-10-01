@@ -165,3 +165,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01(결정): 개발 중 완전 무료 유지. Workers Paid는 공개 베타 직전(또는 1102 관측 시) 재결정 — ARCHITECTURE §10. 계정 플랜은 사용자 대시보드 확인(API로는 usage_model=standard만 보여 구분 불가).
 - 2026-10-01: Firebase·R2 키 확인. S-3 presign 비교 통과, S-5 서버 측 통과·배포, S-4 재측정. 실기기 푸시 수신 확인 요청.
 - 2026-10-01: S-5 실기기 통과 → 스파이크 전부 통과. 사용자 승인으로 ARCHITECTURE 확정, 스파이크 리소스(Worker·Hyperdrive·R2 버킷) 삭제(기존 `hamkke` 버킷은 유지). Phase 0은 새 세션 권장.
+- 2026-10-01: PR woopinbell/bombyeol#1(spike→main)이 실수로 머지됐으나, 사용자가 로컬에서 main을 9744db2로 되돌림(확인 완료). 원격 브랜치는 `main`(9744db2), `docs`, `spike/s1-opennext-prisma`(참고용, 머지 금지) 3개. Phase 0은 새 세션에서 main 기준 작업 브랜치로 시작.
