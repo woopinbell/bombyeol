@@ -42,7 +42,7 @@
 | ID | 결과 | 날짜 |
 |---|---|---|
 | S-1 | **통과(쿼리 왕복)** — 원격 쓰기·마이그레이션 경로는 미결 | 2026-10-01 |
-| S-2 | 미수행 — 키 대기(`AUTH_KAKAO_*`, `AUTH_GOOGLE_*`, `AUTH_SECRET`) | — |
+| S-2 | **서버 측 통과, 실제 로그인은 사용자 확인 대기** | 2026-10-01 |
 | S-3 | **통과(Worker 프록시 방식)** — presign 방식은 R2 S3 키 대기 | 2026-10-01 |
 | S-4 | **기준선 측정, 유료 플랜 필요 판정** — S-2·S-3·S-5 후 재측정 | 2026-10-01 |
 | S-5 | 미수행 — Firebase 개발 프로젝트 키·실기기 대기 | — |
@@ -61,6 +61,15 @@
 - **미결**: Supabase에 스키마 적용 경로(원격 `SpikePing` 테이블 없음 → `ping`은 "table does not exist" 500, 즉 DB 도달은 확인). CLOUD_SESSION §2.1대로 **CI(GitHub Actions) 마이그레이션**을 Phase 0에서 구성 — 이때 필요한 비밀값(이름·IPv4 풀러 필요 여부)은 그 시점에 ENV_MANIFEST에 먼저 적고 요청.
 - **S-4 사전 신호**: 배포 출력 `Total Upload 54,672 KiB / gzip 18,092 KiB`, Startup 20ms. 빈 앱인데도 크다(Prisma·Next 서버 번들). 요금제 한도 대비 판단은 S-4에서.
 - 생성한 Cloudflare 리소스(정리 대상, 스파이크 종료 후 삭제 여부 사용자 확인): Hyperdrive `bombyeol-spike-s1`, Worker `bombyeol-spike-s1`, R2 버킷 `bombyeol-spike-s3`(비어 있음). 모든 스파이크 코드는 `spike/s1-opennext-prisma` 한 브랜치에 누적.
+
+### S-2 상세 — Auth.js 카카오·Google (같은 스파이크 브랜치)
+
+- 키 5종 클라우드 환경 주입 확인(2026-10-01, 값 미출력): 형식 정상. 가짜 인가 코드로 토큰 엔드포인트 호출 → Google `invalid_grant`, 카카오 `KOE320`(코드 없음) = **클라이언트 자격증명 유효**(대조: 틀린 secret은 `invalid_client`/`KOE010`).
+- 구현: `next-auth@5.0.0-beta.32`(v5는 2026-10 현재도 **beta** — 리스크로 기록, 대안 Better Auth 1.7.x), JWT 세션(DB 어댑터 없음), `trustHost: true`, tRPC `protectedProcedure`(`me`: 세션 + DB `now()` 왕복).
+- Worker 시크릿: 환경변수 값을 stdin으로 `wrangler secret put`(출력·파일 기록 없음). 이후 키를 바꾸면 시크릿도 다시 넣어야 한다.
+- 원격 확인: 비로그인 `me` → 401, `/api/auth/providers` 콜백 URL이 등록값과 일치, 로그인 시작 → kauth.kakao.com / accounts.google.com로 302(PKCE 사용, redirect_uri 정확). 번들 12.1 MiB, Startup 23ms.
+- 남은 것: **사용자 브라우저에서 실제 로그인 → `/api/trpc/me` 200** 확인(카카오·Google 각각). 카카오 이메일 미수집(비즈 앱 전환 전)으로도 계정 식별(`sub`=카카오 ID) 가능한지 확인.
+- 주의: 확인 중 카카오 REST API 키(client_id, 브라우저 인가 URL에 원래 노출되는 공개값)가 세션 출력에 한 번 찍힘. secret 계열은 출력되지 않음.
 
 ### S-3 상세 — R2 업로드 크기 강제 (같은 스파이크 브랜치, 버킷 `bombyeol-spike-s3`)
 
@@ -125,3 +134,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: 작업 위치 규칙 합의(CLOUD_SESSION §2.1) — 클라우드 기본, Supabase 마이그레이션은 CI, 실사용 확인은 사용자 기기. S-1 리소스(Hyperdrive 1, 시험 Worker 1) 생성 승인받음.
 - 2026-10-01: S-1 수행 — 로컬·원격(Hyperdrive→Supabase) tRPC 왕복 통과. 로컬 .git 덮어쓰기 사고 발생·복구(위 사고 기록). 다음: S-2 착수 여부 사용자 확인, Supabase 마이그레이션 CI 경로는 Phase 0.
 - 2026-10-01: S-3(Worker 프록시)·S-4(기준선)·S-6·S-7·S-8 수행. R2 시험 버킷 생성(승인). 로컬 dockerd가 중간에 종료돼 재기동. 다음: S-2(카카오·Google 키), S-5(Firebase), S-3 presign(R2 키) 대기.
+- 2026-10-01: S-2 키 확인·구현·배포. 실제 로그인 확인을 사용자에게 요청.
