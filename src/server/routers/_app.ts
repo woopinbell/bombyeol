@@ -1,0 +1,11 @@
+import { publicProcedure, router } from "@/server/trpc/init";
+
+export const appRouter = router({
+  // 배포 스모크: Worker → Hyperdrive → Postgres 왕복(CLOUD_SESSION §2.1)
+  health: publicProcedure.query(async ({ ctx }) => {
+    await ctx.prisma.$queryRaw`select 1`;
+    return { ok: true };
+  }),
+});
+
+export type AppRouter = typeof appRouter;
