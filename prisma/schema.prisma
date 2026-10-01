@@ -15,3 +15,12 @@ model SpikePing {
   note      String
   createdAt DateTime @default(now())
 }
+
+// S-6 스파이크: 정확한 장기 창(시간·일) 카운터
+model RateCounter {
+  key         String
+  windowStart DateTime
+  count       Int      @default(0)
+
+  @@id([key, windowStart])
+}
