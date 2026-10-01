@@ -14,13 +14,13 @@
 | DB | **Postgres**(서버리스형) + Prisma + `@prisma/adapter-pg` + Hyperdrive | D1(SQLite) + `@prisma/adapter-d1`(현재 Preview) | Workers에서 pg는 nodejs_compat + Hyperdrive로 Prisma 실행 가능(요청마다 클라이언트 생성). 공급자 **Supabase Postgres**(사용자 선택, S-1 통과 2026-10-01: Hyperdrive가 Supabase 직결 IPv6 문자열로 동작, PG 17.11). Supabase는 일반 Postgres로만 사용(RLS·Auth·Storage 미사용, `CLOUD_SESSION.md` §2.1). Prisma 7 `prisma-client` 생성기 `runtime = "workerd"` |
 | 실시간 | **사용하지 않음** | — | 가족 피드·아카이브는 실시간이 필수가 아니다. TanStack Query refetch-on-focus + 푸시로 충분. 클라이언트가 직접 브로드캐스트하는 공개 채널 자체가 없으므로 hamkke의 Realtime 우회 남용 리스크가 **구조적으로 사라진다**(G-08) |
 | 인증 | **Auth.js v5** — 카카오 + Google | Better Auth(카카오 문서 있음) | Auth.js 환경변수 규칙 `AUTH_<PROVIDER>_ID/SECRET` → `AUTH_KAKAO_ID/SECRET` 확인(2026-10-01). 이메일 매직링크 없음. Workers에서의 세션 동작은 S-2 |
-| 미디어 | **Cloudflare R2** | — | egress 무료. 업로드 경로는 §5 |
+| 미디어 | **Cloudflare R2** | — | egress 무료. 업로드 경로는 §5. S-3: Worker 프록시 + `FixedLengthStream`으로 크기 강제 확인(presign 비교는 키 대기) |
 | 알림 | **FCM 웹푸시** + 카카오톡 공유하기(사용자 발송) | — | iOS는 홈 화면 추가 PWA만 푸시 가능(웹 조사로 확인) |
 | 결제 | **미정**(`OPEN_QUESTIONS.md` Q-PAY) | 후보: 포트원+토스페이먼츠 등 국내 PG, Stripe(해외 법인 필요 가능) | Stripe는 한국 사업자에 계정 개설이 불가하다는 자료 확인 — 착수 전 재결정 |
 | PDF | **클라이언트 생성**(브라우저에서 PDF 조립) | 서버 생성(Workers CPU 한도 검증 필요) | 서버 CPU·저장 비용 0. 한글 폰트 임베딩·용량은 S-7 |
 | 이미지 | 업로드 전 클라이언트가 썸네일 생성, `next/image`는 `unoptimized` | Cloudflare Images(과금) | 변환 과금 회피(hamkke 계승) |
 | 스케줄 | **Cron Triggers**(정리 작업) | — | hamkke는 Vercel이라 스케줄러가 없었지만 CF는 기본 제공. 용도: 미확정 업로드 정리·사용량 집계. 정시 사용자 알림은 별도 결정 |
-| 레이트 리밋 | Workers Rate Limiting 바인딩 또는 DB 카운터 | DB(`InviteCodeAttempt` 방식) | 새 인프라 없이 시작 가능. 선택은 S-6 |
+| 레이트 리밋 | **DB 카운터(주)** + Workers Rate Limiting 바인딩(보조) | — | S-6(2026-10-01): 바인딩은 PoP 단위·10/60초 창·결과적 일관성이라 원격에서 한도를 크게 넘겨 통과 → 비용 게이트(G-04·G-07·G-11)는 DB 고정 창 카운터로 정확히, 바인딩은 폭주 완화만 |
 | i18n | **next-intl**, 라우팅 없음, 한국어만 출시 | — | hamkke 계승 |
 | 테스트 | Vitest(라우터 = 실제 DB 통합), Playwright(e2e, 로컬 DB 전용 가드) | — | hamkke 계승 |
 | UI 기반 | shadcn/ui + Radix, Tailwind | — | 디자인은 `DESIGN.md`·`design-research/` |
@@ -107,7 +107,7 @@ hamkke에서 R2 남용이 가능했던 다섯 구멍을 처음부터 닫는 경�
 
 - 저장: R2 약 $0.015/GB/월(hamkke 점검 시 확인한 값), egress 무료. 무료 티어 10GB.
 - 지배 비용은 **저장량**이므로 Space별 총량 상한(무료·프리미엄 모두)이 필수.
-- Workers 요금제: Next.js 번들은 무료 플랜 한도를 넘길 가능성이 커서 유료 플랜(월 $5 안팎)이 필요할 수 있다 — S-4에서 확인(추정).
+- Workers 요금제: **유료 플랜 필요(S-4 실측)** — 크기는 64 MiB(비압축) 안에 들어오지만(추적 제외 후 11.5 MiB) CPU가 무료 한도 10ms/요청을 넘는다(웜 8~20ms, 콜드 200~450ms, SSR 30~340ms). 월 $5 최소 + 초과분.
 - 최악 비용 시나리오는 `COST_GUARDS.md` §3에서 가정별로 계산해 둔다.
 
 ## 11. 테스트 전략

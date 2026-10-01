@@ -42,7 +42,13 @@
 | ID | 결과 | 날짜 |
 |---|---|---|
 | S-1 | **통과(쿼리 왕복)** — 원격 쓰기·마이그레이션 경로는 미결 | 2026-10-01 |
-| S-2 ~ S-8 | 미수행 | — |
+| S-2 | 미수행 — 키 대기(`AUTH_KAKAO_*`, `AUTH_GOOGLE_*`, `AUTH_SECRET`) | — |
+| S-3 | **통과(Worker 프록시 방식)** — presign 방식은 R2 S3 키 대기 | 2026-10-01 |
+| S-4 | **기준선 측정, 유료 플랜 필요 판정** — S-2·S-3·S-5 후 재측정 | 2026-10-01 |
+| S-5 | 미수행 — Firebase 개발 프로젝트 키·실기기 대기 | — |
+| S-6 | **통과(DB 카운터 주력 + 바인딩 보조)** | 2026-10-01 |
+| S-7 | **통과** | 2026-10-01 |
+| S-8 | **통과(HTTPS 전부)** — DB 직접 TCP만 불가(설계로 우회) | 2026-10-01 |
 
 ### S-1 상세 (브랜치 `spike/s1-opennext-prisma`, main 머지 금지)
 
@@ -54,7 +60,39 @@
   - 배포된 `*.workers.dev`는 클라우드 VM에서 curl로 도달 가능 → 배포 스모크를 세션 안에서 자동 수행할 수 있다.
 - **미결**: Supabase에 스키마 적용 경로(원격 `SpikePing` 테이블 없음 → `ping`은 "table does not exist" 500, 즉 DB 도달은 확인). CLOUD_SESSION §2.1대로 **CI(GitHub Actions) 마이그레이션**을 Phase 0에서 구성 — 이때 필요한 비밀값(이름·IPv4 풀러 필요 여부)은 그 시점에 ENV_MANIFEST에 먼저 적고 요청.
 - **S-4 사전 신호**: 배포 출력 `Total Upload 54,672 KiB / gzip 18,092 KiB`, Startup 20ms. 빈 앱인데도 크다(Prisma·Next 서버 번들). 요금제 한도 대비 판단은 S-4에서.
-- 생성한 Cloudflare 리소스(정리 대상, 스파이크 종료 후 삭제 여부 사용자 확인): Hyperdrive `bombyeol-spike-s1`, Worker `bombyeol-spike-s1`.
+- 생성한 Cloudflare 리소스(정리 대상, 스파이크 종료 후 삭제 여부 사용자 확인): Hyperdrive `bombyeol-spike-s1`, Worker `bombyeol-spike-s1`, R2 버킷 `bombyeol-spike-s3`(비어 있음). 모든 스파이크 코드는 `spike/s1-opennext-prisma` 한 브랜치에 누적.
+
+### S-3 상세 — R2 업로드 크기 강제 (같은 스파이크 브랜치, 버킷 `bombyeol-spike-s3`)
+
+- 방식: `PUT /api/spike/upload?bytes=N` → 서버가 Content-Type 화이트리스트·선언 크기 상한 검사 → 본문을 `FixedLengthStream(N)`에 통과시켜 R2 바인딩 `put` → `head`로 크기 재확인. 불일치면 삭제·400.
+- 원격 결과: 정확 1000B 200 / 본문 2000B(선언 1000) 400 / 본문 500B 400 / 선언 상한 초과 413 / 금지 타입 415 / 거부 후 잔존 객체 0 / 9MB 2.6s 200.
+- 차이: chunked 전송(Content-Length 없음)은 크기가 정확해도 **원격에서 거부**(로컬은 통과). 실패 쪽으로 닫히므로 안전하고, 브라우저 `fetch(File/Blob)`은 Content-Length를 보낸다. 앱은 Content-Length 필수로 명시.
+- 결론: G-01은 **Worker 프록시 방식으로 충족 확인.** presign(`Content-Length` 서명 강제) 방식은 `R2_ACCESS_KEY_ID/SECRET` 필요 — 키 받으면 비교(프록시는 업로드가 Worker 요청·CPU를 거치고 요청 본문 상한의 적용을 받음).
+
+### S-4 상세 — 번들·CPU 기준선
+
+- 한도(공식 문서 2026-10 확인): Worker 크기 **비압축 64 MiB**(무료·유료 동일, 압축 한도 없음), 시작 시간 1s, CPU **무료 10ms/요청**, 유료 기본 30s(최대 5분). 유료 = 월 $5 최소, 1천만 요청·3천만 CPU-ms 포함.
+- 최초 빌드 53.4 MiB(한도 근접) — 원인: Next 출력 추적이 next.config(`@opennextjs/cloudflare`→wrangler)·prisma.config 경유로 wrangler·workerd·Prisma CLI·PGlite까지 끌어오고 OpenNext가 모든 `.wasm`을 번들. `outputFileTracingExcludes`로 **11.5 MiB**(gzip 3.1 MiB), Startup 20ms. → Phase 0 `chore(infra)`에 이 제외 목록 포함.
+- CPU(`wrangler tail` 실측): 웜 `dbVersion` 8~20ms, **콜드 isolate 200~450ms**, SSR 페이지 30~340ms. → **무료 플랜(10ms) 불가, Workers Paid 필요**(ARCHITECTURE §10 추정과 일치). 비용 예: 평균 100ms × 100만 요청 ≈ 초과 CPU $1.4 + 기본 $5.
+- 계정 플랜 상태는 토큰 권한으로 조회 불가(구독 API 10000). 현재 요청은 모두 ok — 사용자 확인 필요.
+
+### S-6 상세 — 레이트 리밋
+
+- 바인딩(`ratelimits`, 5/60s): 로컬은 정확히 6번째부터 429. **원격은 매우 관대** — 고정 키로 약 35회 통과 후에야 간헐적 429. 문서상 Cloudflare 위치(PoP) 단위·10/60초 창만 지원·결과적 일관성. 또한 클라우드 VM의 송신 IP가 여러 개로 바뀐다(IAD).
+- DB 카운터(`RateCounter` 고정 창 upsert, 5/3600s): 로컬 정확히 6번째부터 429. 원격은 Supabase 마이그레이션 경로 확정 후 확인.
+- 결론: **정확성이 필요한 비용 게이트(G-04 발급 횟수, G-07 로그인·초대 시도, G-11 생성 수·brute-force)는 DB 카운터**, 바인딩은 앞단 폭주 완화용 보조. 이 결정을 ARCHITECTURE §1에 반영.
+
+### S-7 상세 — 클라이언트 한글 PDF (`spikes/s7-pdf/`)
+
+- pdf-lib + @pdf-lib/fontkit + Pretendard TTF(2.7MB), 헤드리스 Chromium.
+- 100쪽·쪽당 약 900자(서로 다른 음절 다수, 서브셋 최악 근사): 서브셋 **3.2s / 0.49MB**, 비서브셋 3.6s / 1.43MB. 쪽당 사진 1장(1200×900 JPEG) + 400자: 1.5s / 5.6MB(크기는 사진이 지배).
+- CPU 6배 스로틀(저사양 폰 근사): 100쪽 텍스트 22.6s → 실제 구현은 **Web Worker + 진행률 표시** 필요.
+- 한글 추출 검증(pdfjs): 원문과 정확히 일치.
+- 결론: 클라이언트 생성 유지(G-13). 실기기 시간은 사용자 기기에서 후속 확인(미완료 검증).
+
+### S-8 상세 — 클라우드 세션 외부 호스트
+
+HTTPS 응답 확인(프록시 거부 0건): api.cloudflare.com, `*.workers.dev`(배포 Worker), `<account>.r2.cloudflarestorage.com`, api.supabase.com, kauth/kapi/developers.kakao.com, accounts.google.com, oauth2/www.googleapis.com, fcm/firebase/firebaseinstallations.googleapis.com, github.com, api.github.com, registry.npmjs.org, cdn.jsdelivr.net. 결제 공급자 호스트는 Q-PAY 결정 후 추가. DB 직접 TCP는 불가(위 "Phase S 키 확인") → 배포 Worker·CI 경로로 설계.
 
 ### 사고 기록 (2026-10-01, 로컬 한정, 복구 완료)
 
@@ -62,7 +100,10 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 
 ## 미완료 검증 항목
 
-- (없음 — 코드 없음)
+- S-4 최종 번들·CPU 재측정(S-2·S-3 presign·S-5 반영 후), 계정의 Workers Paid 여부 확인(사용자)
+- S-6 DB 카운터 원격 동작(Supabase 마이그레이션 경로 확정 후)
+- S-7 실기기(저사양 Android·iPhone) PDF 생성 시간
+- Supabase 원격 마이그레이션 경로(CI) — Phase 0
 
 ## 임시 완화한 게이트 (`TODO(G-xx)`)
 
@@ -83,3 +124,4 @@ create-next-app이 임시 폴더에서 자체 `git init`을 했고 이를 `cp -r
 - 2026-10-01: 사용자가 Phase S 키 주입 → 키 확인(위 표). Cloudflare 정상, Supabase DB는 VM에서 직접 도달 불가로 S-1 방식 조정 제안. S-1 착수 사용자 확인 대기.
 - 2026-10-01: 작업 위치 규칙 합의(CLOUD_SESSION §2.1) — 클라우드 기본, Supabase 마이그레이션은 CI, 실사용 확인은 사용자 기기. S-1 리소스(Hyperdrive 1, 시험 Worker 1) 생성 승인받음.
 - 2026-10-01: S-1 수행 — 로컬·원격(Hyperdrive→Supabase) tRPC 왕복 통과. 로컬 .git 덮어쓰기 사고 발생·복구(위 사고 기록). 다음: S-2 착수 여부 사용자 확인, Supabase 마이그레이션 CI 경로는 Phase 0.
+- 2026-10-01: S-3(Worker 프록시)·S-4(기준선)·S-6·S-7·S-8 수행. R2 시험 버킷 생성(승인). 로컬 dockerd가 중간에 종료돼 재기동. 다음: S-2(카카오·Google 키), S-5(Firebase), S-3 presign(R2 키) 대기.
