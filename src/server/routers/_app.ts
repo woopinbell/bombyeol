@@ -1,4 +1,5 @@
 import { publicProcedure, router } from "@/server/trpc/init";
+import { archiveRouter } from "./archive";
 import { calendarRouter } from "./calendar";
 import { childRouter } from "./child";
 import { consentRouter } from "./consent";
@@ -38,6 +39,7 @@ export const appRouter = router({
   calendar: calendarRouter,
   family: familyRouter,
   push: pushRouter,
+  archive: archiveRouter,
 });
 
 export type AppRouter = typeof appRouter;
