@@ -53,6 +53,12 @@
   --color-spring-green: var(--spring-green);
   --color-spring-yellow: var(--spring-yellow);
   --color-spring-sky: var(--spring-sky);
+  /* 외부 로그인 버튼(공식 가이드 값) */
+  --color-kakao: var(--kakao-container);
+  --color-kakao-label: var(--kakao-label);
+  --color-google: var(--google-fill);
+  --color-google-stroke: var(--google-stroke);
+  --color-google-label: var(--google-label);
   /* shadcn 컴포넌트가 쓰는 이름 → 역할 */
   --color-background: var(--bg);
   --color-foreground: var(--fg);

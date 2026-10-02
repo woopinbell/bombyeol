@@ -105,6 +105,19 @@ describe("디자인 토큰 v1 — CSS가 tokens.json과 같다", () => {
     expect(root["toast-life"]).toBe(`${m["toast-life"]}ms`);
   });
 
+  it("외부 로그인 버튼(공식 가이드 값)", () => {
+    const { kakao, google } = tokens.external;
+    expect(root["kakao-container"]).toBe(kakao.container.toLowerCase());
+    expect(root["kakao-label"]).toBe(kakao.label);
+    expect(root["kakao-radius"]).toBe(`${kakao.radius}px`);
+    for (const k of ["fill", "stroke", "label"] as const) {
+      expect(root[`google-${k}`], k).toBe(google.light[k].toLowerCase());
+      expect(block(':root[data-theme="dark"]')[`google-${k}`], `dark ${k}`).toBe(
+        google.dark[k].toLowerCase(),
+      );
+    }
+  });
+
   it("Tailwind 기본 팔레트·라운드·글자·그림자·곡선을 지워 토큰 밖 값이 유틸리티로 새지 않는다", () => {
     for (const ns of ["color", "radius", "text", "font", "font-weight", "shadow", "ease"]) {
       expect(globalsCss, ns).toContain(`--${ns}-*: initial;`);

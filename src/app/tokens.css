@@ -86,6 +86,14 @@
   --d-toast: 400ms;
   --stagger: 50ms;
   --toast-life: 6000ms;
+
+  /* 외부 로그인 버튼 — 각 사 공식 가이드 값(토큰 v1.1, 우리 팔레트 밖이지만 바꾸지 않는다) */
+  --kakao-container: #fee500;
+  --kakao-label: rgb(0 0 0 / 0.85);
+  --kakao-radius: 12px;
+  --google-fill: #ffffff;
+  --google-stroke: #747775;
+  --google-label: #1f1f1f;
   color-scheme: light;
 }
 
@@ -107,6 +115,9 @@
   --on-strong: var(--night-navy);
   --surface: var(--night-navy);
   --scrim: rgb(10 12 24 / 0.6);
+  --google-fill: #131314;
+  --google-stroke: #8e918f;
+  --google-label: #e3e3e3;
   color-scheme: dark;
 }
 /* 역할 — 다크(기기 설정, 앱에서 밝게를 고르지 않았을 때) */
@@ -121,6 +132,9 @@
     --on-strong: var(--night-navy);
     --surface: var(--night-navy);
     --scrim: rgb(10 12 24 / 0.6);
+    --google-fill: #131314;
+    --google-stroke: #8e918f;
+    --google-label: #e3e3e3;
     color-scheme: dark;
   }
 }
