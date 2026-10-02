@@ -1,4 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { createDevMemoryStorage } from "./dev-memory";
 import { createR2Storage } from "./r2";
 import type { MediaStorage } from "./types";
 
@@ -14,6 +15,8 @@ export function storageFromEnv(env: CloudflareEnv = getCloudflareContext().env):
     secretAccessKey: env.R2_SECRET_ACCESS_KEY ?? "",
   };
   if (Object.values(config).every(Boolean)) return createR2Storage(config);
+  // 로컬 개발(next dev)에서만: R2 키 없이 화면의 업로드, 보기 흐름을 확인한다
+  if (process.env.NODE_ENV === "development") return createDevMemoryStorage();
   const missing = (): never => {
     throw new Error(
       "R2 설정이 없습니다(R2_ACCOUNT_ID, R2_BUCKET_NAME, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY).",
