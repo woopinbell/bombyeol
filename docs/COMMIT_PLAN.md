@@ -37,7 +37,7 @@
 - [x] `chore(repo): Next.js(App Router) + TypeScript 프로젝트 초기화` — Next 16.3.8, `node_modules/next/dist/docs/` 확인. main에 `AGENTS.md`(Next 관리 블록)만 두고 루트 `CLAUDE.md`는 docs 링크 유지
 - [x] `chore(tooling): ESLint/Prettier 설정`
 - [x] `chore(tooling): Tailwind CSS 및 shadcn/ui(Radix) 초기화` — Tailwind 4.3, shadcn 4.21(radix-nova). shadcn 기본 팔레트·폰트·예제 버튼은 넣지 않음(토큰은 Phase DS 이후)
-- [x] `chore(design-system): DESIGN.md 확정 토큰 이식` — 토큰 v1(2026-10-02). 2026-10-02 원자 단위로 쪼갬(작업 브랜치 `claude/jolly-shannon-0ae5z1`, main 미머지):
+- [x] `chore(design-system): DESIGN.md 확정 토큰 이식` — 토큰 v1(2026-10-02). 2026-10-02 원자 단위로 쪼갬 — main 머지(PR woopinbell/bombyeol#11, d8d76bd):
   - [x] `chore(design-system): 확정 토큰 v1 이식`(67d2278) — `src/design/tokens.json`(docs `image-asset/brand/tokens.json` 사본) + `src/app/tokens.css` + Tailwind 테마를 토큰으로 제한(기본 색·라운드·글자·그림자 제거, 간격 4px 고정) + shadcn 변수 → 역할 + `src/lib/design-tokens.ts`(모션 상수)
   - [x] `test(design-system): 토큰 대비·CSS 일치 검증`(4e4578f) — DESIGN §12.1 표 + tokens.css 값이 tokens.json과 같은지
   - [x] `chore(design-system): Pretendard 자체 호스팅`(fd71702) — 작성자 배포 dynamic subset(가변) 그대로 + OFL 사본
@@ -192,7 +192,7 @@
 
 ## Phase 9 — 릴리스 준비
 
-- [ ] `test(e2e): 핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭제)` (로컬 DB 전용 가드) — **서버 부분 완료**(f089b91, tRPC 호출로 전체 흐름 + 잔존 데이터 0, 작업 브랜치 `claude/jolly-shannon-0ae5z1`, main 미머지). 브라우저·카카오 리다이렉트·공유·PWA·실기기 푸시는 UI 이후 브라우저 e2e로
+- [ ] `test(e2e): 핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭제)` (로컬 DB 전용 가드) — **서버 부분 완료**(f089b91, tRPC 호출로 전체 흐름 + 잔존 데이터 0, main 머지 PR woopinbell/bombyeol#11). 브라우저·카카오 리다이렉트·공유·PWA·실기기 푸시는 UI 이후 브라우저 e2e로
 - [ ] `test(a11y): 토큰 대비·터치 타깃·글자 크기 검증`
 - [ ] `chore(infra): 프로덕션 환경·도메인·시크릿 구성 점검`
 - [ ] 운영 체크리스트(`COST_GUARDS.md` §4) 사용자 확인
