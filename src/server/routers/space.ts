@@ -152,6 +152,7 @@ export const spaceRouter = router({
             role: true,
             relationLabel: true,
             user: { select: { name: true } },
+            memorial: { select: { id: true } },
           },
         },
         children: {
