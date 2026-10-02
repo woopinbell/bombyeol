@@ -40,6 +40,12 @@ printf '%s\n' '.docs/' 'CLAUDE.md' 'docs' 'image-asset' >> .git/info/exclude
 - hamkke의 교훈: 클라우드 환경변수 `DATABASE_URL`이 **실제 DB**를 가리키면 로컬 테스트·마이그레이션이 실수로 실DB에 닿는다. 봄별은 클라우드 환경에 **개발/테스트용 값만** 넣고, 테스트·e2e는 로컬 Docker Postgres를 쓰며 원격 DB면 스스로 거부하는 가드를 둔다.
 - Docker는 클라우드 VM에서 사용 가능(문서 확인). 로컬 Postgres는 `docker compose`로 띄운다.
 
+### 2.0 클라우드에서 띄운 서버는 사용자가 못 본다 (사용자 지적, 2026-10-02)
+
+- 클라우드 VM의 `localhost`(dev 서버·정적 서버)는 사용자 로컬 브라우저에서 열리지 않는다. CLAUDE.md "디자인 폴리시 보고 시 dev 서버를 켜 둔다"는 **로컬 세션 규칙**이다.
+- 클라우드에서 화면을 보여줄 때는: (1) Playwright 스크린샷·영상을 파일로 보낸다(`SendUserFile`), (2) 정적 목업·프로토타입은 docs 브랜치에 커밋해 사용자가 받아 로컬에서 연다, (3) 실제 앱은 main 머지 후 **스테이징**(`bombyeol-staging` workers.dev)에서 본다.
+- 보고에 `localhost` 주소를 "볼 수 있는 곳"처럼 적지 않는다.
+
 ## 2.1 작업 위치 규칙 (사용자 결정, 2026-10-01)
 
 배경: 클라우드 VM은 IPv6 미지원·프록시 밖 TCP 차단이라 Supabase(직결 IPv6)에 직접 닿지 않는다(`PROGRESS.md` "Phase S 키 확인"). 기준은 **기능별이 아니라 작업 성격별**로 나눈다.
