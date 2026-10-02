@@ -15,55 +15,54 @@
   .who { font-size: 17px; font-weight: 700; }
   .big { border-radius: 20px; height: 380px; }
   .cap1 { font-size: 22px; font-weight: 600; line-height: 1.5; margin: 16px 2px 4px; }
-  .by { font-size: 17px; color: var(--ink); }
+  .by { font-size: 17px; color: var(--fg); }
   .nav { display: flex; gap: 10px; margin-top: 16px; }
-  .nav .btn { flex: 1; min-height: 60px; font-size: 19px; border-color: var(--night-silver); }
+  .nav .btn { flex: 1; min-height: 60px; font-size: 19px; }
   .count { text-align: center; font-size: 16px; font-weight: 700; margin-top: 10px; }
   .like { margin-top: 12px; }
 
   /* 이야기 — paper 배경 + navy 띠 */
-  .band { background: var(--night-navy); color: var(--paper); margin: 0 -20px; padding: 18px 20px 22px; }
+  .band { background: var(--night-navy); color: var(--paper); --strong: var(--paper); --on-strong: var(--night-navy); --fg: var(--paper); --line-strong: var(--line-strong-night); margin: 0 -20px; padding: 18px 20px 22px; }
   .band .k { font-size: 17px; font-weight: 700; color: var(--starlight-gold); display: flex; align-items: center; gap: 8px; }
   .band .k svg { width: 20px; height: 20px; }
   .band .q { font-size: 28px; font-weight: 800; line-height: 1.38; margin: 10px 0 18px; }
   .band .btn + .btn { margin-top: 10px; }
   .sub { font-size: 18px; font-weight: 800; margin: 20px 0 6px; }
   .list { list-style: none; }
-  .list li { display: flex; align-items: center; gap: 12px; min-height: 64px; border-bottom: 1px solid var(--night-silver); font-size: 20px; font-weight: 600; }
-  .list li .st { margin-left: auto; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 10px; border: 1.5px solid var(--night-navy); color: var(--night-navy); white-space: nowrap; }
+  .list li { display: flex; align-items: center; gap: 12px; min-height: 64px; border-bottom: 1px solid var(--line); font-size: 20px; font-weight: 600; }
+  .list li .st { margin-left: auto; font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 10px; border: 1.5px solid var(--strong); color: var(--fg); white-space: nowrap; }
   .list li .st svg { width: 16px; height: 16px; }
-  .list li .st.wait { border-color: var(--night-silver); color: var(--ink); }
+  .list li .st.wait { border-color: var(--line-strong); color: var(--fg); }
 
   /* 우리 */
-  .dd { border: 2px solid var(--night-navy); border-radius: 20px; padding: 18px; }
+  .dd { border: 2px solid var(--strong); border-radius: 20px; padding: 18px; }
   .dd .k { font-size: 17px; font-weight: 700; }
   .dd .t { font-size: 30px; font-weight: 800; margin-top: 6px; }
   .dd .w { font-size: 19px; margin-top: 4px; }
   .rows { list-style: none; margin-top: 18px; }
-  .rows li { display: flex; align-items: center; gap: 14px; min-height: 72px; border-bottom: 1px solid var(--night-silver); font-size: 21px; font-weight: 700; }
-  .rows li .ico { width: 44px; height: 44px; border-radius: 12px; border: 1.5px solid var(--night-silver); display: flex; align-items: center; justify-content: center; flex: none; }
+  .rows li { display: flex; align-items: center; gap: 14px; min-height: 72px; border-bottom: 1px solid var(--line); font-size: 21px; font-weight: 700; }
+  .rows li .ico { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; flex: none; }
   .rows li .ico svg { width: 24px; height: 24px; }
-  .rows li .go { margin-left: auto; width: 24px; height: 24px; color: var(--ink-muted); }
-  .rows li .v { font-size: 17px; font-weight: 600; color: var(--ink); margin-left: auto; }
+  .rows li .go { margin-left: auto; width: 24px; height: 24px; color: var(--fg-muted); }
+  .rows li .v { font-size: 17px; font-weight: 600; color: var(--fg); margin-left: auto; }
 
   /* 온보딩 */
   .onb { padding: 0 24px 28px; }
   .top { display: flex; align-items: center; justify-content: space-between; min-height: 60px; margin-bottom: 10px; }
-  .top .btn { min-height: 52px; font-size: 18px; padding: 0 14px; border-color: var(--night-silver); }
+  .top .btn { min-height: 52px; font-size: 18px; padding: 0 14px; }
   .top .btn svg { width: 22px; height: 22px; }
   .stepk { font-size: 18px; font-weight: 700; }
   .onb h3 { font-size: 32px; font-weight: 800; line-height: 1.32; letter-spacing: -0.02em; margin-top: 18px; }
   .onb p.d { font-size: 22px; line-height: 1.5; margin-top: 14px; }
   .grow { flex: 1; }
-  .kakao { background: var(--spring-yellow); border-color: var(--spring-yellow); color: var(--ink); }
   .face { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; margin: 30px 0 0; }
   .opts { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
-  .opts .btn { min-height: 68px; font-size: 23px; justify-content: space-between; border-color: var(--night-silver); }
-  .opts .btn.on { border: 3px solid var(--night-navy); }
+  .opts .btn { min-height: 68px; font-size: 23px; justify-content: space-between; }
+  .opts .btn.on { border: 3px solid var(--strong); }
   .opts .btn svg { width: 28px; height: 28px; }
   .two { display: flex; gap: 10px; }
   .two .btn { flex: 1; }
-  .sample { font-size: 28px; font-weight: 700; line-height: 1.4; border: 2px solid var(--night-silver); border-radius: 18px; padding: 20px; margin-top: 24px; }
+  .sample { font-size: 28px; font-weight: 700; line-height: 1.4; border: 1px solid var(--line); border-radius: 18px; padding: 20px; margin-top: 24px; }
 </style>
 </head>
 <body>
@@ -74,7 +73,7 @@
   <div class="row" id="tabs">
     <div>
       <div class="phone">
-        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="status"><span>9:41</span><span></span></div>
         <div class="screen">
           <div class="head"><h2>오늘</h2><span class="who">지우</span></div>
           <div class="photo big" data-scene="park"></div>
@@ -90,14 +89,14 @@
     </div>
     <div>
       <div class="phone">
-        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="status"><span>9:41</span><span></span></div>
         <div class="screen">
           <div class="head"><h2>이야기</h2></div>
           <div class="band">
             <div class="k"><span data-i="starFill"></span>지우 엄마가 여쭤봤어요</div>
             <div class="q">어린 시절 살던 동네는 어떠셨어요?</div>
-            <span class="btn gold block elder"><span class="icon" data-i="pen"></span>글로 답하기</span>
-            <span class="btn ghost-night block elder">가족에게 대신 써 달라고 하기</span>
+            <span class="btn primary block elder"><span class="icon" data-i="pen"></span>글로 답하기</span>
+            <span class="btn block elder">가족에게 대신 써 달라고 하기</span>
           </div>
           <div class="sub">남기신 이야기</div>
           <ul class="list">
@@ -112,7 +111,7 @@
     </div>
     <div>
       <div class="phone">
-        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="status"><span>9:41</span><span></span></div>
         <div class="screen">
           <div class="head"><h2>우리</h2></div>
           <div class="dd"><div class="k">다음 가족 일</div><div class="t">할머니 생신 · 12일 남음</div><div class="w">10월 13일 월요일</div></div>

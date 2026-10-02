@@ -9,21 +9,20 @@
   /* 안 A — 한 장씩: 기록 하나 = 큰 카드 하나, 여백 넉넉, 캐주얼 해요체(토스식) */
   .head { display: flex; align-items: flex-end; justify-content: space-between; padding: 8px 0 14px; }
   .head h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
-  .head .who { font-size: 15px; font-weight: 600; color: var(--ink-muted); }
-  .night .head .who { color: var(--night-silver); }
+  .head .who { font-size: 15px; font-weight: 600; color: var(--fg-muted); }
   .filters { display: flex; gap: 8px; margin-bottom: 16px; }
-  .filters .chip.on { border-width: 2.5px; border-color: var(--ink); font-weight: 800; }
-  .card { border: 1.5px solid var(--night-silver); border-radius: 20px; overflow: hidden; margin-bottom: 16px; }
+  .card { border: 1px solid var(--line); border-radius: 20px; overflow: hidden; margin-bottom: 16px; }
   .card .photo { border-radius: 0; height: 300px; }
   .card .body { padding: 14px 16px 12px; }
   .card .line { font-size: 18px; line-height: 1.5; font-weight: 500; }
   .card .by { margin-top: 6px; }
   .card .acts { display: flex; gap: 8px; padding: 0 12px 12px; }
-  .act { min-height: 44px; flex: 1; border: 1.5px solid var(--night-silver); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 15px; font-weight: 600; }
+  .act { min-height: 44px; flex: 1; border: 1.5px solid var(--line-strong); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 15px; font-weight: 600; }
   .act svg { width: 20px; height: 20px; }
-  .mile { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--spring-yellow); margin-bottom: 16px; }
+  .mile { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line); margin-bottom: 16px; }
+  .mile .tag { flex: none; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 10px; border-radius: 16px; background: var(--spring-yellow); font-size: 13px; font-weight: 800; }
+  .mile .tag svg { width: 16px; height: 16px; }
   .mile b { font-size: 17px; }
-  .mile .meta { color: var(--ink); }
   .fab { position: absolute; right: 20px; bottom: 104px; box-shadow: none; }
 
   /* 이야기 */
@@ -31,56 +30,55 @@
   .qcard .from { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--starlight-gold); }
   .qcard .from svg { width: 18px; height: 18px; }
   .qcard .q { font-size: 24px; font-weight: 700; line-height: 1.4; margin: 10px 0 18px; }
-  .sub { font-size: 15px; font-weight: 700; color: var(--night-silver); margin-bottom: 10px; }
+  .sub { font-size: 15px; font-weight: 700; color: var(--fg-muted); margin-bottom: 10px; }
   .garden { list-style: none; }
-  .garden li { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--night-indigo); }
-  .garden .stage { width: 52px; flex: none; text-align: center; font-size: 12px; font-weight: 700; color: var(--night-silver); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .garden li { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .garden .stage { width: 52px; flex: none; text-align: center; font-size: 12px; font-weight: 700; color: var(--fg-muted); display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .garden .stage svg { width: 24px; height: 24px; }
   .garden .stage.done { color: var(--starlight-gold); }
   .garden .t { font-size: 17px; font-weight: 600; line-height: 1.4; }
-  .garden .m { font-size: 14px; color: var(--night-silver); margin-top: 2px; }
+  .garden .m { font-size: 14px; color: var(--fg-muted); margin-top: 2px; }
 
   /* 우리 */
-  .dday { border-radius: 20px; background: var(--night-navy); color: var(--paper); padding: 20px; margin-bottom: 22px; }
+  .dday { border-radius: 20px; background: var(--raised); color: var(--paper); padding: 20px; margin-bottom: 22px; }
   .dday .k { font-size: 14px; font-weight: 600; color: var(--night-silver); }
   .dday .big { display: flex; align-items: baseline; gap: 12px; margin-top: 6px; }
   .dday .big b { font-size: 34px; font-weight: 800; color: var(--starlight-gold); }
   .dday .big span { font-size: 20px; font-weight: 700; }
   .dday .when { font-size: 15px; color: var(--night-silver); margin-top: 4px; }
-  .gen { font-size: 14px; font-weight: 700; color: var(--ink-muted); margin: 4px 0 6px; }
+  .gen { font-size: 14px; font-weight: 700; color: var(--fg-muted); margin: 4px 0 6px; }
   .people { list-style: none; margin-bottom: 14px; }
-  .people li { display: flex; align-items: center; gap: 12px; min-height: 56px; border-bottom: 1px solid var(--night-silver); }
+  .people li { display: flex; align-items: center; gap: 12px; min-height: 56px; border-bottom: 1px solid var(--line); }
   .ava { width: 40px; height: 40px; border-radius: 50%; flex: none; overflow: hidden; }
   .people .n { font-size: 17px; font-weight: 600; flex: 1; }
-  .people .r { font-size: 14px; color: var(--ink-muted); }
-  .memo { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; padding: 3px 8px; border-radius: 8px; border: 1px solid var(--night-indigo); color: var(--night-indigo); }
+  .people .r { font-size: 14px; color: var(--fg-muted); }
+  .memo { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; padding: 3px 8px; border-radius: 8px; border: 1px solid var(--line-strong); color: var(--fg); }
   .memo svg { width: 14px; height: 14px; }
   .links { display: flex; gap: 8px; }
-  .links .btn { flex: 1; font-size: 15px; min-height: 48px; padding: 0 10px; border-color: var(--night-silver); }
+  .links .btn { flex: 1; font-size: 15px; min-height: 48px; padding: 0 10px; }
 
   /* 온보딩 */
   .onb { padding: 0 24px 28px; }
-  .step { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 22px; font-size: 15px; font-weight: 600; color: var(--ink-muted); }
-  .step .back { display: flex; align-items: center; gap: 2px; color: var(--ink); min-height: 48px; }
+  .step { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 22px; font-size: 15px; font-weight: 600; color: var(--fg-muted); }
+  .step .back { display: flex; align-items: center; gap: 2px; color: var(--fg); min-height: 48px; }
   .step .back svg { width: 22px; height: 22px; }
   .bar { display: flex; gap: 6px; margin-bottom: 26px; }
-  .bar i { flex: 1; height: 6px; border-radius: 3px; background: var(--night-silver); }
-  .bar i.on { background: var(--night-navy); }
+  .bar i { flex: 1; height: 6px; border-radius: 3px; background: var(--line-strong); }
+  .bar i.on { background: var(--strong); }
   .onb h3 { font-size: 28px; font-weight: 800; line-height: 1.35; letter-spacing: -0.02em; }
   .onb p.d { font-size: 19px; line-height: 1.55; margin-top: 12px; }
   .grow { flex: 1; }
-  .kakao { background: var(--spring-yellow); border-color: var(--spring-yellow); color: var(--ink); }
-  .inviter { display: flex; align-items: center; gap: 14px; margin: 28px 0; padding: 16px; border: 1.5px solid var(--night-silver); border-radius: 18px; }
+  .inviter { display: flex; align-items: center; gap: 14px; margin: 28px 0; padding: 16px; border: 1px solid var(--line); border-radius: 18px; }
   .inviter .ava { width: 64px; height: 64px; }
   .inviter b { font-size: 20px; display: block; }
   .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 26px; }
-  .choices .btn { min-height: 64px; font-size: 20px; border-color: var(--night-silver); }
-  .choices .btn.on { border: 2.5px solid var(--night-navy); }
+  .choices .btn { min-height: 64px; font-size: 20px; }
+  .choices .btn.on { border: 2.5px solid var(--strong); }
   .sizes { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
-  .size { border: 1.5px solid var(--night-silver); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
-  .size.on { border: 2.5px solid var(--night-navy); }
+  .size { border: 1.5px solid var(--line-strong); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .size.on { border: 2.5px solid var(--strong); }
   .size .s { font-weight: 700; }
-  .size .check { width: 28px; height: 28px; color: var(--night-navy); }
+  .size .check { width: 28px; height: 28px; color: var(--strong); }
   .done-photo { height: 240px; margin: 26px 0 0; }
 </style>
 </head>
@@ -93,11 +91,11 @@
     <!-- 오늘 -->
     <div>
       <div class="phone">
-        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="status"><span>9:41</span><span></span></div>
         <div class="screen">
           <div class="head"><h2>오늘</h2><span class="who">지우네 가족</span></div>
           <div class="filters"><span class="chip on">모두</span><span class="chip">지우</span><span class="chip">콩이</span></div>
-          <div class="mile"><span class="icon" data-i="sprout"></span><div><b>지우가 처음 걸었어요</b><div class="meta">3월 2일 · 엄마가 남겼어요</div></div></div>
+          <div class="mile"><span class="tag on-spring"><span data-i="sprout"></span>처음</span><div><b>지우가 처음 걸었어요</b><div class="meta">3월 2일 · 엄마가 남겼어요</div></div></div>
           <div class="card">
             <div class="photo" data-scene="park"></div>
             <div class="body">
@@ -110,18 +108,18 @@
         <span class="btn primary fab"><span class="icon" data-i="plus"></span>기록하기</span>
         <div class="tabs" data-tabs="today"></div>
       </div>
-      <p class="cap"><b>오늘</b> — 마일스톤은 노란 띠 하나 — 이 화면의 봄 색은 노랑 하나뿐(선택 칩은 굵은 테두리로, DESIGN §3 규칙 2). 기록하기는 글자 라벨이 있는 버튼 하나.</p>
+      <p class="cap"><b>오늘</b> — 마일스톤은 작은 노란 칩 하나 — 이 화면의 봄 색은 노랑 하나뿐(선택 칩은 굵은 테두리로, DESIGN §3 규칙 2). 기록하기는 글자 라벨이 있는 버튼 하나.</p>
     </div>
     <!-- 이야기 -->
     <div>
       <div class="phone night">
-        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="status"><span>9:41</span><span></span></div>
         <div class="screen">
           <div class="head"><h2>이야기</h2><span class="who">할머니의 이야기</span></div>
           <div class="qcard">
             <div class="from"><span data-i="starFill"></span>지우 엄마가 물어봤어요</div>
             <div class="q">어린 시절 살던 동네는 어땠어요?</div>
-            <span class="btn gold block elder"><span class="icon" data-i="pen"></span>답하기</span>
+            <span class="btn primary block elder"><span class="icon" data-i="pen"></span>답하기</span>
           </div>
           <div class="sub">이야기 정원 · 12개</div>
           <ul class="garden">
@@ -132,12 +130,12 @@
         </div>
         <div class="tabs" data-tabs="story"></div>
       </div>
-      <p class="cap"><b>이야기</b> — 맨 위 질문 카드 하나 + 골드 [답하기]. 아래 "정원"은 상태를 그림과 글로 함께(답 완료·쓰는 중·질문만). 손그림 일러스트는 넣지 않았어요(Q-ILLUST).</p>
+      <p class="cap"><b>이야기</b> — 맨 위 질문 카드 하나 + [답하기](골드는 테두리·별 표식에만 — DESIGN §7). 아래 "정원"은 상태를 그림과 글로 함께(답 완료·쓰는 중·질문만). 손그림 일러스트는 넣지 않았어요(Q-ILLUST).</p>
     </div>
     <!-- 우리 -->
     <div>
       <div class="phone">
-        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="status"><span>9:41</span><span></span></div>
         <div class="screen">
           <div class="head"><h2>우리</h2><span class="who">지우네 가족</span></div>
           <div class="dday"><div class="k">다음 가족 일</div><div class="big"><b>D-12</b><span>할머니 생신</span></div><div class="when">10월 13일 월요일</div></div>

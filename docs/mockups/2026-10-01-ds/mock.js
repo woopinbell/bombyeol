@@ -1,4 +1,6 @@
 // 목업 전용 — 사진 자리(평면 도형)와 아이콘을 채운다. 사진 색은 콘텐츠 자리 표시일 뿐 UI 색이 아니다.
+// ?theme=dark|light 로 모드를 고정할 수 있다(없으면 기기 설정을 따른다).
+{ const t = new URLSearchParams(location.search).get("theme"); if (t) document.documentElement.dataset.theme = t; }
 const C = { paper:"#F7F1E6", ink:"#2C2621", navy:"#232B4D", indigo:"#34406B", silver:"#C7CEDD", gold:"#E8C77A", pink:"#F2A7B3", green:"#A9C88C", yellow:"#F4CB6E", sky:"#A8D8E8" };
 const SCENES = {
   park: `<rect width="400" height="300" fill="${C.sky}"/><circle cx="320" cy="70" r="34" fill="${C.yellow}"/><path d="M0 220 Q120 150 240 210 T400 190 V300 H0Z" fill="${C.green}"/><circle cx="170" cy="168" r="16" fill="${C.ink}"/><path d="M158 186h24l6 44h-36z" fill="${C.pink}"/><path d="M160 230v24M180 230v24" stroke="${C.ink}" stroke-width="6" stroke-linecap="round"/>`,

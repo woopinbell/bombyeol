@@ -4,7 +4,8 @@
 
 - **확정 아님**: 색·글자 값은 `DESIGN.md` §3·§4 초안 그대로, 로고는 미사용(글자 "봄별"), 손글씨 없음(Q-FONT), 일러스트 없음(Q-ILLUST). 사진은 평면 도형 자리 표시.
 - 카카오 버튼은 자리 표시 — 실제는 카카오 로그인 디자인 가이드의 색·모양을 따른다.
-- 보기: `a.html`·`b.html`·`c.html`을 브라우저로 연다(Pretendard는 jsDelivr). 스크린샷은 `shots/`(Playwright, 390×844 프레임).
+- 보기: `a.html`·`b.html`·`c.html`을 브라우저로 연다(Pretendard는 jsDelivr). 기기 설정을 따르고 `?theme=dark`/`?theme=light`로 고정. 스크린샷은 `shots/`(Playwright, 390×844 프레임, 다크는 `*-dark.png`).
+- 2026-10-02 갱신: 라이트·다크 역할 토큰(`DESIGN.md` §3.1)으로 바꿨고, 점검(`design-research/2026-10-02-mockup-audit.md`)에서 찾은 위반(테두리 대비 1.4:1, 골드 넓은 버튼, 노란 띠, 칩 40px)을 고쳤다.
 
 | | 안 A — 한 장씩 | 안 B — 날짜별 앨범 | 안 C — 큰글씨 간편 모드 |
 |---|---|---|---|

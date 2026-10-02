@@ -9,9 +9,9 @@
   /* 안 B — 날짜별 앨범: 하루 단위로 묶고 사진은 2열, 한눈에 많이. 이야기는 "정원" 타일. 문구는 해요체 + 어르신에게만 "~세요" */
   .head { padding: 8px 0 12px; }
   .head h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
-  .seg { display: flex; border: 1.5px solid var(--night-silver); border-radius: 14px; padding: 3px; margin-bottom: 18px; }
-  .seg span { flex: 1; min-height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 11px; font-size: 16px; font-weight: 600; color: var(--ink-muted); }
-  .seg span.on { background: var(--night-navy); color: var(--paper); }
+  .seg { display: flex; border: 1.5px solid var(--line-strong); border-radius: 14px; padding: 3px; margin-bottom: 18px; }
+  .seg span { flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 11px; font-size: 16px; font-weight: 600; color: var(--fg-muted); }
+  .seg span.on { background: var(--strong); color: var(--on-strong); }
   .day { display: flex; align-items: baseline; justify-content: space-between; margin: 2px 0 10px; }
   .day b { font-size: 19px; font-weight: 800; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
@@ -21,24 +21,21 @@
   .rx { display: flex; gap: 14px; font-size: 15px; font-weight: 600; margin-bottom: 18px; }
   .rx span { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; }
   .rx svg { width: 20px; height: 20px; }
-  .ms { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 20px; background: var(--spring-pink); font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+  .ms { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 20px; background: var(--spring-pink); color: var(--ink); font-size: 15px; font-weight: 700; margin-bottom: 10px; }
   .ms svg { width: 18px; height: 18px; }
-  .addbar { flex: none; padding: 10px 20px; border-top: 1px solid var(--night-silver); }
+  .addbar { flex: none; padding: 10px 20px; border-top: 1px solid var(--line); }
 
   /* 이야기 */
-  .night .seg { border-color: var(--night-indigo); }
-  .night .seg span { color: var(--night-silver); }
-  .night .seg span.on { background: var(--paper); color: var(--night-navy); }
   .ask { display: flex; gap: 14px; align-items: center; background: var(--night-indigo); border-radius: 18px; padding: 16px; margin-bottom: 18px; }
   .ask .q { flex: 1; }
   .ask .k { font-size: 13px; font-weight: 700; color: var(--starlight-gold); }
   .ask .t { font-size: 19px; font-weight: 700; line-height: 1.4; margin-top: 4px; }
   .ask .btn { flex: none; min-height: 52px; padding: 0 16px; }
   .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .tile { border: 1.5px solid var(--night-indigo); border-radius: 16px; padding: 12px; min-height: 150px; display: flex; flex-direction: column; }
+  .tile { border: 1.5px solid var(--line-strong); border-radius: 16px; padding: 12px; min-height: 150px; display: flex; flex-direction: column; }
   .tile .photo { height: 70px; border-radius: 10px; margin-bottom: 8px; }
   .tile .t { font-size: 16px; font-weight: 700; line-height: 1.35; flex: 1; }
-  .tile .s { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: var(--night-silver); margin-top: 8px; }
+  .tile .s { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: var(--fg-muted); margin-top: 8px; }
   .tile .s svg { width: 16px; height: 16px; }
   .tile.done { border-color: var(--starlight-gold); }
   .tile.done .s { color: var(--starlight-gold); }
@@ -47,48 +44,47 @@
   .month { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .month b { font-size: 19px; }
   .cal { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; row-gap: 2px; margin-bottom: 16px; }
-  .cal .w { font-size: 13px; font-weight: 700; color: var(--ink-muted); padding: 4px 0; }
+  .cal .w { font-size: 13px; font-weight: 700; color: var(--fg-muted); padding: 4px 0; }
   .cal .d { font-size: 15px; height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-  .cal .d.mute { color: var(--ink-muted); }
+  .cal .d.mute { color: var(--fg-muted); }
   .cal .d.today { font-weight: 800; }
-  .cal .d.today::before { content: ""; position: absolute; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--ink); }
-  .cal .d.ev::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--night-navy); position: absolute; bottom: 2px; }
-  .up { list-style: none; border-top: 1px solid var(--night-silver); }
-  .up li { display: flex; align-items: center; gap: 14px; min-height: 60px; border-bottom: 1px solid var(--night-silver); }
+  .cal .d.today::before { content: ""; position: absolute; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--fg); }
+  .cal .d.ev::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--strong); position: absolute; bottom: 2px; }
+  .up { list-style: none; border-top: 1px solid var(--line); }
+  .up li { display: flex; align-items: center; gap: 14px; min-height: 60px; border-bottom: 1px solid var(--line); }
   .up .dd { width: 56px; flex: none; font-size: 17px; font-weight: 800; }
   .up .n { font-size: 17px; font-weight: 600; flex: 1; }
-  .up .r { font-size: 14px; color: var(--ink-muted); }
+  .up .r { font-size: 14px; color: var(--fg-muted); }
   .faces { display: flex; gap: 14px; margin: 16px 0 0; }
   .faces div { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
-  .faces .ava { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; border: 2px solid var(--night-silver); }
-  .faces .memo .ava { border-style: dashed; border-color: var(--night-indigo); }
+  .faces .ava { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; border: 2px solid var(--line); }
+  .faces .memo .ava { border-style: dashed; border-color: var(--fg); }
 
   /* 온보딩 — 3단계로 압축 */
   .onb { padding: 0 24px 28px; }
-  .top { display: flex; justify-content: space-between; align-items: center; min-height: 52px; font-size: 15px; font-weight: 600; color: var(--ink-muted); margin-bottom: 18px; }
-  .top .back { display: flex; align-items: center; color: var(--ink); }
+  .top { display: flex; justify-content: space-between; align-items: center; min-height: 52px; font-size: 15px; font-weight: 600; color: var(--fg-muted); margin-bottom: 18px; }
+  .top .back { display: flex; align-items: center; color: var(--fg); }
   .top .back svg { width: 22px; height: 22px; }
   .dots { display: flex; gap: 8px; }
-  .dots i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--night-navy); }
-  .dots i.on { background: var(--night-navy); }
+  .dots i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--strong); }
+  .dots i.on { background: var(--strong); }
   .onb h3 { font-size: 27px; font-weight: 800; line-height: 1.35; letter-spacing: -0.02em; }
   .onb p.d { font-size: 19px; line-height: 1.55; margin-top: 10px; }
   .grow { flex: 1; }
-  .kakao { background: var(--spring-yellow); border-color: var(--spring-yellow); color: var(--ink); }
   .hero { height: 260px; margin: 22px 0 14px; }
   .field { margin-top: 22px; }
   .field label { font-size: 16px; font-weight: 700; display: block; margin-bottom: 8px; }
-  .input { min-height: 60px; border: 2px solid var(--ink); border-radius: 14px; display: flex; align-items: center; padding: 0 16px; font-size: 21px; font-weight: 600; }
+  .input { min-height: 60px; border: 2px solid var(--fg); border-radius: 14px; display: flex; align-items: center; padding: 0 16px; font-size: 21px; font-weight: 600; }
   .sugg { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
   .sugg .chip { min-height: 48px; font-size: 18px; }
   .slider { margin-top: 18px; }
-  .slider .track { height: 8px; border-radius: 4px; background: var(--night-silver); position: relative; margin: 26px 8px 10px; }
-  .slider .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 55%; background: var(--night-navy); border-radius: 4px; }
-  .slider .knob { position: absolute; left: 55%; top: 50%; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; background: var(--paper); border: 3px solid var(--night-navy); }
+  .slider .track { height: 8px; border-radius: 4px; background: var(--line-strong); position: relative; margin: 26px 8px 10px; }
+  .slider .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 55%; background: var(--strong); border-radius: 4px; }
+  .slider .knob { position: absolute; left: 55%; top: 50%; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; background: var(--bg); border: 3px solid var(--strong); }
   .slider .ends { display: flex; justify-content: space-between; font-weight: 700; }
   .slider .pm { display: flex; gap: 10px; margin-top: 14px; }
   .slider .pm .btn { flex: 1; }
-  .preview { border: 1.5px solid var(--night-silver); border-radius: 16px; padding: 16px; font-size: 22px; font-weight: 600; line-height: 1.45; margin-top: 18px; }
+  .preview { border: 1px solid var(--line); border-radius: 16px; padding: 16px; font-size: 22px; font-weight: 600; line-height: 1.45; margin-top: 18px; }
 </style>
 </head>
 <body>
@@ -99,7 +95,7 @@
   <div class="row" id="tabs">
     <div>
       <div class="phone">
-        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="status"><span>9:41</span><span></span></div>
         <div class="screen">
           <div class="head"><h2>지우네 오늘</h2></div>
           <div class="seg"><span class="on">모두</span><span>지우</span><span>콩이</span></div>
@@ -117,11 +113,11 @@
     </div>
     <div>
       <div class="phone night">
-        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="status"><span>9:41</span><span></span></div>
         <div class="screen">
           <div class="head"><h2>할머니의 이야기</h2></div>
           <div class="seg"><span class="on">전체 12</span><span>답 완료 7</span><span>기다리는 질문 2</span></div>
-          <div class="ask"><div class="q"><div class="k">지우 엄마가 물어봤어요</div><div class="t">어린 시절 살던 동네는 어땠어요?</div></div><span class="btn gold">답하기</span></div>
+          <div class="ask"><div class="q"><div class="k">지우 엄마가 물어봤어요</div><div class="t">어린 시절 살던 동네는 어땠어요?</div></div><span class="btn primary">답하기</span></div>
           <div class="tiles">
             <div class="tile done"><div class="photo" data-scene="old"></div><div class="t">시집오던 날 탄 버스</div><div class="s"><span data-i="starFill"></span>별 3 · 답 완료</div></div>
             <div class="tile"><div class="t">처음 끓여 본 된장찌개</div><div class="s"><span data-i="pen"></span>쓰는 중</div></div>
@@ -135,7 +131,7 @@
     </div>
     <div>
       <div class="phone">
-        <div class="status"><span>9:41</span><span>봄별</span></div>
+        <div class="status"><span>9:41</span><span></span></div>
         <div class="screen">
           <div class="head"><h2>우리 가족</h2></div>
           <div class="month"><b>10월</b><span class="meta">달력 크게 보기</span></div>
