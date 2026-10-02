@@ -33,6 +33,14 @@
   /* 곡선은 tokens.css의 --ease-*(같은 이름)가 맡는다 - Tailwind 기본값과 겹치지 않게 지운다 */
   --ease-*: initial;
   --spacing: 4px;
+
+  /* 탭 전환: 이동 없이 페이드만(DESIGN §11 d-fast, 감소 모션에서도 같은 값) */
+  --animate-tab-in: fade-in var(--d-fast) linear;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
 }
 
 @theme inline {
