@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import type { MemberRole, Prisma } from "@/generated/prisma/client";
+import { memoized } from "./context";
 import { publicProcedure } from "./init";
 
 /** 진행 중(취소, 완료 전)인 Space 삭제 요청 */
@@ -14,10 +15,10 @@ export function openSpaceDeletion(spaceId: string): Prisma.DeletionRequestWhereI
  */
 export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
   if (!ctx.userId) throw new TRPCError({ code: "UNAUTHORIZED" });
-  const user = await ctx.prisma.user.findUnique({
-    where: { id: ctx.userId },
-    select: { deletedAt: true },
-  });
+  const userId = ctx.userId;
+  const user = await memoized(ctx, `user:${userId}`, () =>
+    ctx.prisma.user.findUnique({ where: { id: userId }, select: { deletedAt: true } }),
+  );
   if (!user || user.deletedAt) throw new TRPCError({ code: "UNAUTHORIZED" });
   return next({ ctx: { ...ctx, userId: ctx.userId } });
 });
@@ -30,10 +31,12 @@ export const protectedProcedure = publicProcedure.use(async ({ ctx, next }) => {
 export const spaceProcedure = protectedProcedure
   .input(z.object({ spaceId: z.string().min(1).max(64) }))
   .use(async ({ ctx, input, next, type, meta }) => {
-    const member = await ctx.prisma.member.findUnique({
-      where: { spaceId_userId: { spaceId: input.spaceId, userId: ctx.userId } },
-      select: { id: true, role: true, spaceId: true, space: { select: { deletedAt: true } } },
-    });
+    const member = await memoized(ctx, `member:${input.spaceId}:${ctx.userId}`, () =>
+      ctx.prisma.member.findUnique({
+        where: { spaceId_userId: { spaceId: input.spaceId, userId: ctx.userId } },
+        select: { id: true, role: true, spaceId: true, space: { select: { deletedAt: true } } },
+      }),
+    );
     if (!member || member.space.deletedAt) throw new TRPCError({ code: "NOT_FOUND" });
     if (type === "mutation" && !meta?.allowWhileDeleting) {
       const deleting = await ctx.prisma.deletionRequest.findFirst({

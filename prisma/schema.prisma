@@ -3,6 +3,8 @@ generator client {
   output       = "../src/generated/prisma"
   runtime      = "workerd"
   moduleFormat = "esm"
+  // 관계를 쿼리마다 따로 부르지 않고 한 번에(LATERAL JOIN) - Workers에서 DB 왕복과 CPU를 줄인다(2026-10-02 측정)
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {

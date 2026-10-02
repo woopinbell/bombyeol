@@ -14,6 +14,9 @@ import { entityId, isNotFuture, isoDate } from "./inputs";
 
 const kindInput = z.string().min(1).max(32);
 
+/** 오늘 탭에 한 번에 싣는 마일스톤 수(그보다 오래된 것은 대상별 목록에서) */
+const MILESTONE_FEED_LIMIT = 200;
+
 /** kind별 값 스키마로 검증한 JSON(PRD §4.2 프리셋 + 자유 입력) */
 function parseValue(subject: "child" | "pet", kind: string, value: unknown) {
   const preset = milestonePreset(subject, kind);
@@ -141,6 +144,32 @@ export const milestoneRouter = router({
       const rows = await ctx.prisma.milestone.findMany({
         where: subject,
         orderBy: [{ recordedAt: "desc" }, { createdAt: "desc" }],
+        select: milestoneSelect,
+      });
+      const reactions = await reactionSummaries(
+        ctx.prisma,
+        ctx.userId,
+        "milestoneId",
+        rows.map((m) => m.id),
+      );
+      return rows.map((m) => ({ ...m, reactions: reactions.get(m.id)! }));
+    }),
+
+  /**
+   * 가족 전체(또는 한 대상)의 마일스톤을 한 번에(모든 멤버) - 오늘 탭이 대상마다 따로 부르지 않게.
+   * 기록일 최신순, 최근 MILESTONE_FEED_LIMIT개까지.
+   */
+  listAll: spaceProcedure
+    .input(z.object({ subject: memberSubjectInput.optional() }))
+    .query(async ({ ctx, input }) => {
+      const spaceId = ctx.member.spaceId;
+      const subject = input.subject
+        ? await resolveSubject(ctx.prisma, spaceId, input.subject)
+        : { spaceId };
+      const rows = await ctx.prisma.milestone.findMany({
+        where: { spaceId, ...subject },
+        orderBy: [{ recordedAt: "desc" }, { createdAt: "desc" }],
+        take: MILESTONE_FEED_LIMIT,
         select: milestoneSelect,
       });
       const reactions = await reactionSummaries(

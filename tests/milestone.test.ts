@@ -106,6 +106,29 @@ describe("milestone 기록", () => {
     expect(await api.milestone.list({ spaceId, subject: pet })).toHaveLength(3); // 입양일 + 몸무게 2
   });
 
+  it("가족 전체 마일스톤을 한 번에(대상 거르기 가능), 기록일 최신순", async () => {
+    const { api, spaceId, child, pet } = await family();
+    await api.milestone.create({
+      spaceId,
+      subject: child,
+      kind: "step",
+      value: {},
+      recordedAt: "2026-09-02",
+    });
+    await api.milestone.create({
+      spaceId,
+      subject: pet,
+      kind: "walk",
+      value: {},
+      recordedAt: "2026-09-03",
+    });
+    const all = await api.milestone.listAll({ spaceId });
+    expect(all.map((m) => m.kind)).toEqual(["walk", "step"]);
+    expect(all[0].reactions).toEqual({ likes: 0, comments: 0, likedByMe: false });
+    const onlyChild = await api.milestone.listAll({ spaceId, subject: child });
+    expect(onlyChild.map((m) => m.kind)).toEqual(["step"]);
+  });
+
   it("대상에 맞지 않는 kind, 범위 밖 값, 모르는 필드를 거부한다", async () => {
     const { api, spaceId, child, pet } = await family();
     const base = { spaceId, recordedAt: "2026-09-01" };
