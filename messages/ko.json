@@ -82,5 +82,32 @@
     "kakao": "카카오 로그인",
     "google": "Google로 계속하기",
     "haveCode": "초대 코드가 있어요"
+  },
+  "onboarding": {
+    "steps": {
+      "oneLeft": "1단계 남았어요",
+      "last": "마지막 단계예요",
+      "twoLeft": "2단계 남았어요"
+    },
+    "family": {
+      "title": "우리 가족을\n만들어요",
+      "name": "가족 이름",
+      "namePlaceholder": "예) 지우네 가족",
+      "relation": "나는 가족에게",
+      "relationMom": "엄마",
+      "relationDad": "아빠",
+      "relationCustom": "직접 쓸게요",
+      "relationCustomLabel": "가족에게 불릴 이름",
+      "childTitle": "첫 아이",
+      "childHint": "지금 넣지 않아도 돼요. 나중에 우리 탭에서 넣을 수 있어요.",
+      "childStatus": "아이는",
+      "childBorn": "태어났어요",
+      "childExpecting": "곧 태어나요",
+      "childName": "이름(곧 태어나면 태명)",
+      "childDate": "생일 또는 태어날 날",
+      "childDateHint": "곧 태어나면 출생 예정일을 골라 주세요",
+      "submit": "가족 만들기",
+      "submitting": "만드는 중…"
+    }
   }
 }
