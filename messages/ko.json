@@ -56,5 +56,22 @@
       "comment": "내 기록에 댓글이 달렸어요",
       "news": "새 소식이 있어요"
     }
+  },
+  "errors": {
+    "INVITE_INVALID": "초대 링크가 만료됐거나 이미 쓰였어요. 초대한 가족에게 새 링크를 부탁해 주세요",
+    "ALREADY_MEMBER": "이미 이 가족과 함께하고 있어요",
+    "MEMBERSHIP_LIMIT": "함께할 수 있는 가족 수를 넘었어요",
+    "MEMBER_ROLE_LIMIT": "이 가족은 더 초대할 수 없어요. 초대한 가족에게 알려 주세요",
+    "SPACE_CREATE_LIMIT": "가족을 더 만들 수 없어요",
+    "CHILD_LIMIT": "아이를 더 등록할 수 없어요",
+    "INVITE_ACTIVE_LIMIT": "아직 쓰지 않은 초대가 많아요. 먼저 보낸 초대를 써 주세요",
+    "RATE_LIMITED": "잠시 뒤에 다시 해 주세요",
+    "SPACE_DELETING": "삭제를 기다리는 가족이라 바꿀 수 없어요",
+    "NAME_REQUIRED": "이름이나 태명을 써 주세요",
+    "ONE_DATE_REQUIRED": "생일이나 태어날 날 중 하나를 골라 주세요",
+    "DATE_IN_FUTURE": "생일은 오늘보다 앞선 날이어야 해요",
+    "INVALID_INPUT": "입력한 내용을 다시 확인해 주세요",
+    "SIGN_IN_REQUIRED": "다시 로그인해 주세요",
+    "UNKNOWN": "문제가 생겼어요. 잠시 뒤에 다시 해 주세요"
   }
 }
