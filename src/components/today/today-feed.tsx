@@ -19,6 +19,7 @@ import {
 } from "@/lib/today-feed";
 import { cn } from "@/lib/utils";
 import { motion, prefersReducedMotion } from "@/lib/design-tokens";
+import { kindInfo } from "@/lib/milestone-kinds";
 import { springCurve } from "@/lib/spring";
 
 /**
@@ -118,19 +119,30 @@ function DayChapter({ day, todayKey, ...props }: { day: FeedDay } & FeedProps) {
 
 export function MilestoneStrip({ milestone }: { milestone: FeedMilestone }) {
   const t = useTranslations("milestone");
+  const subject = milestone.childId ? "child" : "pet";
   const value = (milestone.value ?? {}) as { value?: number; title?: string };
   // 프리셋 키(src/lib/milestones.ts)는 서버가 검증한 값이라 문구 키로 그대로 쓴다
-  const kind = `${milestone.childId ? "child" : "pet"}.${milestone.kind}` as Parameters<
-    typeof t
-  >[0];
+  const kind = `${subject}.${milestone.kind}` as Parameters<typeof t>[0];
+  const isFresh = useToday().fresh.has(milestone.id);
+  const wrap = useRef<HTMLSpanElement>(null);
+  // 방금 남긴 기록: 띠가 안착하고, "처음" 기록(대상당 하나)이면 2초 안에 끝나는 반짝임(DESIGN §9.2, §11)
+  useEffect(() => {
+    const el = wrap.current;
+    if (!isFresh || !el) return;
+    const chip = el.firstElementChild as HTMLElement;
+    settle([chip]);
+    if (kindInfo(subject, milestone.kind)?.once && !prefersReducedMotion()) return sparkle(el);
+  }, [isFresh, subject, milestone.kind]);
   return (
-    <p className="inline-flex items-center gap-2 rounded-md bg-spring-pink py-2 pr-4 pl-3 text-ink">
-      <Icon name="spark" size="small" />
-      <span>
-        <b className="font-bold">{milestone.subjectName}</b>{" "}
-        {t.has(kind) ? t(kind, { value: value.value ?? "", title: value.title ?? "" }) : null}
+    <span ref={wrap} className="relative inline-block">
+      <span className="inline-flex items-center gap-2 rounded-md bg-spring-pink py-2 pr-4 pl-3 text-ink">
+        <Icon name="spark" size="small" />
+        <span>
+          <b className="font-bold">{milestone.subjectName}</b>{" "}
+          {t.has(kind) ? t(kind, { value: value.value ?? "", title: value.title ?? "" }) : null}
+        </span>
       </span>
-    </p>
+    </span>
   );
 }
 
@@ -347,4 +359,37 @@ function settle(elements: HTMLElement[]) {
       { duration: curve.duration, easing, delay: i * motion.stagger, fill: "backwards" },
     ),
   );
+}
+
+/** 반짝임(Josh Comeau Sparkles): 50~450ms 간격으로 하나씩, 각 750ms, 전체 2초 안에 끝난다. 정리 함수를 돌려준다 */
+function sparkle(host: HTMLElement) {
+  const spec = motion.sparkle;
+  const sizes = [12, 16, 20];
+  const started = performance.now();
+  const timers: ReturnType<typeof setTimeout>[] = [];
+  const spawn = () => {
+    if (performance.now() - started > spec["total-max"] - spec.life) return;
+    const size = sizes[Math.floor(Math.random() * sizes.length)];
+    const star = document.createElement("span");
+    star.className = "sparkle";
+    star.setAttribute("aria-hidden", "true");
+    Object.assign(star.style, {
+      width: `${size}px`,
+      height: `${size}px`,
+      left: `calc(${Math.random() * 100}% - ${size / 2}px)`,
+      top: `calc(${-20 + Math.random() * 140}% - ${size / 2}px)`,
+    });
+    star.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4z"/></svg>';
+    host.appendChild(star);
+    timers.push(setTimeout(() => star.remove(), spec.life));
+    timers.push(
+      setTimeout(spawn, spec["gap-min"] + Math.random() * (spec["gap-max"] - spec["gap-min"])),
+    );
+  };
+  spawn();
+  return () => {
+    timers.forEach(clearTimeout);
+    host.querySelectorAll(".sparkle").forEach((n) => n.remove());
+  };
 }

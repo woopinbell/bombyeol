@@ -264,7 +264,6 @@
     "removeComment": "지우기"
   },
   "upload": {
-    "open": "사진 올리기",
     "title": "사진 올리기",
     "video": "영상",
     "picked": "{count}개 골랐어요.",
@@ -280,5 +279,57 @@
     "donePhotos": "사진 {count}장을 올렸어요",
     "doneVideos": "영상 {count}개를 올렸어요",
     "doneMixed": "사진과 영상을 올렸어요"
+  },
+  "milestoneKind": {
+    "child": {
+      "first_roll": "처음 뒤집기",
+      "first_sit": "처음 혼자 앉기",
+      "first_crawl": "처음 기기",
+      "first_tooth": "첫 이",
+      "first_step": "첫 걸음",
+      "first_word": "첫 말",
+      "height": "키",
+      "weight": "몸무게",
+      "head": "머리둘레",
+      "custom": "직접 쓰기"
+    },
+    "pet": {
+      "adoption": "가족이 된 날",
+      "first_walk": "첫 산책",
+      "weight": "몸무게",
+      "vaccination": "예방접종",
+      "vet_visit": "병원",
+      "custom": "직접 쓰기"
+    }
+  },
+  "record": {
+    "open": "기록하기",
+    "chooseTitle": "무엇을 남길까요",
+    "photo": "사진 올리기",
+    "photoHint": "사진과 영상을 골라 올려요",
+    "diary": "일기 쓰기",
+    "diaryHint": "아이에게 남기는 짧은 글이에요",
+    "milestone": "성장 기록 남기기",
+    "milestoneHint": "첫 걸음, 키, 몸무게 같은 순간이에요"
+  },
+  "diary": {
+    "title": "일기 쓰기",
+    "child": "누구에게 남길까요",
+    "body": "오늘의 이야기",
+    "draftHint": "쓰는 중인 글은 이 기기에 남아 있어요",
+    "submit": "일기 올리기",
+    "done": "일기를 올렸어요"
+  },
+  "milestoneSheet": {
+    "title": "성장 기록 남기기",
+    "who": "누구의 기록인가요",
+    "what": "어떤 순간인가요",
+    "value": "얼마인가요({unit})",
+    "titleLabel": "어떤 순간인지 짧게",
+    "date": "날짜",
+    "note": "메모",
+    "noteHint": "쓰지 않아도 괜찮아요",
+    "submit": "기록 남기기",
+    "done": "성장 기록을 남겼어요"
   }
 }

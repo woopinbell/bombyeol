@@ -158,7 +158,6 @@ export function UploadSheet({
       await Promise.all(uploaded.map((id) => discardUpload(spaceId, id)));
       const key = e instanceof UploadError ? e.key : "UNKNOWN";
       setError(key);
-      toast({ message: errors(key) });
     } finally {
       setProgress(null);
     }
@@ -244,8 +243,11 @@ export function UploadSheet({
           hint={t("bodyHint")}
           maxLength={MOMENT_POLICY.bodyMaxChars}
           autoComplete="off"
-          error={error === "INVALID_INPUT" ? errors(error) : undefined}
         />
+        {/* 실패는 토스트가 아니라 여기 남긴다(DESIGN §9.6 중요한 결과는 토스트에만 두지 않는다) */}
+        <p aria-live="polite" className="font-bold empty:hidden">
+          {error ? errors(error) : null}
+        </p>
       </form>
     </Sheet>
   );

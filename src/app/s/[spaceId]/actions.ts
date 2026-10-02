@@ -117,3 +117,33 @@ export async function createMoment(
     return { error: toErrorKey(error) } satisfies Failed;
   }
 }
+
+export async function createDiary(spaceId: string, input: { childId: string; body: string }) {
+  try {
+    const caller = await serverCaller();
+    return await caller.moment.createDiary({
+      spaceId,
+      subject: { type: "child", childId: input.childId },
+      body: input.body,
+    });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}
+
+export async function createMilestone(
+  spaceId: string,
+  input: {
+    subject: { type: "child"; childId: string } | { type: "pet"; petId: string };
+    kind: string;
+    value: Record<string, unknown>;
+    recordedAt: string;
+  },
+) {
+  try {
+    const caller = await serverCaller();
+    return await caller.milestone.create({ spaceId, ...input });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}

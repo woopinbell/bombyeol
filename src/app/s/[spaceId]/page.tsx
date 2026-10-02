@@ -59,22 +59,31 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/s/
     ...space.pets.map((p) => ({ who: { type: "pet", petId: p.id } as Who, label: p.name })),
   ];
   const current = whoParam(who);
-
-  // 올릴 수 있는 대상(서버 canRecordFor와 같은 규칙): 아이는 parent, 반려동물과 가족 모두는 grandparent도
-  const tu = await getTranslations("upload");
-  const recordable =
-    family.role === "relative"
-      ? []
-      : [
-          ...(family.role === "parent"
-            ? space.children.map((c) => ({ value: `child:${c.id}`, label: childName(c) }))
-            : []),
-          ...space.pets.map((p) => ({ value: `pet:${p.id}`, label: p.name })),
-          { value: "family", label: tu("family") },
-        ];
-  const defaultSubject =
-    recordable.find((r) => current && r.value === current)?.value ?? recordable[0]?.value;
   const emptyName = choices.find((c) => current && whoParam(c.who) === current)?.label;
+
+  // 남길 수 있는 기록(서버 canRecordFor와 같은 규칙): 아이 대상은 parent만, 반려동물과 가족 모두는 grandparent도,
+  // relative는 열람과 반응만. 별이 된 반려동물에는 새 성장 기록을 남기지 않는다(사진은 남길 수 있다)
+  const tu = await getTranslations("upload");
+  const isParent = family.role === "parent";
+  const canRecord = family.role !== "relative";
+  const kids = isParent
+    ? space.children.map((c) => ({ value: `child:${c.id}`, label: childName(c) }))
+    : [];
+  const pets = canRecord ? space.pets.map((p) => ({ value: `pet:${p.id}`, label: p.name })) : [];
+  const livingPets = pets.filter((_, i) => space.pets[i].status === "living");
+  const pick = (subjects: { value: string; label: string }[]) =>
+    subjects.length
+      ? {
+          subjects,
+          defaultValue:
+            subjects.find((r) => current && r.value === current)?.value ?? subjects[0].value,
+        }
+      : null;
+  const options = {
+    photo: canRecord ? pick([...kids, ...pets, { value: "family", label: tu("family") }]) : null,
+    diary: pick(kids),
+    milestone: pick([...kids, ...livingPets]),
+  };
 
   return (
     <TodayProvider
@@ -92,11 +101,7 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/s/
     >
       <TabPage
         header={<TabTitle>{space.name}</TabTitle>}
-        dock={
-          defaultSubject ? (
-            <RecordDock subjects={recordable} defaultSubject={defaultSubject} />
-          ) : undefined
-        }
+        dock={options.photo ? <RecordDock {...options} /> : undefined}
       >
         {choices.length > 1 ? (
           <nav aria-label={t("whoLabel")} className="mt-2">
