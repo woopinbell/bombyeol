@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Icon, type IconName } from "@/components/ui/icon";
+import { ToastProvider, ToastRegion } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 const TABS = [
@@ -24,39 +25,42 @@ export function FamilyShell({ spaceId, children }: { spaceId: string; children: 
   const current =
     TABS.find((tab) => tab.path && pathname.startsWith(base + tab.path))?.key ?? "today";
   return (
-    <div
-      data-surface={current === "story" ? "night" : undefined}
-      className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-(--d-fast) ease-linear"
-    >
-      <div className="mx-auto flex w-full max-w-(--content-max) flex-1 flex-col">{children}</div>
-      <nav
-        aria-label={t("label")}
-        className="sticky bottom-0 z-10 border-t-(length:--bw-hair) border-line bg-bg pb-[env(safe-area-inset-bottom)] transition-colors duration-(--d-fast) ease-linear"
+    <ToastProvider>
+      <div
+        data-surface={current === "story" ? "night" : undefined}
+        className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-(--d-fast) ease-linear"
       >
-        <ul className="mx-auto flex max-w-(--content-max)">
-          {TABS.map((tab) => {
-            const on = tab.key === current;
-            return (
-              <li key={tab.key} className="flex-1">
-                <Link
-                  href={base + tab.path}
-                  aria-current={on ? "page" : undefined}
-                  data-press=""
-                  className={cn(
-                    "press flex min-h-(--touch-elder) flex-col items-center justify-center gap-1 text-caption",
-                    on
-                      ? "font-heavy text-fg in-data-[surface=night]:text-starlight-gold"
-                      : "font-medium text-fg-muted",
-                  )}
-                >
-                  <Icon name={on ? tab.iconOn : tab.icon} />
-                  {t(tab.key)}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-    </div>
+        <div className="mx-auto flex w-full max-w-(--content-max) flex-1 flex-col">{children}</div>
+        <nav
+          aria-label={t("label")}
+          className="sticky bottom-0 z-10 border-t-(length:--bw-hair) border-line bg-bg pb-[env(safe-area-inset-bottom)] transition-colors duration-(--d-fast) ease-linear"
+        >
+          <ul className="mx-auto flex max-w-(--content-max)">
+            {TABS.map((tab) => {
+              const on = tab.key === current;
+              return (
+                <li key={tab.key} className="flex-1">
+                  <Link
+                    href={base + tab.path}
+                    aria-current={on ? "page" : undefined}
+                    data-press=""
+                    className={cn(
+                      "press flex min-h-(--touch-elder) flex-col items-center justify-center gap-1 text-caption",
+                      on
+                        ? "font-heavy text-fg in-data-[surface=night]:text-starlight-gold"
+                        : "font-medium text-fg-muted",
+                    )}
+                  >
+                    <Icon name={on ? tab.iconOn : tab.icon} />
+                    {t(tab.key)}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+        <ToastRegion host="page" />
+      </div>
+    </ToastProvider>
   );
 }

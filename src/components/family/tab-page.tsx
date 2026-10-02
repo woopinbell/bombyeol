@@ -25,7 +25,10 @@ export function TabPage({
         {children}
       </main>
       {dock ? (
-        <div className="sticky bottom-[calc(var(--touch-elder)+env(safe-area-inset-bottom))] z-10 border-t-(length:--bw-hair) border-line bg-bg px-5 py-3">
+        <div
+          data-dock=""
+          className="sticky bottom-[calc(var(--touch-elder)+env(safe-area-inset-bottom))] z-10 border-t-(length:--bw-hair) border-line bg-bg px-5 py-3"
+        >
           {dock}
         </div>
       ) : null}
