@@ -16,7 +16,12 @@ import { loadFamily } from "@/server/family";
 export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
   const { spaceId } = await params;
   const { space, role, caller } = await loadFamily(spaceId);
-  const usage = await caller.media.usage({ spaceId });
+  // 반려동물 커버(짧은 TTL 읽기 URL)는 목록 조회에만 있다
+  const [usage, pets] = await Promise.all([
+    caller.media.usage({ spaceId }),
+    space.pets.some((p) => p.coverAssetId) ? caller.pet.list({ spaceId }) : [],
+  ]);
+  const covers = new Map(pets.map((p) => [p.id, p.coverUrl]));
   const t = await getTranslations("usTab");
   const format = await getFormatter();
   const isParent = role === "parent";
@@ -28,6 +33,7 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
     ...space.children.map((c) => ({
       key: c.id,
       href: `/s/${space.id}/us/child/${c.id}`,
+      cover: null as string | null,
       name: childName(c),
       detail:
         c.status === "expecting"
@@ -41,6 +47,7 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
     ...space.pets.map((p) => ({
       key: p.id,
       href: `/s/${space.id}/us/pet/${p.id}`,
+      cover: covers.get(p.id) ?? null,
       name: p.name,
       detail:
         p.status === "memorial"
@@ -65,6 +72,15 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
               {rows.map((row) => {
                 const body = (
                   <>
+                    {row.cover ? (
+                      // 서명 URL(짧은 TTL)이라 이미지 최적화 경로를 거치지 않는다. 이름이 옆에 있어 꾸밈 그림
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={row.cover}
+                        alt=""
+                        className="size-(--touch) flex-none rounded-full object-cover"
+                      />
+                    ) : null}
                     <span className="flex flex-1 flex-col">
                       <span className="font-bold">{row.name}</span>
                       {row.detail ? (

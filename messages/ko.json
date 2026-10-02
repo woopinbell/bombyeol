@@ -424,6 +424,15 @@
     "laterHint": "비워 두고 나중에 채워도 괜찮아요",
     "submitNew": "반려동물 더하기",
     "submitEdit": "고친 정보 저장",
-    "submitting": "저장하는 중"
+    "submitting": "저장하는 중",
+    "cover": "커버 사진",
+    "coverAlt": "{name} 사진",
+    "coverEmpty": "아직 사진이 없어요",
+    "coverPick": "사진 고르기",
+    "coverChange": "사진 바꾸기",
+    "coverRemove": "사진 지우기",
+    "coverUploading": "사진을 올리는 중",
+    "coverDone": "커버 사진을 바꿨어요",
+    "coverRemoved": "커버 사진을 지웠어요"
   }
 }
