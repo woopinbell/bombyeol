@@ -42,7 +42,10 @@ export function Title({
 }) {
   return (
     <h1
-      className={cn("font-heavy text-balance", size === "display" ? "text-display" : "text-title")}
+      className={cn(
+        "font-heavy whitespace-pre-line text-balance",
+        size === "display" ? "text-display" : "text-title",
+      )}
     >
       {children}
     </h1>
