@@ -16,7 +16,7 @@ const SPARKLE = { minGap: 50, maxGap: 450, life: 750, total: 2000 }; // Josh Spa
 const slow = () => (root.dataset.slow === "on" ? 5 : 1);
 const reduced = () => root.dataset.motion === "reduce" || !matchMedia("(prefers-reduced-motion: no-preference)").matches;
 const dur = (name) => { const el = document.createElement("i"); el.style.transitionDuration = `var(${name})`; document.body.append(el); const v = parseFloat(getComputedStyle(el).transitionDuration) * 1000; el.remove(); return v; };
-const toastLife = () => (root.dataset.toast === "long" ? 6000 : 4000) * slow();
+const toastLife = () => (root.dataset.toast === "short" ? 4000 : 6000) * slow(); // 사용자 선택 6초(2026-10-02)
 
 /* ── 스프링: 반-암시적 오일러, 프레임당 4번 나눠 적분 ───────────────── */
 function spring({ from = 0, to = 1, stiffness, damping, mass = 1, onUpdate, onDone }) {

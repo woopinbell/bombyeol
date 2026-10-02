@@ -170,8 +170,8 @@
       <div class="grp"><span>글자</span><button data-set="text" data-v="" aria-pressed="true">보통</button><button data-set="text" data-v="large">크게</button></div>
       <div class="grp"><span>움직임 줄이기</span><button data-set="motion" data-v="" aria-pressed="true">끔(기기 설정)</button><button data-set="motion" data-v="reduce">켬</button></div>
       <div class="grp"><span>느리게 보기</span><button data-set="slow" data-v="" aria-pressed="true">×1</button><button data-set="slow" data-v="on">×5</button></div>
-      <div class="grp"><span>시트 시간</span><button data-set="sheet" data-v="" aria-pressed="true">500ms (Vaul)</button><button data-set="sheet" data-v="fast">350ms</button></div>
-      <div class="grp"><span>토스트 표시</span><button data-set="toast" data-v="" aria-pressed="true">4초 (Sonner)</button><button data-set="toast" data-v="long">6초 (어르신)</button></div>
+      <div class="grp"><span>시트 시간</span><button data-set="sheet" data-v="" aria-pressed="true">350ms (선택)</button><button data-set="sheet" data-v="vaul">500ms (Vaul)</button></div>
+      <div class="grp"><span>토스트 표시</span><button data-set="toast" data-v="" aria-pressed="true">6초 (선택)</button><button data-set="toast" data-v="short">4초 (Sonner)</button></div>
       <h2>데모 동작</h2>
       <div class="grp"><button id="demo-ms">마일스톤 달성(반짝임)</button><button id="demo-photos">사진 2장 올리기(안착)</button><button id="demo-toast">토스트 3개 쌓기</button></div>
       <h2>해볼 것</h2>
@@ -185,11 +185,11 @@
       <h2>모션 토큰 후보</h2>
       <table>
         <tr><th>이름</th><th>값</th><th>어디에</th></tr>
-        <tr><td><code>ease-sheet</code></td><td>cubic-bezier(.32,.72,0,1) · 500ms</td><td>시트 열기·닫기·되돌아가기 (Vaul)</td></tr>
+        <tr><td><code>ease-sheet</code></td><td>cubic-bezier(.32,.72,0,1) · 350ms</td><td>시트 열기·닫기·되돌아가기 (Vaul)</td></tr>
         <tr><td><code>ease-out</code></td><td>cubic-bezier(.23,1,.32,1)</td><td>댓글 등장 등 사용자가 부른 것 (Emil)</td></tr>
         <tr><td><code>ease-press</code></td><td>cubic-bezier(0,0,.15,1) · 150ms</td><td>누름, 2px 거리 배율 (SEED)</td></tr>
         <tr><td><code>d-fast</code></td><td>200ms linear</td><td>탭 전환 페이드, 감소 모션</td></tr>
-        <tr><td><code>d-toast</code> / 수명</td><td>400ms ease / 4000ms</td><td>토스트 (Sonner), 밀어 닫기 45px·0.11px/ms</td></tr>
+        <tr><td><code>d-toast</code> / 수명</td><td>400ms ease / 6000ms</td><td>토스트 (Sonner), 밀어 닫기 45px·0.11px/ms</td></tr>
         <tr><td><code>spring-boop</code></td><td>강성 300 · 감쇠 10, 150ms 뒤 복귀</td><td>별 하나 (Josh Boop)</td></tr>
         <tr><td><code>spring-settle</code></td><td>강성 158 · 감쇠 20 (≈0.5s, bounce .2)</td><td>새 사진 안착 (Emil)</td></tr>
         <tr><td><code>stagger</code></td><td>50ms</td><td>여러 장 등장 간격</td></tr>

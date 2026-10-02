@@ -9,9 +9,9 @@
   --d-press: calc(150ms * var(--slow));              /* 누름 피드백 */
   --d-fast: calc(200ms * var(--slow));               /* 탭 전환 페이드, 감소 모션 페이드, 토글 */
   --d-base: calc(250ms * var(--slow));               /* 작은 패널·가림막 */
-  --d-sheet: calc(500ms * var(--slow));              /* 시트 — 비교안 350ms(설정판) */
+  --d-sheet: calc(350ms * var(--slow));              /* 시트 — 사용자 선택 350ms(2026-10-02), 비교안 500ms(Vaul) */
   --d-toast: calc(400ms * var(--slow));              /* 토스트 이동 */
   --stagger: calc(50ms * var(--slow));               /* 여러 개 등장 간격 */
 }
-:root[data-sheet="fast"] { --d-sheet: calc(350ms * var(--slow)); }
+:root[data-sheet="vaul"] { --d-sheet: calc(500ms * var(--slow)); }
 :root[data-slow="on"] { --slow: 5; }
