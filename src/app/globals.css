@@ -278,4 +278,15 @@
       transform: scale(0) rotate(180deg);
     }
   }
+
+  /* 불러오는 중 자리: 150ms 기다렸다가 200ms 페이드로 나타난다(DESIGN §9.6) */
+  .skeleton-appear {
+    opacity: 0;
+    animation: appear var(--d-fast) linear 150ms forwards;
+  }
+  @keyframes appear {
+    to {
+      opacity: 1;
+    }
+  }
 }
