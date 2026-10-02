@@ -91,7 +91,12 @@
     "UNKNOWN": "문제가 생겼어요. 잠시 뒤에 다시 해 주세요",
     "PET_LIMIT": "반려동물을 더 등록할 수 없어요",
     "USE_MARK_BORN": "태어난 날은 아래 태어났어요에서 적어 주세요",
-    "CHILD_ALREADY_BORN": "이미 태어난 아이로 적혀 있어요"
+    "CHILD_ALREADY_BORN": "이미 태어난 아이로 적혀 있어요",
+    "PROMPT_INVALID": "질문을 다시 골라 주세요",
+    "NARRATOR_INVALID": "이 분의 이야기는 받아 적을 수 없어요",
+    "QUESTION_REQUIRED": "물어볼 질문을 골라 주시거나 직접 써 주세요",
+    "ASK_ANSWERED": "이미 답한 질문이에요",
+    "ASK_OPEN_LIMIT": "답을 기다리는 질문이 많아요. 먼저 보낸 질문을 기다려 주세요"
   },
   "auth": {
     "logoAlt": "봄별",
@@ -199,7 +204,33 @@
   },
   "storyTab": {
     "title": "이야기",
-    "empty": "할머니 할아버지의 이야기가 여기에 모여요. 이야기 화면은 곧 열려요."
+    "narratorTitle": "{name}의 이야기",
+    "whoLabel": "누구의 이야기를 볼까요",
+    "all": "모두",
+    "todayQuestion": "오늘의 질문",
+    "askedBy": "{who}의 질문",
+    "answer": "답하기",
+    "otherQuestion": "다른 질문",
+    "askTo": "{name}께 물어보기",
+    "scribe": "대신 받아 적기",
+    "waitingTitle": "답을 기다리는 질문",
+    "waitingTo": "{to}께 보낸 질문",
+    "cancelAsk": "거두기",
+    "askCanceled": "질문을 거뒀어요",
+    "undo": "되돌리기",
+    "collection": "이야기 모음",
+    "write": "직접 쓰기",
+    "emptyTitle": "아직 이야기가 없어요",
+    "emptyLead": "할머니 할아버지의 이야기가 여기에 모여요.",
+    "more": "지난 이야기 더 보기",
+    "loading": "불러오는 중",
+    "star": "별 {count}",
+    "comment": "댓글 {count}",
+    "byline": "{name} 이야기",
+    "year": "{year}년",
+    "scribedBy": "받아 적은 사람 {name}",
+    "photoAlt": "이야기 사진",
+    "memorialMark": "별이 되신 분"
   },
   "usTab": {
     "empty": "가족 달력과 구성원 화면은 곧 열려요.",
@@ -434,5 +465,49 @@
     "coverUploading": "사진을 올리는 중",
     "coverDone": "커버 사진을 바꿨어요",
     "coverRemoved": "커버 사진을 지웠어요"
+  },
+  "storySheet": {
+    "title": "이야기",
+    "edit": "고치기",
+    "remove": "이 이야기 지우기",
+    "confirmRemove": "이 이야기를 지울까요? 지운 이야기와 사진은 되돌릴 수 없어요.",
+    "confirmYes": "지우기",
+    "confirmNo": "그만두기",
+    "removed": "이야기를 지웠어요"
+  },
+  "storyWrite": {
+    "title": "이야기 남기기",
+    "editTitle": "이야기 고치기",
+    "narrator": "누구의 이야기인가요",
+    "me": "나",
+    "scribeHint": "받아 적으면 그분의 이야기로 남고, 받아 적은 사람도 함께 보여요",
+    "titleLabel": "제목",
+    "optionalHint": "쓰지 않아도 괜찮아요",
+    "body": "이야기",
+    "draftHint": "쓰는 중인 글은 이 기기에 남아 있어요",
+    "year": "언제쯤 일인가요(연도)",
+    "yearHint": "예를 들어 1975. 몰라도 괜찮아요",
+    "category": "어떤 이야기인가요",
+    "photo": "옛날 사진 한 장",
+    "photoAlt": "고른 사진",
+    "photoPick": "사진 고르기",
+    "photoChange": "사진 바꾸기",
+    "photoRemove": "사진 빼기",
+    "submit": "이야기 남기기",
+    "save": "고친 이야기 저장",
+    "sending": "올리는 중",
+    "done": "이야기를 남겼어요",
+    "edited": "이야기를 고쳤어요"
+  },
+  "storyAsk": {
+    "title": "물어보기",
+    "to": "누구께 물어볼까요",
+    "category": "어떤 이야기를 물어볼까요",
+    "question": "질문",
+    "custom": "직접 쓴 질문",
+    "customLabel": "물어볼 질문",
+    "customHint": "질문 카드에 없는 것을 물어봐요",
+    "submit": "물어보기 보내기",
+    "done": "{name}께 물어봤어요"
   }
 }
