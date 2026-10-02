@@ -16,13 +16,15 @@ export async function loadMoreMoments(spaceId: string, who: Who, cursor: FeedCur
   }
 }
 
-export async function toggleLike(
+/** 좋아요를 원하는 상태로(여러 번 보내도 같다). 화면은 연달아 누른 것을 모아 마지막 상태만 보낸다 */
+export async function setLike(
   spaceId: string,
   target: { type: "moment"; momentId: string } | { type: "milestone"; milestoneId: string },
+  liked: boolean,
 ) {
   try {
     const caller = await serverCaller();
-    return await caller.reaction.toggleLike({ spaceId, target });
+    return await caller.reaction.setLike({ spaceId, target, liked });
   } catch (error) {
     return { error: toErrorKey(error) } satisfies Failed;
   }

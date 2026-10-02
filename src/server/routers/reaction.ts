@@ -43,6 +43,8 @@ async function toggleReaction(
   input: ReactionTarget,
   kind: "like" | "star",
   rule: RateLimitRule,
+  /** 지정하면 그 상태로 맞춘다(여러 번 보내도 같은 결과). 없으면 뒤집는다 */
+  want?: boolean,
 ) {
   const spaceId = ctx.member.spaceId;
   const target = await resolveTarget(ctx.prisma, spaceId, input);
@@ -53,13 +55,14 @@ async function toggleReaction(
     await lockKey(tx, `${kind}:${targetIdOf(target)}:${ctx.userId}`);
     const where = { ...target, kind, createdById: ctx.userId };
     const existing = await tx.reaction.findFirst({ where, select: { id: true } });
-    if (existing) await tx.reaction.delete({ where: { id: existing.id } });
-    else await tx.reaction.create({ data: { ...where, spaceId } });
+    const on = want ?? !existing;
+    if (existing && !on) await tx.reaction.delete({ where: { id: existing.id } });
+    if (!existing && on) await tx.reaction.create({ data: { ...where, spaceId } });
     const count = await tx.reaction.count({ where: { ...target, kind } });
-    return { on: !existing, count };
+    return { on, count, changed: on !== Boolean(existing) };
   });
-  // 켤 때만 알린다(끄기, 다시 켜기 반복은 대상별 쿨다운이 막는다)
-  if (result.on) {
+  // 새로 켰을 때만 알린다(끄기, 다시 켜기 반복은 대상별 쿨다운이 막는다)
+  if (result.on && result.changed) {
     notify(ctx.push, { type: "reaction", spaceId, actorId: ctx.userId, kind, target: input });
   }
   return result;
@@ -76,6 +79,23 @@ export const reactionRouter = router({
         input.target,
         "like",
         RATE_LIMITS.likePerUser,
+      );
+      return { liked: on, likes: count };
+    }),
+
+  /**
+   * 좋아요를 원하는 상태로(여러 번 보내도 같은 결과). 화면은 연달아 누른 것을 모아 마지막 상태만 보낸다 -
+   * 누를 때마다 요청하면 Workers CPU 한도에 걸린다(2026-10-02 스테이징에서 관측).
+   */
+  setLike: spaceProcedure
+    .input(z.object({ target: likeTargetInput, liked: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { on, count } = await toggleReaction(
+        ctx,
+        input.target,
+        "like",
+        RATE_LIMITS.likePerUser,
+        input.liked,
       );
       return { liked: on, likes: count };
     }),
