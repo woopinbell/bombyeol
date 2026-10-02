@@ -88,6 +88,7 @@ def hangul(style):
     return d
 
 def latin(font_path, text="BOMBYEOL", size=17.0, track=0.42, wght=520):
+    """텍스트를 Pretendard 윤곽선 경로로(OFL — 로고·이미지 사용 허용). 반환: (d, 폭)"""
     from fontTools.ttLib import TTFont
     from fontTools.varLib import instancer
     from fontTools.pens.svgPathPen import SVGPathPen
@@ -97,6 +98,7 @@ def latin(font_path, text="BOMBYEOL", size=17.0, track=0.42, wght=520):
     gs = f.getGlyphSet(); cmap = f.getBestCmap(); upm = f["head"].unitsPerEm; s = size / upm
     x = 0.0; paths = []
     for ch in text:
+        if ch == " ": x += size * 0.28 + size * track; continue
         gn = cmap[ord(ch)]; pen = SVGPathPen(gs)
         gs[gn].draw(TransformPen(pen, (s, 0, 0, -s, x, 0)))
         paths.append(pen.getCommands()); x += gs[gn].width * s + size * track
@@ -138,5 +140,57 @@ def main(font):
         (OUT / n).write_text(s, encoding="utf-8")
     print(len(files), "files")
 
+# ── 확정 파생 에셋(사용자 선택 2026-10-02: S2 + W2) ────────────────────
+FINAL_S, FINAL_W = "S2", "W2"
+
+def derive(font):
+    """image-asset/logo·icon·og에 확정 조합의 파생 에셋 SVG를 쓴다. PNG는 render.mjs가 만든다."""
+    A = OUT.parent; ld, lw = latin(font)
+    S, W = FINAL_S, FINAL_W
+    sym = lambda **k: symbol(S, k.pop("bg", C["paper"]), **k)
+    lock = lambda wc, **k: (f'<g transform="translate(0 6) scale(1.5)">{sym(**k)}</g>'
+                            f'<g transform="translate(176 8)">{wordmark(W, wc, ld, lw)}</g>')
+    files = {
+        "logo/symbol.svg": svg(100, 100, sym(), "봄별 심볼"),
+        "logo/symbol-dark.svg": svg(100, 100, sym(bg=C["navy"], dark=True), "봄별 심볼(어두운 바탕용)"),
+        "logo/wordmark.svg": svg(252, 162, wordmark(W, C["navy"], ld, lw), "봄별 워드마크"),
+        "logo/wordmark-dark.svg": svg(252, 162, wordmark(W, C["paper"], ld, lw), "봄별 워드마크(어두운 바탕용)"),
+        "logo/primary.svg": svg(440, 172, lock(C["navy"]), "봄별 로고"),
+        "logo/primary-dark.svg": svg(440, 172, lock(C["paper"], bg=C["navy"], dark=True), "봄별 로고(어두운 바탕용)"),
+        "logo/monochrome.svg": svg(440, 172, lock(C["ink"], mono=C["ink"]).replace(C["gold"], C["ink"]), "봄별 로고 단색"),
+        "logo/stacked.svg": svg(252, 300, f'<g transform="translate(66 0) scale(1.2)">{sym()}</g><g transform="translate(0 132)">{wordmark(W, C["navy"], ld, lw)}</g>', "봄별 로고 세로"),
+    }
+    # 파비콘 SVG: 바탕을 모르므로 틈·가운데 점은 마스크로 뚫고, 탭이 어두우면 별을 silver로(SVG 안 미디어 쿼리)
+    pts = star_pts(72, 70, 17, 8.5)
+    petals = "".join(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{C[k]}"/>' for x, y, r, k in [(30, 32, 17, "pink"), (54, 27, 15, "green"), (57, 51, 16, "sky"), (33, 56, 15, "yellow")])
+    files["icon/favicon.svg"] = svg(100, 100,
+        f'<style>.st{{fill:{C["navy"]};stroke:{C["navy"]}}}@media (prefers-color-scheme: dark){{.st{{fill:{C["silver"]};stroke:{C["silver"]}}}}}</style>'
+        f'<mask id="m"><rect width="100" height="100" fill="#fff"/><circle cx="44" cy="42" r="6.5" fill="#000"/>'
+        f'<polygon points="{pts}" fill="#000" stroke="#000" stroke-width="18" stroke-linejoin="round"/></mask>'
+        f'<g mask="url(#m)">{petals}</g><polygon class="st" points="{pts}" stroke-width="11" stroke-linejoin="round"/>', "봄별")
+    # 래스터용 원본(꽉 찬 paper 바탕)
+    full = lambda k, dark=False: svg(100, 100, f'<g transform="translate({50-50*k:.2f} {50-50*k:.2f}) scale({k})">{symbol(S, C["navy"] if dark else C["paper"], dark=dark, small=True)}</g>', "봄별 아이콘", bg=C["navy"] if dark else C["paper"])
+    files["icon/_app.svg"] = full(0.86)            # 180·192·512·1024 (OS가 모서리를 깎음)
+    files["icon/_maskable.svg"] = full(0.6)        # 안전 영역(지름 80% 원) 안, 별 끝 여유 확보
+    files["icon/_favicon-png.svg"] = svg(100, 100, f'<g transform="translate(3 3) scale(.94)">{symbol(S, C["paper"], small=True)}</g>', "봄별", bg=C["paper"], rx=22)
+    # OG 1200×630
+    tag_d, tag_w = latin(font, "손주의 봄과 조부모의 별이 만나는 곳", size=40, track=0.0, wght=600)
+    sub_d, sub_w = latin(font, "우리 가족만의 기억 아카이브", size=30, track=0.0, wght=450)
+    # 가운데 정렬 — 메신저가 가운데를 잘라도 로고·문구가 남게
+    k = 1.55; lx = 600 - 440 * k / 2
+    files["og/og-image.svg"] = svg(1200, 630,
+        f'<g transform="translate({lx:.1f} 96) scale({k})">{lock(C["navy"])}</g>'
+        f'<path transform="translate({600 - tag_w/2:.1f} 432)" d="{tag_d}" fill="{C["ink"]}"/>'
+        f'<path transform="translate({600 - sub_w/2:.1f} 484)" d="{sub_d}" fill="#6F6860"/>',
+        "봄별 — 손주의 봄과 조부모의 별이 만나는 곳", bg=C["paper"])
+    for n, body in files.items():
+        (A / n).write_text(body, encoding="utf-8")
+    (A / "icon/manifest-icons.json").write_text(
+        '[\n  {"src":"/brand/icon/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},\n'
+        '  {"src":"/brand/icon/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},\n'
+        '  {"src":"/brand/icon/maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}\n]\n', encoding="utf-8")
+    print(len(files), "derived")
+
 if __name__ == "__main__":
     main(sys.argv[1])
+    derive(sys.argv[1])

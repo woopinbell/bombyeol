@@ -1,12 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" role="img" aria-labelledby="title desc">
-  <title id="title">봄별 symbol</title>
-  <desc id="desc">Pastel flower cluster with a deep navy star and small spring sparkle.</desc>
-  <rect width="260" height="260" rx="58" fill="#F7F1E6"/>
-  <circle cx="84" cy="92" r="46" fill="#F2A7B3"/>
-  <circle cx="142" cy="66" r="40" fill="#A9C88C"/>
-  <circle cx="154" cy="126" r="43" fill="#A8D8E8"/>
-  <circle cx="90" cy="150" r="40" fill="#F4CB6E"/>
-  <circle cx="120" cy="109" r="33" fill="#F7F1E6"/>
-  <path d="M178 72 190 98 218 104 198 124 203 152 178 138 153 152 158 124 138 104 166 98Z" fill="#232B4D"/>
-  <path d="M216 42 222 57 238 63 222 69 216 85 210 69 194 63 210 57Z" fill="#A9C88C"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="봄별 심볼"><title>봄별 심볼</title><circle cx="30" cy="32" r="17" fill="#F2A7B3"/><circle cx="54" cy="27" r="15" fill="#A9C88C"/><circle cx="57" cy="51" r="16" fill="#A8D8E8"/><circle cx="33" cy="56" r="15" fill="#F4CB6E"/><circle cx="44" cy="42" r="6.5" fill="#F7F1E6"/><polygon points="72.00,53.00 77.00,63.12 88.17,64.75 80.08,72.63 81.99,83.75 72.00,78.50 62.01,83.75 63.92,72.63 55.83,64.75 67.00,63.12" fill="#F7F1E6" stroke="#F7F1E6" stroke-width="18.0" stroke-linejoin="round"/><polygon points="72.00,53.00 77.00,63.12 88.17,64.75 80.08,72.63 81.99,83.75 72.00,78.50 62.01,83.75 63.92,72.63 55.83,64.75 67.00,63.12" fill="#232B4D" stroke="#232B4D" stroke-width="11.0" stroke-linejoin="round"/><path d="M85 13 Q85.686 19.314 92 20 Q85.686 20.686 85 27 Q84.314 20.686 78 20 Q84.314 19.314 85 13Z" fill="#A9C88C"/></svg>

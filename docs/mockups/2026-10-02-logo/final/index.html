@@ -1,0 +1,34 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>봄별 로고 파생 에셋</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:14px/1.5 system-ui,sans-serif;background:#E9E4DA;color:#2C2621}
+.board{padding:28px;width:max-content}h1{font-size:20px;margin:0 0 16px}h2{font-size:15px;margin:0 0 10px}
+.card{background:#F7F1E6;border-radius:18px;padding:18px 22px;margin-bottom:16px}.row{display:flex;gap:22px;align-items:flex-end}
+.c{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px}.navy{background:#232B4D;color:#F7F1E6;border-radius:14px;padding:12px}
+.tab{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px 10px 0 0;width:220px;font-size:13px}
+.tab.l{background:#fff;color:#222}.tab.d{background:#35363a;color:#eee}
+.mask{position:relative;width:192px;height:192px}.mask img{width:192px;height:192px;display:block;border-radius:50%}
+.mask.sq img{border-radius:0}.mask.sq::after{content:"";position:absolute;inset:19.2px;border:2px dashed #E05;border-radius:50%}
+.home{display:flex;gap:18px;background:#4a5a7a;padding:16px;border-radius:14px}.home div{display:flex;flex-direction:column;align-items:center;gap:6px;color:#fff;font-size:12px}
+.home img{width:64px;height:64px;border-radius:15px}.home img.r{border-radius:50%}
+</style></head><body><div class="board"><h1>봄별 로고 확정 조합 S2 + W2 — 파생 에셋</h1>
+<div class="card"><h2>로고</h2><div class="row">
+<div class="c"><img src="../../../../image-asset/logo/primary.png" width="440"><span>primary</span></div>
+<div class="c navy"><img src="../../../../image-asset/logo/primary-dark.png" width="440"><span>primary-dark</span></div>
+<div class="c"><img src="../../../../image-asset/logo/monochrome.png" width="330"><span>monochrome</span></div>
+<div class="c"><img src="../../../../image-asset/logo/stacked.png" width="150"><span>stacked</span></div>
+</div></div>
+<div class="card"><h2>파비콘 — 밝은/어두운 탭(SVG는 탭 색에 맞춰 별 색이 바뀜, PNG는 paper 바탕)</h2><div class="row">
+<div class="c"><div class="tab l"><img src="../../../../image-asset/icon/favicon.svg" width="16">봄별 · 우리 가족</div><span>favicon.svg 16px, 밝은 탭</span></div>
+<div class="c"><div class="tab d"><img src="dark-fav.svg" width="16">봄별 · 우리 가족</div><span>favicon.svg 16px, 어두운 탭(미디어 쿼리 결과 재현)</span></div>
+<div class="c"><img src="../../../../image-asset/icon/favicon-16.png" width="16"><span>16</span></div>
+<div class="c"><img src="../../../../image-asset/icon/favicon-32.png" width="32"><span>32</span></div>
+<div class="c"><img src="../../../../image-asset/icon/favicon-48.png" width="48"><span>48</span></div>
+</div></div>
+<div class="card"><h2>앱 아이콘 — 홈 화면(iOS 둥근 사각·Android 원형), 마스커블 안전 영역(빨간 점선 = 지름 80%)</h2><div class="row">
+<div class="home"><div><img src="../../../../image-asset/icon/icon-180.png">iOS</div><div><img class="r" src="../../../../image-asset/icon/maskable-512.png">Android</div><div><img src="../../../../image-asset/icon/icon-192.png">PWA</div></div>
+<div class="c"><div class="mask sq"><img src="../../../../image-asset/icon/maskable-512.png"></div><span>maskable-512 + 안전 영역</span></div>
+<div class="c"><div class="mask"><img src="../../../../image-asset/icon/maskable-512.png"></div><span>원형으로 잘렸을 때</span></div>
+<div class="c"><img src="../../../../image-asset/icon/icon-512.png" width="192"><span>icon-512</span></div>
+</div></div>
+<div class="card"><h2>공유 이미지(OG 1200×630) — 카카오톡·메신저 미리보기</h2><div class="row"><div class="c"><img src="../../../../image-asset/og/og-image.png" width="600"><span>og-image.png</span></div></div></div>
+</div></body></html>
