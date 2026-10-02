@@ -57,12 +57,15 @@
   - 메모: parent가 아닌 사람이 `/us/child/[id]` 주소로 직접 오면 not-found 화면이 나오지만 상태 코드는 200(우리 탭 loading.tsx가 먼저 스트리밍을 시작해서 - 기존 구조, 서버 액션은 parentProcedure가 막음). 저장 공간의 파일 수는 썸네일까지 세므로 표시하지 않았다.
   - 남은 것: 반려동물 커버 사진 고르기(서버는 있음), 아이, 반려동물 지우기 화면(Phase 7 UI), 기록 날짜(takenAt) 고치기는 서버만 있음.
   - **PR woopinbell/bombyeol#16 CI 통과(4분) → 머지 커밋으로 main 머지(da2074f)**. 스키마 변경 없음. **스테이징 배포**(버전 29ad189c, Startup 20ms): `/`, `/s/...`, `/s/.../us/child/new`, `/s/.../us/pet/new` 비로그인 → 로그인 307, `/login` 200, health ok, 내부 스모크 db ok, R2 서명 강제 403/403/200, Head, Copy, 정리 ok, fcm invalid_token(정상). 작업 브랜치는 머지된 main으로 맞춤. **로그인한 화면은 사용자 확인 대기**(스테이징에 테스트 계정을 만들지 않음).
+- **2026-10-02 반려동물 커버 + Phase 4 이야기 탭 UI(작업 브랜치 `claude/magical-planck-y1ekem`, main da2074f 위 7커밋, 푸시 4a5156d, main 미머지, 열린 PR 없음)**: e91b853 올리기 단계(서명, PUT, 확인)를 `src/components/media/upload.ts`로 분리 → a6da4d4 반려동물 고치기 화면에 커버 사진(고르기, 바꾸기, 지우기 - 브라우저 JPEG 재인코딩, 실패하면 올린 파일 치움, 이전 커버는 서버가 지움 G-05), 우리 탭 목록에 작은 사진 → 5bb9eca `reaction.setStar`(멱등) + 테스트 → 46a6907 `space.get` 멤버에 memorial → 783f327 `useSettledToggle`(좋아요, 별 하나 공용 연타 묶기), 댓글 대상에 이야기 → 61c2483 `src/lib/story-view.ts`(오늘의 질문: 아직 답하지 않은 카드 중 날짜로 하나, 다른 질문은 offset) + 테스트 → 4a5156d 이야기 탭 화면(질문 카드, 물어보기 시트, 답을 기다리는 질문, 이야기 모음, 자세히 보기, 쓰기 시트, 별 하나 boop - spring-boop 토큰, 감소 모션이면 정지). 스키마 변경 없음.
+  - 검증: format, lint, typecheck, Vitest **381건**(377 → 381), next build, OpenNext + dry-run 18.60 MiB(gzip 4.70 MiB). 로컬 브라우저(할머니, 엄마 계정): 할머니가 오늘의 질문에 답하기(연도), 엄마가 물어보기(카드, 직접 쓴 질문), 별 하나와 댓글, 대신 받아 적기(제목, 카테고리), 물어보기 거두기(토스트 뒤 DB 삭제), 할머니에게 엄마의 질문 카드와 답하기(답하면 카드가 바로 사라지고 다음 카드), 고치기, 지우기 확인, 사진 붙인 이야기, 별 5번 연타 요청 1번, 커버 사진 고르기, 바꾸기, 지우기(이전 파일 deleted), 오늘 탭 회귀 12항목 - 전부 통과, 콘솔 오류 0. 스크린샷 `docs/mockups/2026-10-02-story-ui/`.
+  - 메모: 답한 이야기를 지우면 그 물어보기는 다시 답을 기다린다(서버 SetNull - 기존 동작). 화면 결정: 이야기 탭 머리말은 탭 이름 대신 가족 이름(화자를 고르면 "할머니의 이야기"), 목업의 "이야기 12, 받은 별 23" 합계는 페이지 단위 목록으로는 정확히 셀 수 없어 뺐다(필요하면 서버 집계 추가).
 - 작업 메모: `npm test`는 로컬 DB를 비운다(시드한 화면 확인 데이터도 사라짐). 파이프로 grep하면 실패가 가려지니 종료 코드를 따로 본다.
 - 환경 메모: 기존 스위트에서 3번 중 1번 테스트 1건이 실패했다가 재실행에 통과(어떤 테스트인지 기록 못 함 - 다음에 반복 실행으로 찾을 것). Docker Hub 429로 `db:up` 첫 시도 실패, 재시도 성공. 컨테이너에 한글 폰트가 없어 목업 스크린샷은 Pretendard woff2를 받아 Playwright route로 주입(스크래치패드, 리포에 넣지 않음).
 
 ### 다음 할 일 (2026-10-02 세션 마감 기준 - 새 세션은 여기부터)
 
-main da2074f(PR woopinbell/bombyeol#16까지 머지), 스테이징 버전 29ad189c. 작업 브랜치 `claude/magical-planck-y1ekem`은 main과 같다. 열린 PR 없음.
+main da2074f(PR woopinbell/bombyeol#16까지 머지), 스테이징 버전 29ad189c. **작업 브랜치 `claude/magical-planck-y1ekem`에 반려동물 커버 + 이야기 탭 7커밋(푸시 4a5156d, main 미머지, PR 없음)** - 사용자 확인 뒤 PR, CI, 머지, 스테이징 배포.
 
 **사용자가 할 일(먼저 확인)**
 1. **Workers Paid 전환**(결정됨, Q-PLAN) - 대시보드 Workers & Pages > Plans. 2026-10-02 13시 기준 아직 무료(1102 계속 관측). 전환 뒤 Cloudflare GraphQL 분석(`workersInvocationsAdaptive`, 스크립트 `bombyeol-staging`)으로 status, cpuTime 확인.
@@ -71,8 +74,8 @@ main da2074f(PR woopinbell/bombyeol#16까지 머지), 스테이징 버전 29ad18
 4. 결정 대기: Q-PAY(결제 공급자, 사업자 등록 여부 선결), Q-ILLUST(일러스트), Q-HONOR(경어 잠정), Q-DOMAIN.
 
 **개발 순서(제안)**
-1. ~~Phase 3 남은 화면~~(2026-10-02 PR woopinbell/bombyeol#16 머지, 스테이징 배포). 이어서 할 것: 반려동물 커버 사진 고르기. 사용자 확인: 스테이징에서 글 고치기, 성장 기록 시트(좋아요, 댓글, 고치기, 처음 옮기기, 지우기), 우리 탭(아이, 반려동물 더하기, 고치기, 태어났어요, 저장 공간).
-2. **Phase 4 이야기 탭 UI**(`feat(story)`) - 질문 카드, 이야기 모음, 쓰기, 별 하나(좋아요처럼 연타를 모아 마지막 상태만 보낼 것 - `reaction.toggleStar`에도 setLike 같은 멱등 API 추가), 물어보기.
+1. ~~Phase 3 남은 화면~~(2026-10-02 PR woopinbell/bombyeol#16 머지, 스테이징 배포), 반려동물 커버(작업 브랜치). 사용자 확인: 스테이징에서 글 고치기, 성장 기록 시트(좋아요, 댓글, 고치기, 처음 옮기기, 지우기), 우리 탭(아이, 반려동물 더하기, 고치기, 태어났어요, 저장 공간).
+2. ~~Phase 4 이야기 탭 UI~~(2026-10-02 작업 브랜치, 위 기록) - PR, 머지, 스테이징 배포 남음.
 3. Phase 5 우리 탭 UI(달력, 구성원, D-day, 별이 되신 분, 임신 기록, 설정: 화면 설정 `setDisplayPref`, 초대 관리).
 4. Phase 6 UI: 카카오톡 공유(`feat(share)`), PWA(`feat(pwa)`, 서비스 워커, 푸시 토큰 등록 화면).
 5. Phase 7 UI: 계정, 데이터 삭제 페이지(`feat(privacy)`).
