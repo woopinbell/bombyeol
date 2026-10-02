@@ -7,6 +7,7 @@
 | `logo/primary.svg` · `.png` | 가로 로고(심볼 + 워드마크), 밝은 바탕 |
 | `logo/primary-dark.svg` · `.png` | 가로 로고, 어두운 바탕(글자 paper, 별 silver) — 바탕은 투명 |
 | `logo/stacked.svg` · `.png` | 세로 로고(스플래시·온보딩) |
+| `logo/stacked-dark.svg` · `.png` | 세로 로고, 앱 다크 모드(바탕 night-deep) 위 — 겹침 틈을 바탕색으로 |
 | `logo/symbol.svg` · `.png` / `symbol-dark` | 심볼만(앱 안 헤더·프로필) |
 | `logo/wordmark.svg` · `.png` / `wordmark-dark` | 워드마크만 |
 | `logo/monochrome.svg` · `.png` | 단색(ink) — 인쇄·제약 환경 |

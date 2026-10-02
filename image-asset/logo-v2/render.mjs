@@ -19,6 +19,7 @@ const jobs = [ // [원본 SVG, 결과 PNG, 폭, 높이, 투명 바탕]
   ["logo/primary-dark.svg", "logo/primary-dark.png", 1760, 688, true],
   ["logo/monochrome.svg", "logo/monochrome.png", 1760, 688, true],
   ["logo/stacked.svg", "logo/stacked.png", 1008, 1200, true],
+  ["logo/stacked-dark.svg", "logo/stacked-dark.png", 1008, 1200, true],
   ["og/og-image.svg", "og/og-image.png", 1200, 630, false],
 ];
 const b = await chromium.launch();

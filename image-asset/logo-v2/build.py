@@ -7,7 +7,7 @@
 import math, sys, io
 from pathlib import Path
 OUT = Path(__file__).parent
-C = dict(paper="#F7F1E6", ink="#2C2621", navy="#232B4D", indigo="#34406B", silver="#C7CEDD", gold="#E8C77A",
+C = dict(deep="#171C33", paper="#F7F1E6", ink="#2C2621", navy="#232B4D", indigo="#34406B", silver="#C7CEDD", gold="#E8C77A",
          pink="#F2A7B3", green="#A9C88C", yellow="#F4CB6E", sky="#A8D8E8")
 
 def star_pts(cx, cy, R, r, rot=-90):
@@ -159,6 +159,8 @@ def derive(font):
         "logo/primary-dark.svg": svg(440, 172, lock(C["paper"], bg=C["navy"], dark=True), "봄별 로고(어두운 바탕용)"),
         "logo/monochrome.svg": svg(440, 172, lock(C["ink"], mono=C["ink"]).replace(C["gold"], C["ink"]), "봄별 로고 단색"),
         "logo/stacked.svg": svg(252, 300, f'<g transform="translate(66 0) scale(1.2)">{sym()}</g><g transform="translate(0 132)">{wordmark(W, C["navy"], ld, lw)}</g>', "봄별 로고 세로"),
+        # 앱 다크 모드(바탕 night-deep) 위 투명 배경용 — 겹침 틈을 바탕색으로
+        "logo/stacked-dark.svg": svg(252, 300, f'<g transform="translate(66 0) scale(1.2)">{sym(bg=C["deep"], dark=True)}</g><g transform="translate(0 132)">{wordmark(W, C["paper"], ld, lw)}</g>', "봄별 로고 세로(어두운 바탕용)"),
     }
     # 파비콘 SVG: 바탕을 모르므로 틈·가운데 점은 마스크로 뚫고, 탭이 어두우면 별을 silver로(SVG 안 미디어 쿼리)
     pts = star_pts(72, 70, 17, 8.5)
