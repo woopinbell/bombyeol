@@ -1,4 +1,4 @@
-// 내부 경로(Cron 정리·배포 스모크) 호출 인증. 별도 Secret 없이 AUTH_SECRET에서 용도별 키를 유도한다.
+// 내부 경로(Cron 정리, 배포 스모크) 호출 인증. 별도 Secret 없이 AUTH_SECRET에서 용도별 키를 유도한다.
 // 경로는 공개 URL이기도 하므로 이 토큰 없이는 거부한다.
 export type InternalPurpose = "cleanup" | "smoke";
 

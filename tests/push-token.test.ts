@@ -18,7 +18,7 @@ async function user(name = "u") {
   return { id: u.id, caller: callerFor(prisma, u.id) };
 }
 
-describe("push.register·unregister", () => {
+describe("push.register, unregister", () => {
   it("비로그인은 등록할 수 없다", async () => {
     await expect(callerFor(prisma, null).push.register({ token: token(1) })).rejects.toThrow(
       /UNAUTHORIZED/,

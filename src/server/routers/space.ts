@@ -79,7 +79,7 @@ export const spaceRouter = router({
   ),
 
   /**
-   * Space 삭제 요청(parent). Space 이름을 다시 입력해야 한다. 유예 기간 동안 읽기·내보내기만 되고
+   * Space 삭제 요청(parent). Space 이름을 다시 입력해야 한다. 유예 기간 동안 읽기, 내보내기만 되고
    * 어느 parent든 취소할 수 있다. 유예가 끝나면 정리 Cron이 파일(R2)부터 지우고 Space를 파기한다(G-06).
    * 열려 있는 초대는 거둔다(새 합류 차단). 이미 요청돼 있으면 그 요청을 돌려준다.
    */
@@ -128,7 +128,7 @@ export const spaceRouter = router({
     return { canceled: count > 0 };
   }),
 
-  /** 진행 중인 삭제 요청(모든 멤버 — 유예 안내 배너용). 없으면 null */
+  /** 진행 중인 삭제 요청(모든 멤버 - 유예 안내 배너용). 없으면 null */
   deletionStatus: spaceProcedure.query(({ ctx }) =>
     ctx.prisma.deletionRequest.findFirst({
       where: openSpaceDeletion(ctx.member.spaceId),

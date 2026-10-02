@@ -40,7 +40,7 @@ describe("child.delete", () => {
     expect(await prisma.child.count({ where: { id: kong.id } })).toBe(1);
   });
 
-  it("그 아이의 기록·마일스톤·임신 기록을 지우고 파일은 purging으로 넘긴다(다른 아이는 그대로)", async () => {
+  it("그 아이의 기록, 마일스톤, 임신 기록을 지우고 파일은 purging으로 넘긴다(다른 아이는 그대로)", async () => {
     const { api, spaceId, kong, bom, photo } = await family();
     await api.consent.grantSpace({
       spaceId,
@@ -104,7 +104,7 @@ describe("child.delete", () => {
 });
 
 describe("pet.delete", () => {
-  it("기록·커버·기념 정보는 지우고, 반려동물에 붙인 이야기는 남긴다", async () => {
+  it("기록, 커버, 기념 정보는 지우고, 반려동물에 붙인 이야기는 남긴다", async () => {
     const { api, spaceId, photo } = await family();
     const cover = await photo();
     const pet = await api.pet.create({

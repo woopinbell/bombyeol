@@ -2,8 +2,7 @@ import { useId, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * 하나만 고르는 칩(라디오). 자바스크립트 없이도 동작한다(폼 전송). 선택은 굵은 테두리 + 굵은 글자 —
- * 색만으로 구분하지 않는다(DESIGN §8). 칩 높이는 터치 최소 48px.
+ * 하나만 고르는 칩(라디오). 자바스크립트 없이도 동작한다(폼 전송). 선택은 굵은 테두리 + 굵은 글자 - * 색만으로 구분하지 않는다(DESIGN §8). 칩 높이는 터치 최소 48px.
  */
 export function ChoiceChips({
   name,

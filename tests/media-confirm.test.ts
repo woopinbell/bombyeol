@@ -47,7 +47,7 @@ describe("media.confirm (G-02)", () => {
     );
   });
 
-  it("저장된 크기·타입이 선언과 다르면 객체를 지우고 자산을 폐기한다", async () => {
+  it("저장된 크기, 타입이 선언과 다르면 객체를 지우고 자산을 폐기한다", async () => {
     const { api, storage, spaceId, assetId, pendingKey } = await uploaded();
     storage.forcePut(pendingKey, 9_999_999, "image/jpeg");
     await expect(api.media.confirm({ spaceId, assetId })).rejects.toMatchObject({

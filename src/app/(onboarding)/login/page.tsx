@@ -8,7 +8,7 @@ import { buttonClass } from "@/components/ui/button";
 import { Lead, Screen, Title } from "@/components/ui/screen";
 import { safeNext } from "@/lib/safe-next";
 
-/** 로그인(DESIGN §9.5): 이메일·비밀번호 없음, 카카오 한 번. 가입은 로그인과 같다 — 가족 합류는 초대로만. */
+/** 로그인(DESIGN §9.5): 이메일, 비밀번호 없음, 카카오 한 번. 가입은 로그인과 같다 - 가족 합류는 초대로만. */
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const next = safeNext((await searchParams).next);
   const session = await auth();

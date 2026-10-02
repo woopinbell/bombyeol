@@ -1,7 +1,7 @@
 /**
- * 화면 설정(테마·글자 크기·움직임 줄이기)을 <html data-*>로 적용한다.
+ * 화면 설정(테마, 글자 크기, 움직임 줄이기)을 <html data-*>로 적용한다.
  * 서버는 설정을 모르므로 첫 페인트 전에 인라인 스크립트가 localStorage를 읽어 속성을 붙인다
- * (Next 가이드 "Preventing Flash Before Hydration"). 값의 의미는 src/app/tokens.css와 DESIGN.md §3.1·§11·§12.
+ * (Next 가이드 "Preventing Flash Before Hydration"). 값의 의미는 src/app/tokens.css와 DESIGN.md §3.1, §11, §12.
  */
 export const DISPLAY_PREFS_KEY = "bombyeol.display";
 
@@ -69,7 +69,7 @@ export function setDisplayPref<K extends DisplayPrefKey>(
   try {
     localStorage.setItem(DISPLAY_PREFS_KEY, JSON.stringify(next));
   } catch {
-    // 사생활 보호 모드 등 — 적용만 한다
+    // 사생활 보호 모드 등 - 적용만 한다
   }
   applyTo(document.documentElement, next);
   return next;

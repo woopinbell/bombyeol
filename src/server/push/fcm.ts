@@ -20,7 +20,7 @@ function b64url(data: ArrayBuffer | string) {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-/** `\n` 이스케이프·실제 줄바꿈·감싼 따옴표 모두 받는다(ENV_MANIFEST Phase 6) */
+/** `\n` 이스케이프, 실제 줄바꿈, 감싼 따옴표 모두 받는다(ENV_MANIFEST Phase 6) */
 export function pemBody(pem: string) {
   return pem
     .trim()
@@ -41,7 +41,7 @@ async function importKey(pem: string) {
   );
 }
 
-/** 실패 단계를 남기는 오류(스모크 진단용 — 메시지에 키·토큰 값을 넣지 않는다) */
+/** 실패 단계를 남기는 오류(스모크 진단용 - 메시지에 키, 토큰 값을 넣지 않는다) */
 export class FcmStageError extends Error {
   constructor(
     readonly stage: "key" | "token",
@@ -85,7 +85,7 @@ async function accessToken(config: FcmConfig, fetcher: typeof fetch) {
     }),
   });
   if (!res.ok) {
-    // Google 오류 코드·설명(예: invalid_grant / Invalid JWT Signature)만 남긴다
+    // Google 오류 코드, 설명(예: invalid_grant / Invalid JWT Signature)만 남긴다
     const body = (await res.json().catch(() => ({}))) as {
       error?: string;
       error_description?: string;
@@ -105,8 +105,7 @@ type FcmError = {
 };
 
 /**
- * 응답을 세 갈래로 나눈다. 토큰을 지우는 건 FCM이 토큰 문제라고 답했을 때만이다 —
- * INVALID_ARGUMENT는 페이로드 문제일 수도 있어 등록 토큰을 가리킬 때만 지운다(전체 토큰 소실 방지).
+ * 응답을 세 갈래로 나눈다. 토큰을 지우는 건 FCM이 토큰 문제라고 답했을 때만이다 - * INVALID_ARGUMENT는 페이로드 문제일 수도 있어 등록 토큰을 가리킬 때만 지운다(전체 토큰 소실 방지).
  */
 export function classifyFcmResponse(status: number, body: FcmError): SendOutcome {
   if (status >= 200 && status < 300) return "ok";
@@ -158,7 +157,7 @@ export function createFcmSender(config: FcmConfig, fetcher: typeof fetch = fetch
   };
 }
 
-/** 개인 키 문자열의 모양(값 없이): 시작 표시·이스케이프 줄바꿈·실제 줄바꿈·본문 길이 */
+/** 개인 키 문자열의 모양(값 없이): 시작 표시, 이스케이프 줄바꿈, 실제 줄바꿈, 본문 길이 */
 export function keyShape(pem: string) {
   return [
     `begin=${pem.includes("BEGIN PRIVATE KEY") ? "y" : "n"}`,
@@ -171,7 +170,7 @@ export function keyShape(pem: string) {
 
 /**
  * 배포 스모크용 진단: 가짜 등록 토큰으로 보내고 어느 단계에서 멈췄는지 돌려준다.
- * 기대값은 `invalid_token`(키·토큰 교환·FCM 호출이 모두 정상). 키·토큰 값은 결과에 넣지 않는다.
+ * 기대값은 `invalid_token`(키, 토큰 교환, FCM 호출이 모두 정상). 키, 토큰 값은 결과에 넣지 않는다.
  */
 export async function probeFcm(
   config: FcmConfig,
@@ -199,8 +198,8 @@ export async function probeFcm(
 }
 
 /**
- * 요청 환경의 서비스 계정으로 발송기를 만든다. 설정이 없는 환경(키 미등록 스테이징·로컬)은
- * null — 알림만 건너뛰고 기능은 그대로 동작한다.
+ * 요청 환경의 서비스 계정으로 발송기를 만든다. 설정이 없는 환경(키 미등록 스테이징, 로컬)은
+ * null - 알림만 건너뛰고 기능은 그대로 동작한다.
  */
 export function fcmConfigFromEnv(env: CloudflareEnv): FcmConfig | null {
   const config = {

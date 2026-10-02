@@ -27,7 +27,7 @@ export async function createFamily(
   const wantsChild = Boolean(values.childName || values.childDate);
   const child = wantsChild
     ? {
-        // 이름·태명 칸 하나: 곧 태어나면 태명, 태어났으면 이름
+        // 이름, 태명 칸 하나: 곧 태어나면 태명, 태어났으면 이름
         ...(values.childStatus === "expecting"
           ? { nickname: values.childName || undefined, dueDate: values.childDate || undefined }
           : { name: values.childName || undefined, birthDate: values.childDate || undefined }),

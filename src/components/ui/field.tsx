@@ -13,7 +13,7 @@ export function Field({
   label: ReactNode;
   hint?: ReactNode;
   error?: ReactNode;
-  /** 어르신 화면: 입력칸 56px·글자 19px */
+  /** 어르신 화면: 입력칸 56px, 글자 19px */
   elder?: boolean;
 }) {
   const id = useId();

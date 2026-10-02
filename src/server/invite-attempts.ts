@@ -2,8 +2,8 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import { INVITE_POLICY } from "@/lib/plan";
 
 /**
- * 초대코드 brute-force 방지(G-07·G-11, hamkke InviteCodeAttempt 방식).
- * 실패만 기록하고, 사용자·IP 각각 최근 창 안의 실패 수가 한도에 이르면 더 시도하지 못한다.
+ * 초대코드 brute-force 방지(G-07, G-11, hamkke InviteCodeAttempt 방식).
+ * 실패만 기록하고, 사용자, IP 각각 최근 창 안의 실패 수가 한도에 이르면 더 시도하지 못한다.
  */
 export async function isInviteAttemptBlocked(
   prisma: PrismaClient,

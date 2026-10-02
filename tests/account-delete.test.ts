@@ -10,7 +10,7 @@ const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
 
-/** 카카오로 가입한 엄마가 만든 가족 + 아빠·할머니 */
+/** 카카오로 가입한 엄마가 만든 가족 + 아빠, 할머니 */
 async function family() {
   const mom = await findOrCreateUser(prisma, {
     provider: "kakao",
@@ -119,7 +119,7 @@ describe("user.deleteAccount", () => {
     expect(again.deletedAt).toBeNull();
   });
 
-  it("다른 가족이 남은 Space의 유일한 parent면 막는다 — 다른 parent가 있거나 삭제 요청 중이면 된다", async () => {
+  it("다른 가족이 남은 Space의 유일한 parent면 막는다 - 다른 parent가 있거나 삭제 요청 중이면 된다", async () => {
     const f = await family();
     await f.join("grandparent", "할머니");
     await expect(f.api.user.deleteAccount({ confirm: true })).rejects.toThrow(/LAST_PARENT/);

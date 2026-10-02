@@ -19,7 +19,7 @@ describe("초대코드", () => {
     for (const ch of "0O1IL") expect(INVITE_ALPHABET).not.toContain(ch);
   });
 
-  it("입력은 대소문자·공백·하이픈을 무시하고, 형식이 틀리면 null", () => {
+  it("입력은 대소문자, 공백, 하이픈을 무시하고, 형식이 틀리면 null", () => {
     expect(normalizeInviteCode(" abc-def ")).toBe("ABCDEF");
     expect(normalizeInviteCode("ABCDE")).toBeNull();
     expect(normalizeInviteCode("ABCDE0")).toBeNull();

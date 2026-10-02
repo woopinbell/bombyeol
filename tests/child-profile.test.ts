@@ -17,7 +17,7 @@ async function withExpectingChild() {
 }
 
 describe("child 프로필 관리", () => {
-  it("태명 시절 아이를 출생으로 전환하면 태명·예정일은 남는다", async () => {
+  it("태명 시절 아이를 출생으로 전환하면 태명, 예정일은 남는다", async () => {
     const { api, spaceId, childId } = await withExpectingChild();
     const born = await api.child.markBorn({
       spaceId,
@@ -37,7 +37,7 @@ describe("child 프로필 관리", () => {
     ).rejects.toMatchObject({ code: "CONFLICT", message: "CHILD_ALREADY_BORN" });
   });
 
-  it("미래 생일·출생 전 생일 직접 수정·이름 모두 지우기는 거부한다", async () => {
+  it("미래 생일, 출생 전 생일 직접 수정, 이름 모두 지우기는 거부한다", async () => {
     const { api, spaceId, childId } = await withExpectingChild();
     await expect(
       api.child.markBorn({ spaceId, childId, birthDate: "2099-01-01" }),

@@ -8,7 +8,7 @@ beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
 
 // 실제 사용 흐름: 카카오 로그인 → 가족 만들기 → 초대 → 양가 조부모 합류 → 역할별 권한
-describe("가족 생성·초대·역할 통합", () => {
+describe("가족 생성, 초대, 역할 통합", () => {
   it("부모가 만든 가족에 조부모가 합류하고, 역할에 따라 할 수 있는 일이 다르다", async () => {
     const mom = await findOrCreateUser(prisma, {
       provider: "kakao",
@@ -77,7 +77,7 @@ describe("가족 생성·초대·역할 통합", () => {
       dadApi.child.create({ spaceId, child: { name: "별이", birthDate: "2024-12-25" } }),
     ).resolves.toMatchObject({ status: "born" });
 
-    // 조부모는 열람만: 아이 등록·초대·회수 불가
+    // 조부모는 열람만: 아이 등록, 초대, 회수 불가
     await expect(
       grandpaApi.child.create({ spaceId, child: { name: "x", birthDate: "2024-01-01" } }),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });

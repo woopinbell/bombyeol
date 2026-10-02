@@ -1,5 +1,5 @@
 // 초대코드: 6자, 헷갈리는 문자(0/O, 1/I/L) 제외 31종 → 약 8.9억 가지.
-// 짧은 TTL·1회용·입력 실패 제한(G-07·G-11)과 함께 쓴다.
+// 짧은 TTL, 1회용, 입력 실패 제한(G-07, G-11)과 함께 쓴다.
 export const INVITE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 export const INVITE_CODE_LENGTH = 6;
 
@@ -17,7 +17,7 @@ export function generateInviteCode(): string {
   return code;
 }
 
-/** 사용자 입력을 정규화(대소문자·공백·하이픈 무시). 형식이 틀리면 null */
+/** 사용자 입력을 정규화(대소문자, 공백, 하이픈 무시). 형식이 틀리면 null */
 export function normalizeInviteCode(input: string): string | null {
   const code = input.toUpperCase().replace(/[\s-]/g, "");
   if (code.length !== INVITE_CODE_LENGTH) return null;

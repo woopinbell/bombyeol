@@ -21,7 +21,7 @@ export class FakeSender implements PushSender {
 
 /**
  * 응답 뒤 작업을 모아 두었다가 flush()에서 실제 디스패처로 실행한다(waitUntil 흉내).
- * 응답과 발송 사이에 생긴 변화(멤버 제외·visibility 변경)를 재현할 수 있게 flush 전에는 시작하지 않는다.
+ * 응답과 발송 사이에 생긴 변화(멤버 제외, visibility 변경)를 재현할 수 있게 flush 전에는 시작하지 않는다.
  */
 export function testPush(prisma: PrismaClient, sender: PushSender = new FakeSender()) {
   const queued: PushTask[] = [];

@@ -35,7 +35,7 @@ const milestoneSelect = {
   createdBy: { select: { id: true, name: true } },
 } satisfies Prisma.MilestoneSelect;
 
-/** 수정·삭제 대상: 같은 Space, 작성자 또는 parent */
+/** 수정, 삭제 대상: 같은 Space, 작성자 또는 parent */
 async function findEditable(
   ctx: {
     prisma: Prisma.TransactionClient;
@@ -57,8 +57,8 @@ async function findEditable(
 
 export const milestoneRouter = router({
   /**
-   * 마일스톤 기록. 아이는 parent만, 반려동물은 parent·grandparent(canRecordFor).
-   * "처음" 기록(첫 걸음·입양일 등)은 대상당 하나. 글 쓰기 폭주는 사용자당 리밋(G-07).
+   * 마일스톤 기록. 아이는 parent만, 반려동물은 parent, grandparent(canRecordFor).
+   * "처음" 기록(첫 걸음, 입양일 등)은 대상당 하나. 글 쓰기 폭주는 사용자당 리밋(G-07).
    */
   create: spaceProcedure
     .input(
@@ -131,7 +131,7 @@ export const milestoneRouter = router({
       return rows.map((m) => ({ ...m, reactions: reactions.get(m.id)! }));
     }),
 
-  /** 아이 나이 기반 제안(PRD §4.2): 나이에 맞고 아직 기록하지 않은 "처음" 기록 + 키·몸무게 */
+  /** 아이 나이 기반 제안(PRD §4.2): 나이에 맞고 아직 기록하지 않은 "처음" 기록 + 키, 몸무게 */
   suggestions: spaceProcedure
     .input(z.object({ childId: entityId }))
     .query(async ({ ctx, input }) => {
@@ -144,7 +144,7 @@ export const milestoneRouter = router({
       return suggestChildMilestones(child.status === "born" ? child.birthDate : null, recorded);
     }),
 
-  /** 값·기록일 수정(작성자 또는 parent). kind와 대상은 바꾸지 않는다 */
+  /** 값, 기록일 수정(작성자 또는 parent). kind와 대상은 바꾸지 않는다 */
   update: spaceProcedure
     .input(
       z.object({

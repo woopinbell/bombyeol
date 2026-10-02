@@ -1,4 +1,4 @@
-/** 세로 로고 — 라이트·다크(앱 설정·기기 설정) 바탕에 맞는 파생본을 고른다(image-asset/brand/asset-index.md). */
+/** 세로 로고 - 라이트, 다크(앱 설정, 기기 설정) 바탕에 맞는 파생본을 고른다(image-asset/brand/asset-index.md). */
 export function Logo({ alt }: { alt: string }) {
   return (
     <div className="mt-6 self-start">

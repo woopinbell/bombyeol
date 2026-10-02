@@ -20,8 +20,8 @@ async function family() {
   return { ...setup, childId: child.id, petId: pet.id, upload };
 }
 
-describe("moment 사진·영상 피드", () => {
-  it("아이 대상 기록: 원본·썸네일 읽기 URL이 순서대로 나오고 대상별로 걸러진다", async () => {
+describe("moment 사진, 영상 피드", () => {
+  it("아이 대상 기록: 원본, 썸네일 읽기 URL이 순서대로 나오고 대상별로 걸러진다", async () => {
     const { api, spaceId, childId, petId, upload } = await family();
     const photo = await upload();
     const video = await upload("video");
@@ -65,7 +65,7 @@ describe("moment 사진·영상 피드", () => {
     expect(familyOnly.items).toEqual([expect.objectContaining({ childId: null, petId: null })]);
   });
 
-  it("권한: 아이 기록은 parent만, 반려동물·가족은 grandparent도, relative는 열람만", async () => {
+  it("권한: 아이 기록은 parent만, 반려동물, 가족은 grandparent도, relative는 열람만", async () => {
     const { spaceId, storage, childId, petId } = await family();
     const grandparent = await addMember(prisma, spaceId, "grandparent", storage);
     const relative = await addMember(prisma, spaceId, "relative", storage);
@@ -99,7 +99,7 @@ describe("moment 사진·영상 피드", () => {
     });
   });
 
-  it("G-02: 다른 Space·미확정·이미 붙은·중복·영상 썸네일 자산을 거부한다", async () => {
+  it("G-02: 다른 Space, 미확정, 이미 붙은, 중복, 영상 썸네일 자산을 거부한다", async () => {
     const a = await family();
     const b = await mediaSetup(prisma);
     const subject = { type: "family" } as const;
@@ -141,7 +141,7 @@ describe("moment 사진·영상 피드", () => {
     });
   });
 
-  it("대상·날짜·개수 검증", async () => {
+  it("대상, 날짜, 개수 검증", async () => {
     const a = await family();
     const b = await family();
     const photo = await a.upload();

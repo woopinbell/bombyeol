@@ -15,7 +15,7 @@ const space = (spaceId = "s1") => ({
 });
 
 describe("DeletionRequest 스키마", () => {
-  it("Space당 진행 중인 삭제 요청은 하나뿐 — 취소·완료된 요청은 여러 개 있어도 된다", async () => {
+  it("Space당 진행 중인 삭제 요청은 하나뿐 - 취소, 완료된 요청은 여러 개 있어도 된다", async () => {
     const first = await prisma.deletionRequest.create({ data: space() });
     await expect(prisma.deletionRequest.create({ data: space() })).rejects.toThrow();
     await prisma.deletionRequest.update({

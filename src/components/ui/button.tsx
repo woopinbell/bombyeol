@@ -2,7 +2,7 @@ import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * 버튼(DESIGN §9.1·§12). 주 버튼은 화면당 하나, 아이콘만 있는 버튼은 만들지 않는다(글자 라벨 필수).
+ * 버튼(DESIGN §9.1, §12). 주 버튼은 화면당 하나, 아이콘만 있는 버튼은 만들지 않는다(글자 라벨 필수).
  * 누름 피드백은 PressFeedback이 data-press 요소에 거리 2px 배율을 계산해 준다.
  */
 const variants = {

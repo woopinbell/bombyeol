@@ -1,5 +1,5 @@
-// 마일스톤 프리셋(PRD §4.2·§4.2.1). 문구는 kind를 키로 messages에서 찾는다.
-// 반려동물 의료 기록은 V1 범위 밖 — 예방접종·병원 방문은 자유 메모까지만 둔다.
+// 마일스톤 프리셋(PRD §4.2, §4.2.1). 문구는 kind를 키로 messages에서 찾는다.
+// 반려동물 의료 기록은 V1 범위 밖 - 예방접종, 병원 방문은 자유 메모까지만 둔다.
 
 import { z } from "zod";
 
@@ -64,7 +64,7 @@ export function ageInMonths(birthDate: Date, today: Date) {
 }
 
 /**
- * 아이 나이 기반 제안: 나이 창에 들어온 아직 기록하지 않은 "처음" 기록을 먼저, 그다음 키·몸무게.
+ * 아이 나이 기반 제안: 나이 창에 들어온 아직 기록하지 않은 "처음" 기록을 먼저, 그다음 키, 몸무게.
  * 출생 전이면 제안하지 않는다.
  */
 export function suggestChildMilestones(

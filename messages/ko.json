@@ -8,7 +8,7 @@
       "childhood": "어린 시절",
       "youth": "젊은 시절",
       "work": "일",
-      "love": "사랑·결혼",
+      "love": "사랑과 결혼",
       "parenting": "자녀 키우기",
       "food": "음식",
       "holidays": "명절",
@@ -31,7 +31,7 @@
       "love_wedding": "결혼식 날은 어땠어요?",
       "parenting_first_child": "첫 아이가 태어난 날을 기억하세요?",
       "parenting_hard_times": "아이들을 키우면서 가장 어려웠던 때는요?",
-      "parenting_child_memory": "우리 엄마·아빠는 어릴 때 어떤 아이였어요?",
+      "parenting_child_memory": "우리 엄마 아빠는 어릴 때 어떤 아이였어요?",
       "food_mothers_dish": "어머니가 해 주시던 음식 중 생각나는 게 있어요?",
       "food_signature": "가족에게 꼭 물려주고 싶은 음식 솜씨가 있어요?",
       "food_hungry_days": "먹을 것이 귀하던 시절 이야기를 들려주세요.",
@@ -76,7 +76,7 @@
   },
   "auth": {
     "logoAlt": "봄별",
-    "title": "손주의 봄과\n할머니·할아버지의 별을\n한곳에",
+    "title": "손주의 봄과\n할머니 할아버지의 별을\n한곳에",
     "lead": "가족끼리만 보는 사진과 이야기 앨범이에요.",
     "inviteNote": "가족에게 초대 링크를 받았다면, 그 링크를 눌러 들어오면 바로 가족 앨범으로 가요.",
     "kakao": "카카오 로그인",
@@ -107,7 +107,7 @@
       "childDate": "생일 또는 태어날 날",
       "childDateHint": "곧 태어나면 출생 예정일을 골라 주세요",
       "submit": "가족 만들기",
-      "submitting": "만드는 중…"
+      "submitting": "만드는 중이에요"
     }
   }
 }

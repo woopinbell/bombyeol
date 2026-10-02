@@ -8,7 +8,7 @@ export type R2Config = {
   secretAccessKey: string;
 };
 
-/** R2 S3 호환 API(SigV4) 구현. presign·Head·Copy·Delete를 한 경로로 통일한다(ARCHITECTURE §5). */
+/** R2 S3 호환 API(SigV4) 구현. presign, Head, Copy, Delete를 한 경로로 통일한다(ARCHITECTURE §5). */
 export function createR2Storage(config: R2Config): MediaStorage {
   const client = new AwsClient({
     accessKeyId: config.accessKeyId,
@@ -42,7 +42,7 @@ export function createR2Storage(config: R2Config): MediaStorage {
 
   return {
     presignPut: (key, { bytes, contentType, expiresSec }) =>
-      // 길이·타입을 서명해야 다른 크기·타입의 PUT이 SignatureDoesNotMatch로 거부된다(S-3 검증).
+      // 길이, 타입을 서명해야 다른 크기, 타입의 PUT이 SignatureDoesNotMatch로 거부된다(S-3 검증).
       presign(key, "PUT", expiresSec, {
         "content-length": String(bytes),
         "content-type": contentType,

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * 한 화면 틀: 가운데 한 기둥(최대 480px), 좌우 20px, 위쪽 머리말 · 본문 · 아래 행동(주 버튼).
+ * 한 화면 틀: 가운데 한 기둥(최대 480px), 좌우 20px, 위쪽 머리말 , 본문 , 아래 행동(주 버튼).
  * 아래 행동은 화면 아래에 붙고 안전 영역(홈 바)만큼 띄운다.
  */
 export function Screen({

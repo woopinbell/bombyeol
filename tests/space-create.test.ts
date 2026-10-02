@@ -94,7 +94,7 @@ describe("space.create", () => {
     ).rejects.toMatchObject({ message: "MEMBERSHIP_LIMIT" });
   });
 
-  it("입력 검증: 이름·날짜 규칙", async () => {
+  it("입력 검증: 이름, 날짜 규칙", async () => {
     const api = callerFor(prisma, (await newUser()).id);
     await expect(api.space.create({ name: "  " })).rejects.toMatchObject({ code: "BAD_REQUEST" });
     await expect(

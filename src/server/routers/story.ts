@@ -78,7 +78,7 @@ type SpaceCtx = Context & {
 };
 
 /**
- * 응답 모양: 화자·대필자는 작성 시점 스냅샷(멤버가 사라져도 표시된다, PRIVACY §5).
+ * 응답 모양: 화자, 대필자는 작성 시점 스냅샷(멤버가 사라져도 표시된다, PRIVACY §5).
  * 사진은 파일 키 대신 짧은 TTL 읽기 URL(ARCHITECTURE §4). 삭제 도중 실패한 사진은 숨긴다.
  */
 async function toStory(ctx: SpaceCtx, row: StoryRow) {
@@ -112,7 +112,7 @@ async function toStory(ctx: SpaceCtx, row: StoryRow) {
   };
 }
 
-/** 목록·상세용: 응답 모양 + 별 하나·댓글 요약 */
+/** 목록, 상세용: 응답 모양 + 별 하나, 댓글 요약 */
 async function withReactions(ctx: SpaceCtx, rows: StoryRow[]) {
   const reactions = await storyReactionSummaries(
     ctx.prisma,
@@ -131,8 +131,8 @@ async function checkPhoto(ctx: SpaceCtx, assetId: string | null | undefined) {
 
 /**
  * 누가 누구의 이야기를 쓸 수 있나(PRD §4.3):
- * 자기 이야기는 parent·grandparent, 대필은 parent·grandparent가 어르신(grandparent)의 이야기를.
- * relative는 열람·반응만.
+ * 자기 이야기는 parent, grandparent, 대필은 parent, grandparent가 어르신(grandparent)의 이야기를.
+ * relative는 열람, 반응만.
  */
 async function resolveNarrator(ctx: SpaceCtx, narratorMemberId: string | undefined) {
   if (ctx.member.role === "relative") throw new TRPCError({ code: "FORBIDDEN" });
@@ -189,7 +189,7 @@ async function findStory(ctx: SpaceCtx, storyId: string) {
     },
   });
   if (!story) throw notFound("ITEM_NOT_FOUND");
-  // 기념 상태인 분의 이야기는 영구 보존 — 고치거나 지우려면 parent가 기념을 먼저 되돌린다
+  // 기념 상태인 분의 이야기는 영구 보존 - 고치거나 지우려면 parent가 기념을 먼저 되돌린다
   if (story.narrator?.memorial) throw inputError("MEMORIAL_READ_ONLY");
   const owner = story.createdById === ctx.userId || story.narratorMemberId === ctx.member.id;
   return { story, owner };
@@ -224,8 +224,8 @@ export const storyRouter = router({
 
   /**
    * 이야기 쓰기. 질문 카드에 답하거나(promptKey → 카테고리는 카드를 따른다) 자유롭게 쓴다.
-   * narratorMemberId가 내가 아니면 대필 — 작성자(화자)·대필자를 함께 기록한다. 글 쓰기 리밋(G-07).
-   * askId를 주면 그 물어보기에 대한 답 — 화자는 질문받은 어르신, 카드는 물어보기를 따르고 물어보기가 닫힌다.
+   * narratorMemberId가 내가 아니면 대필 - 작성자(화자), 대필자를 함께 기록한다. 글 쓰기 리밋(G-07).
+   * askId를 주면 그 물어보기에 대한 답 - 화자는 질문받은 어르신, 카드는 물어보기를 따르고 물어보기가 닫힌다.
    */
   create: spaceProcedure
     .input(
@@ -322,7 +322,7 @@ export const storyRouter = router({
         storyYear: storyYear.nullable().optional(),
         category: categoryInput.nullable().optional(),
         petId: entityId.nullable().optional(),
-        /** 사진 바꾸기·빼기 — 이전 사진 파일은 지운다(G-05) */
+        /** 사진 바꾸기, 빼기 - 이전 사진 파일은 지운다(G-05) */
         photoAssetId: entityId.nullable().optional(),
       }),
     )
@@ -366,7 +366,7 @@ export const storyRouter = router({
     return { ok: true };
   }),
 
-  /** 이야기 모음(모든 멤버): 최신순, 화자·카테고리·반려동물로 거른다. 커서는 (createdAt, id) */
+  /** 이야기 모음(모든 멤버): 최신순, 화자, 카테고리, 반려동물로 거른다. 커서는 (createdAt, id) */
   list: spaceProcedure
     .input(
       z.object({
@@ -409,7 +409,7 @@ export const storyRouter = router({
   /**
    * 물어보기(PRD §4.3): parent가 어르신(grandparent)께 질문 카드나 직접 쓴 질문을 보낸다.
    * 같은 카드를 이미 보내 답을 기다리는 중이면 그 물어보기를 돌려준다. 새 물어보기는 어르신께 알림,
-   * 카카오톡 공유는 클라이언트가 링크로 보낸다(서버 비용 0). 리밋·열린 물어보기 상한(G-07).
+   * 카카오톡 공유는 클라이언트가 링크로 보낸다(서버 비용 0). 리밋, 열린 물어보기 상한(G-07).
    */
   ask: parentProcedure
     .input(
@@ -469,7 +469,7 @@ export const storyRouter = router({
 
   /**
    * 답을 기다리는 물어보기(모든 멤버, 오래된 순). 어르신당 상한이 있어 페이지 없이 돌려준다.
-   * 답한 물어보기는 이야기 쪽(story.list·get의 ask)에서 보인다.
+   * 답한 물어보기는 이야기 쪽(story.list, get의 ask)에서 보인다.
    */
   asks: spaceProcedure
     .input(z.object({ toMemberId: entityId.optional() }))

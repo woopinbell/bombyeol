@@ -26,7 +26,7 @@ describe("서버 오류 → 문구 키", () => {
     );
   });
 
-  it("로그인 만료·모르는 오류는 내부 내용을 드러내지 않는다", () => {
+  it("로그인 만료, 모르는 오류는 내부 내용을 드러내지 않는다", () => {
     expect(toErrorKey(new TRPCError({ code: "UNAUTHORIZED" }))).toBe("SIGN_IN_REQUIRED");
     expect(toErrorKey(new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "db down" }))).toBe(
       "UNKNOWN",

@@ -4,7 +4,7 @@ import { Steps } from "@/components/ui/steps";
 import { requireSignedIn } from "@/server/session";
 import { FamilyForm } from "./family-form";
 
-/** 가족 만들기(1/2) — 다음은 할머니·할아버지 초대 */
+/** 가족 만들기(1/2) - 다음은 할머니, 할아버지 초대 */
 export default async function FamilyPage() {
   await requireSignedIn("/start/family");
   const t = await getTranslations("onboarding");

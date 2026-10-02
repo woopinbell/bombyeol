@@ -78,14 +78,14 @@ describe("story 물어보기", () => {
     });
   });
 
-  it("이미 답한 물어보기·질문받지 않은 화자로는 답할 수 없다", async () => {
+  it("이미 답한 물어보기, 질문받지 않은 화자로는 답할 수 없다", async () => {
     const { api, spaceId, grandma, grandpa } = await family();
     const ask = await api.story.ask({
       spaceId,
       toMemberId: grandma.member.id,
       promptKey: "love_wedding",
     });
-    // 질문받지 않은 어르신을 화자로 답할 수 없다(대신 받아 적는 것은 된다 — 화자는 할머니)
+    // 질문받지 않은 어르신을 화자로 답할 수 없다(대신 받아 적는 것은 된다 - 화자는 할머니)
     await expect(
       grandpa.api.story.create({
         spaceId,

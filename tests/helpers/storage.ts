@@ -3,7 +3,7 @@ import type { MediaStorage } from "@/server/storage/types";
 type Stored = { bytes: number; contentType: string };
 
 /**
- * 테스트용 메모리 저장소. presignPut이 서명한 길이·타입과 다른 업로드는 R2처럼 거부한다
+ * 테스트용 메모리 저장소. presignPut이 서명한 길이, 타입과 다른 업로드는 R2처럼 거부한다
  * (S-3에서 실제 R2가 SignatureDoesNotMatch로 거부함을 확인).
  */
 export class MemoryStorage implements MediaStorage {

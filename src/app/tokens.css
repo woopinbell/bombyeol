@@ -1,6 +1,6 @@
 /*
- * 봄별 디자인 토큰 v1 — 값은 src/design/tokens.json과 같아야 한다(tests/design-tokens.test.ts가 검사).
- * 화면은 역할(--bg, --fg …)·스케일만 쓴다. 팔레트 이름을 직접 쓰는 곳은 봄 색 면(--spring-*)과
+ * 봄별 디자인 토큰 v1 - 값은 src/design/tokens.json과 같아야 한다(tests/design-tokens.test.ts가 검사).
+ * 화면은 역할(--bg, --fg ...), 스케일만 쓴다. 팔레트 이름을 직접 쓰는 곳은 봄 색 면(--spring-*)과
  * 이야기 골드(--starlight-gold), 봄 색 위 글자(--ink)뿐이다.
  */
 :root {
@@ -20,7 +20,7 @@
   --line-strong-paper: #8d867d;
   --line-strong-night: #73798b;
 
-  /* 역할 — 라이트 */
+  /* 역할 - 라이트 */
   --bg: var(--paper);
   --fg: var(--ink);
   --fg-muted: var(--ink-muted);
@@ -31,7 +31,7 @@
   --surface: var(--night-navy);
   --scrim: rgb(44 38 33 / 0.45);
 
-  /* 간격·라운드·선·터치·레이아웃 */
+  /* 간격, 라운드, 선, 터치, 레이아웃 */
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -51,7 +51,7 @@
   --touch-elder: 56px;
   --content-max: 480px;
 
-  /* 글자 — rem, 글자 크기 설정은 루트만 바꾼다(16 / 20 / 22px) */
+  /* 글자 - rem, 글자 크기 설정은 루트만 바꾼다(16 / 20 / 22px) */
   --font-stack:
     "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --t-caption: 0.875rem;
@@ -74,7 +74,7 @@
   --icon-s: 20px;
   --icon-stroke: 1.75;
 
-  /* 모션 — 스프링·끌기 상수는 src/lib/design-tokens.ts */
+  /* 모션 - 스프링, 끌기 상수는 src/lib/design-tokens.ts */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
@@ -87,7 +87,7 @@
   --stagger: 50ms;
   --toast-life: 6000ms;
 
-  /* 외부 로그인 버튼 — 각 사 공식 가이드 값(토큰 v1.1, 우리 팔레트 밖이지만 바꾸지 않는다) */
+  /* 외부 로그인 버튼 - 각 사 공식 가이드 값(토큰 v1.1, 우리 팔레트 밖이지만 바꾸지 않는다) */
   --kakao-container: #fee500;
   --kakao-label: rgb(0 0 0 / 0.85);
   --kakao-radius: 12px;
@@ -104,7 +104,7 @@
   font-size: 22px;
 }
 
-/* 역할 — 다크(앱 설정) */
+/* 역할 - 다크(앱 설정) */
 :root[data-theme="dark"] {
   --bg: var(--night-deep);
   --fg: var(--paper);
@@ -120,7 +120,7 @@
   --google-label: #e3e3e3;
   color-scheme: dark;
 }
-/* 역할 — 다크(기기 설정, 앱에서 밝게를 고르지 않았을 때) */
+/* 역할 - 다크(기기 설정, 앱에서 밝게를 고르지 않았을 때) */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: var(--night-deep);
@@ -139,7 +139,7 @@
   }
 }
 
-/* 이야기(별) 면 — 두 모드 공통 */
+/* 이야기(별) 면 - 두 모드 공통 */
 [data-surface="night"] {
   --bg: var(--night-navy);
   --fg: var(--paper);
@@ -151,7 +151,7 @@
   --surface: var(--night-indigo);
 }
 
-/* 감소 모션: 이동 없이 짧은 페이드만(스프링·반짝임은 design-tokens.ts의 prefersReducedMotion으로 끈다) */
+/* 감소 모션: 이동 없이 짧은 페이드만(스프링, 반짝임은 design-tokens.ts의 prefersReducedMotion으로 끈다) */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --d-sheet: var(--d-fast);

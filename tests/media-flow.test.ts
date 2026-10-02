@@ -40,7 +40,7 @@ describe("미디어 파이프라인 통합 (G-01~05)", () => {
     await expect(api.media.usage({ spaceId })).resolves.toMatchObject({ confirmedBytes: 0 });
   });
 
-  it("다른 Space 멤버는 남의 자산을 확정·삭제·참조할 수 없다", async () => {
+  it("다른 Space 멤버는 남의 자산을 확정, 삭제, 참조할 수 없다", async () => {
     const a = await mediaSetup(prisma);
     const b = await mediaSetup(prisma);
     const { assetId } = await a.api.media.requestUpload({
@@ -73,7 +73,7 @@ describe("R2 서명 URL (G-01)", () => {
     secretAccessKey: "secret-example",
   });
 
-  it("업로드 URL은 content-length·content-type을 서명 헤더에 포함하고 만료를 건다", async () => {
+  it("업로드 URL은 content-length, content-type을 서명 헤더에 포함하고 만료를 건다", async () => {
     const url = new URL(
       await storage.presignPut("pending/space1/asset1", {
         bytes: 1234,

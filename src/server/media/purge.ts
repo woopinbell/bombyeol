@@ -5,7 +5,7 @@ import { periodKey } from "./usage";
 type Db = PrismaClient | Prisma.TransactionClient;
 
 /**
- * 큰 삭제(아이·반려동물·계정)에서 붙은 파일을 purging으로 표시한다. 기록은 바로 지우고
+ * 큰 삭제(아이, 반려동물, 계정)에서 붙은 파일을 purging으로 표시한다. 기록은 바로 지우고
  * R2 객체는 정리 Cron이 나눠 지운다(한 요청의 하위 요청 한도). 자산 행이 남아 있으므로
  * "DB만 지워지고 파일이 추적되지 않는" 상태는 생기지 않는다(G-05). 사용량에서는 바로 빠진다(G-03).
  */
@@ -65,6 +65,6 @@ export async function purgeAssets(
     });
     purged += count;
   }
-  // attempted: 보낸 삭제 요청 수(실패 포함) — 같은 실행의 남은 하위 요청 몫 계산용
+  // attempted: 보낸 삭제 요청 수(실패 포함) - 같은 실행의 남은 하위 요청 몫 계산용
   return { attempted: assets.length, purged };
 }

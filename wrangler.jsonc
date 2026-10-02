@@ -12,10 +12,10 @@
   },
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol-local" }],
   "observability": { "enabled": true },
-  // 정기 정리(G-05·G-15·G-17): 버려진 업로드·오래된 카운터. 무료 플랜 Cron 한도 안(계정당 5개)
+  // 정기 정리(G-05, G-15, G-17): 버려진 업로드, 오래된 카운터. 무료 플랜 Cron 한도 안(계정당 5개)
   "triggers": { "crons": ["17 * * * *"] },
   // 로컬은 localConnectionString(docker-compose Postgres)으로 연결한다. id는 로컬에서 쓰이지 않는 자리표시.
-  // staging·production의 Hyperdrive는 리소스 생성 승인 후 각 env 블록에 실제 id로 추가한다.
+  // staging, production의 Hyperdrive는 리소스 생성 승인 후 각 env 블록에 실제 id로 추가한다.
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
@@ -24,14 +24,14 @@
     },
   ],
   "env": {
-    // 비프로덕션: 개발 중 배포 스모크·사용자 기기 확인용(개발용 키·DB만).
+    // 비프로덕션: 개발 중 배포 스모크, 사용자 기기 확인용(개발용 키, DB만).
     "staging": {
       "name": "bombyeol-staging",
       "workers_dev": true,
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol-staging" }],
-      // R2_ACCOUNT_ID·R2_ACCESS_KEY_ID·R2_SECRET_ACCESS_KEY는 Secret으로 등록한다(ENV_MANIFEST Phase 2).
+      // R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY는 Secret으로 등록한다(ENV_MANIFEST Phase 2).
       "vars": { "APP_ENV": "staging", "R2_BUCKET_NAME": "bombyeol-staging-media" },
-      // Supabase 개발 DB(직결) — 2026-10-01 생성
+      // Supabase 개발 DB(직결) - 2026-10-01 생성
       // localConnectionString은 배포 명령의 로컬 단계(getPlatformProxy)용이며 배포 Worker에는 쓰이지 않는다.
       "hyperdrive": [
         {

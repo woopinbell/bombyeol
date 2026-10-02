@@ -30,7 +30,7 @@ const commentSelect = {
 } as const;
 
 /**
- * 토글 반응(좋아요·별 하나): 사용자·대상·종류당 하나. 동시에 눌러도 중복 행이 생기지 않게 직렬화한다.
+ * 토글 반응(좋아요, 별 하나): 사용자, 대상, 종류당 하나. 동시에 눌러도 중복 행이 생기지 않게 직렬화한다.
  * 돌려주는 값: 지금 켜졌는지와 대상의 같은 종류 반응 수.
  */
 async function toggleReaction(
@@ -58,7 +58,7 @@ async function toggleReaction(
     const count = await tx.reaction.count({ where: { ...target, kind } });
     return { on: !existing, count };
   });
-  // 켤 때만 알린다(끄기·다시 켜기 반복은 대상별 쿨다운이 막는다)
+  // 켤 때만 알린다(끄기, 다시 켜기 반복은 대상별 쿨다운이 막는다)
   if (result.on) {
     notify(ctx.push, { type: "reaction", spaceId, actorId: ctx.userId, kind, target: input });
   }
@@ -67,7 +67,7 @@ async function toggleReaction(
 
 /** 반응은 모든 멤버(relative 포함)가 남길 수 있다(PRD §4.2 "가족 멤버만"). 쓰기는 사용자당 리밋(G-07) */
 export const reactionRouter = router({
-  /** 좋아요 토글(오늘 기록: Moment·Milestone) */
+  /** 좋아요 토글(오늘 기록: Moment, Milestone) */
   toggleLike: spaceProcedure
     .input(z.object({ target: likeTargetInput }))
     .mutation(async ({ ctx, input }) => {
@@ -80,7 +80,7 @@ export const reactionRouter = router({
       return { liked: on, likes: count };
     }),
 
-  /** 별 하나 토글(이야기): 손주·자녀가 어르신의 이야기에 보내는 1비트 신호(PRD §2·§4.3) */
+  /** 별 하나 토글(이야기): 손주, 자녀가 어르신의 이야기에 보내는 1비트 신호(PRD §2, §4.3) */
   toggleStar: spaceProcedure
     .input(z.object({ target: storyTarget }))
     .mutation(async ({ ctx, input }) => {

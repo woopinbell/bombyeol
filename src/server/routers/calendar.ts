@@ -67,7 +67,7 @@ async function checkWriteLimit(ctx: SpaceCtx) {
   if (!ok) throw limitError("RATE_LIMITED");
 }
 
-/** 고치기·지우기: 만든 사람 또는 parent */
+/** 고치기, 지우기: 만든 사람 또는 parent */
 async function findOwnEvent(ctx: SpaceCtx, eventId: string) {
   const event = await ctx.prisma.familyEvent.findFirst({
     where: { id: eventId, spaceId: ctx.member.spaceId },
@@ -81,8 +81,8 @@ async function findOwnEvent(ctx: SpaceCtx, eventId: string) {
 }
 
 /**
- * 가족 캘린더(PRD §4.4): 생일·기념일·가족 모임. 쓰기는 parent·grandparent(relative는 열람 — Phase 3 원칙).
- * 정시 알림은 없다 — 다가오는 일정은 조회 시점에 계산한다(family.upcoming).
+ * 가족 캘린더(PRD §4.4): 생일, 기념일, 가족 모임. 쓰기는 parent, grandparent(relative는 열람 - Phase 3 원칙).
+ * 정시 알림은 없다 - 다가오는 일정은 조회 시점에 계산한다(family.upcoming).
  */
 export const calendarRouter = router({
   /** 일정 만들기. Space당 일정 수 상한(G-11), 쓰기 리밋(G-07) */
@@ -157,7 +157,7 @@ export const calendarRouter = router({
 
   /**
    * 기간 안의 일정(모든 멤버): 클라이언트의 현지 날짜 범위(from~to 포함)와 UTC 차이(분, 한국 +540).
-   * 매년 반복 일정은 범위 안의 회차로 펼친다 — 회차의 startsAt·endsAt을 돌려준다. 시작 순.
+   * 매년 반복 일정은 범위 안의 회차로 펼친다 - 회차의 startsAt, endsAt을 돌려준다. 시작 순.
    */
   list: spaceProcedure
     .input(

@@ -5,7 +5,7 @@ import { createPrisma } from "@/server/db";
 import { hitRateLimit } from "@/server/rate-limit";
 import { clientIp } from "@/server/trpc/context";
 
-// G-07: 로그인 시작(signin)·OAuth 콜백(callback)에 IP당 레이트 리밋.
+// G-07: 로그인 시작(signin), OAuth 콜백(callback)에 IP당 레이트 리밋.
 const LIMITED = /\/api\/auth\/(signin|callback)\//;
 
 async function limited(req: NextRequest) {

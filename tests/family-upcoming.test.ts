@@ -11,7 +11,7 @@ const d = (iso: string) => new Date(`${iso}T00:00:00Z`);
 const KST = 540;
 
 describe("family.upcoming 우리 탭 카드", () => {
-  it("다가오는 생일·입양기념일·기일·등록한 기념일을 남은 날 순으로, 예정일은 넣지 않는다", async () => {
+  it("다가오는 생일, 입양기념일, 기일, 등록한 기념일을 남은 날 순으로, 예정일은 넣지 않는다", async () => {
     const { api, storage, spaceId } = await mediaSetup(prisma);
     await api.child.create({ spaceId, child: { name: "봄이", birthDate: "2024-10-10" } });
     await api.child.create({ spaceId, child: { nickname: "콩이", dueDate: "2026-10-15" } });

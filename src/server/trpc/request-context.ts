@@ -6,8 +6,7 @@ import { storageFromEnv } from "@/server/storage/from-env";
 import type { Context } from "./context";
 
 /**
- * 요청 하나의 tRPC 컨텍스트. API 라우트(/api/trpc)와 서버 컴포넌트·서버 액션이 같은 것을 쓴다 —
- * 권한 검사는 프로시저 안에 있으므로 어느 길로 불러도 같다.
+ * 요청 하나의 tRPC 컨텍스트. API 라우트(/api/trpc)와 서버 컴포넌트, 서버 액션이 같은 것을 쓴다 - * 권한 검사는 프로시저 안에 있으므로 어느 길로 불러도 같다.
  */
 export function requestContext({
   userId,

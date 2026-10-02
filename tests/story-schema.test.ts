@@ -60,7 +60,7 @@ describe("이야기(별) 스키마 체크 제약", () => {
     expect(await prisma.reaction.count()).toBe(0);
   });
 
-  it("물어보기는 질문 카드·직접 쓴 질문 중 정확히 하나", async () => {
+  it("물어보기는 질문 카드, 직접 쓴 질문 중 정확히 하나", async () => {
     const { user, space, narrator } = await family();
     const base = { spaceId: space.id, askedById: user.id, toMemberId: narrator.id };
     await expect(
@@ -75,7 +75,7 @@ describe("이야기(별) 스키마 체크 제약", () => {
     ).rejects.toThrow();
   });
 
-  it("기념 프로필은 멤버·반려동물 중 하나이고, 멤버가 사라져도 이야기·기념 스냅샷은 남는다", async () => {
+  it("기념 프로필은 멤버, 반려동물 중 하나이고, 멤버가 사라져도 이야기, 기념 스냅샷은 남는다", async () => {
     const { user, space, narrator, pet, story } = await family();
     const base = { spaceId: space.id, createdById: user.id };
     await expect(

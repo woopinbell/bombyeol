@@ -16,7 +16,7 @@ const shortLabel = z.string().trim().min(1).max(30);
 const petFields = {
   name: personName,
   species: z.enum(["dog", "cat", "other"]),
-  /** other일 때 자유 입력(토끼·햄스터 등) */
+  /** other일 때 자유 입력(토끼, 햄스터 등) */
   speciesLabel: shortLabel.nullable().optional(),
   breed: shortLabel.nullable().optional(),
   /** 모르면 추정일 + birthDateEstimated */
@@ -96,8 +96,8 @@ export const petRouter = router({
     }),
 
   /**
-   * 반려동물 삭제(parent, 되돌릴 수 없음). 이름을 다시 입력해야 한다. 그 반려동물의 사진·일기·
-   * 마일스톤·기념 정보와 커버를 함께 지운다(파일은 purging → 정리 Cron, G-05).
+   * 반려동물 삭제(parent, 되돌릴 수 없음). 이름을 다시 입력해야 한다. 그 반려동물의 사진, 일기,
+   * 마일스톤, 기념 정보와 커버를 함께 지운다(파일은 purging → 정리 Cron, G-05).
    * 반려동물에 붙인 이야기는 가족의 기억이라 남긴다(petId만 비워짐). 별이 된 반려동물은 기념 상태로 두는 것을 권한다(화면).
    */
   delete: parentProcedure

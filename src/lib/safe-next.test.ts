@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { safeNext } from "./safe-next";
 
-describe("safeNext — 열린 리다이렉트 방지", () => {
+describe("safeNext - 열린 리다이렉트 방지", () => {
   it("같은 사이트의 화면 경로만 통과", () => {
     expect(safeNext("/invite/ABC123")).toBe("/invite/ABC123");
     expect(safeNext("/s/1?x=1")).toBe("/s/1?x=1");

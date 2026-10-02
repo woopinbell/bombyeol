@@ -42,12 +42,12 @@ async function withMemorialConflict<T>(run: () => Promise<T>): Promise<T> {
 }
 
 /**
- * 별이 되신 가족·반려동물(PRD §4.5, PRIVACY §5). 전환·수정·되돌리기는 parent만(유가족 동의 하에).
- * 기념 상태가 되면: 그 분의 새 이야기·물어보기·이야기 수정·삭제는 막히고(영구 보존) 반응(추모)은 열려 있다.
+ * 별이 되신 가족, 반려동물(PRD §4.5, PRIVACY §5). 전환, 수정, 되돌리기는 parent만(유가족 동의 하에).
+ * 기념 상태가 되면: 그 분의 새 이야기, 물어보기, 이야기 수정, 삭제는 막히고(영구 보존) 반응(추모)은 열려 있다.
  * 반려동물은 새 마일스톤(일상 기록)이 막히고 추억 사진(Moment)은 계속 올릴 수 있다.
  */
 export const memorialRouter = router({
-  /** 기념 상태로 전환. 이름·관계는 스냅샷으로 남긴다. 답을 기다리던 물어보기는 거둔다 */
+  /** 기념 상태로 전환. 이름, 관계는 스냅샷으로 남긴다. 답을 기다리던 물어보기는 거둔다 */
   mark: parentProcedure
     .input(
       z.object({
@@ -110,7 +110,7 @@ export const memorialRouter = router({
       );
     }),
 
-  /** 떠난 날·기억 메모 고치기 */
+  /** 떠난 날, 기억 메모 고치기 */
   update: parentProcedure
     .input(
       z.object({
@@ -141,7 +141,7 @@ export const memorialRouter = router({
       });
     }),
 
-  /** 되돌리기(잘못 전환한 경우). 이야기·기록은 그대로 남는다 */
+  /** 되돌리기(잘못 전환한 경우). 이야기, 기록은 그대로 남는다 */
   unmark: parentProcedure
     .input(z.object({ memorialId: entityId }))
     .mutation(async ({ ctx, input }) => {
@@ -164,7 +164,7 @@ export const memorialRouter = router({
 
   /**
    * 기념 프로필 목록(모든 멤버)과 다음 기일 카드(조회 시점 계산).
-   * today는 클라이언트의 현지 날짜(YYYY-MM-DD) — 없으면 UTC 오늘.
+   * today는 클라이언트의 현지 날짜(YYYY-MM-DD) - 없으면 UTC 오늘.
    */
   list: spaceProcedure
     .input(z.object({ today: isoDate.optional() }))

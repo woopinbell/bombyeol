@@ -30,8 +30,8 @@ const expireGrace = (spaceId: string) =>
     data: { purgeAfter: new Date(Date.now() - 1000) },
   });
 
-describe("space.requestDeletion·cancelDeletion", () => {
-  it("parent만, Space 이름을 정확히 다시 입력해야 요청된다 — 유예 30일, 다시 눌러도 같은 요청", async () => {
+describe("space.requestDeletion, cancelDeletion", () => {
+  it("parent만, Space 이름을 정확히 다시 입력해야 요청된다 - 유예 30일, 다시 눌러도 같은 요청", async () => {
     const { api, spaceId, grandma } = await family();
     await expect(
       grandma.api.space.requestDeletion({ spaceId, confirmName: "가족" }),
@@ -57,7 +57,7 @@ describe("space.requestDeletion·cancelDeletion", () => {
     ).rejects.toThrow(/INVITE_INVALID/);
   });
 
-  it("유예 중에는 읽기만 — 쓰기는 SPACE_DELETING, 나가기·동의 철회·취소는 된다", async () => {
+  it("유예 중에는 읽기만 - 쓰기는 SPACE_DELETING, 나가기, 동의 철회, 취소는 된다", async () => {
     const { api, spaceId, dad, grandma } = await family();
     await api.consent.grantSpace({
       spaceId,

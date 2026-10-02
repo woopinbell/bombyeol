@@ -28,7 +28,7 @@ function fakeStorage(initial?: string, broken = false) {
     },
   };
 }
-/** 인라인 스크립트를 가짜 document·localStorage로 실행한다 */
+/** 인라인 스크립트를 가짜 document, localStorage로 실행한다 */
 function runScript(stored?: string, broken = false) {
   const root = new FakeRoot();
   new Function("localStorage", "document", DISPLAY_PREFS_SCRIPT)(fakeStorage(stored, broken), {
@@ -43,7 +43,7 @@ afterEach(() => {
   delete g.document;
 });
 
-describe("화면 설정 — 첫 페인트 전 스크립트", () => {
+describe("화면 설정 - 첫 페인트 전 스크립트", () => {
   it("저장된 값이 없으면 속성을 붙이지 않는다(기기 설정을 따름)", () => {
     expect(runScript()).toEqual({});
   });
@@ -61,13 +61,13 @@ describe("화면 설정 — 첫 페인트 전 스크립트", () => {
     expect(runScript(stored)).toEqual({});
   });
 
-  it("깨진 JSON·저장소 차단에도 오류 없이 넘어간다", () => {
+  it("깨진 JSON, 저장소 차단에도 오류 없이 넘어간다", () => {
     expect(runScript("{not json")).toEqual({});
     expect(runScript(undefined, true)).toEqual({});
   });
 });
 
-describe("화면 설정 — 설정 화면용 함수", () => {
+describe("화면 설정 - 설정 화면용 함수", () => {
   it("setDisplayPref는 저장하고 바로 적용하며, 스크립트와 같은 결과를 낸다", () => {
     const storage = fakeStorage();
     const root = new FakeRoot();

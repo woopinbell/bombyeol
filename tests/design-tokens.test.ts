@@ -22,7 +22,7 @@ function block(selector: string): Record<string, string> {
 const root = block(":root");
 const ref = (name: string) => (name.startsWith("rgb(") ? name : `var(--${name})`);
 
-// WCAG 2.x 상대 휘도·대비
+// WCAG 2.x 상대 휘도, 대비
 function luminance(hex: string): number {
   const [r, g, b] = [1, 3, 5].map((i) => {
     const c = parseInt(hex.slice(i, i + 2), 16) / 255;
@@ -36,7 +36,7 @@ function contrast(a: string, b: string): number {
   return (x + 0.05) / (y + 0.05);
 }
 
-describe("디자인 토큰 v1 — CSS가 tokens.json과 같다", () => {
+describe("디자인 토큰 v1 - CSS가 tokens.json과 같다", () => {
   it("팔레트", () => {
     for (const [name, hex] of Object.entries(palette)) {
       expect(root[name]?.toLowerCase(), name).toBe(hex.toLowerCase());
@@ -47,7 +47,7 @@ describe("디자인 토큰 v1 — CSS가 tokens.json과 같다", () => {
     ["light", ":root"],
     ["dark", ':root[data-theme="dark"]'],
     ["night", '[data-surface="night"]'],
-  ] as const)("역할 — %s", (mode, selector) => {
+  ] as const)("역할 - %s", (mode, selector) => {
     const css = mode === "light" ? root : block(selector);
     for (const [role, value] of Object.entries(tokens.roles[mode])) {
       expect(css[role], `${mode}.${role}`).toBe(ref(value));
@@ -61,7 +61,7 @@ describe("디자인 토큰 v1 — CSS가 tokens.json과 같다", () => {
     }
   });
 
-  it("간격·라운드·선·터치·레이아웃", () => {
+  it("간격, 라운드, 선, 터치, 레이아웃", () => {
     const px = {
       ...tokens.space,
       ...tokens.radius,
@@ -118,7 +118,7 @@ describe("디자인 토큰 v1 — CSS가 tokens.json과 같다", () => {
     }
   });
 
-  it("Tailwind 기본 팔레트·라운드·글자·그림자·곡선을 지워 토큰 밖 값이 유틸리티로 새지 않는다", () => {
+  it("Tailwind 기본 팔레트, 라운드, 글자, 그림자, 곡선을 지워 토큰 밖 값이 유틸리티로 새지 않는다", () => {
     for (const ns of ["color", "radius", "text", "font", "font-weight", "shadow", "ease"]) {
       expect(globalsCss, ns).toContain(`--${ns}-*: initial;`);
     }
@@ -126,7 +126,7 @@ describe("디자인 토큰 v1 — CSS가 tokens.json과 같다", () => {
   });
 });
 
-describe("디자인 토큰 v1 — 대비(DESIGN.md §12.1)", () => {
+describe("디자인 토큰 v1 - 대비(DESIGN.md §12.1)", () => {
   const roles = tokens.roles as Record<string, Record<string, string>>;
   const cases: [string, string, string, number][] = [];
   for (const [mode, r] of Object.entries(roles)) {

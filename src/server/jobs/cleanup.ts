@@ -9,23 +9,23 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export const CLEANUP_POLICY = {
   /**
-   * 한 번의 실행에서 보내는 R2 삭제 요청 수 — Workers 하위 요청 한도(무료 50) 안.
+   * 한 번의 실행에서 보내는 R2 삭제 요청 수 - Workers 하위 요청 한도(무료 50) 안.
    * 삭제된 기록의 파일(purging)을 먼저, 남는 몫으로 버려진 업로드를 지운다(pending/은 수명주기 규칙이 안전망).
    * 유료 플랜(1000)으로 바꾸면 올린다.
    */
   r2DeletesPerRun: 40,
-  /** RateCounter·InviteCodeAttempt 보관 기간(가장 긴 판정 창보다 길게, G-17) */
+  /** RateCounter, InviteCodeAttempt 보관 기간(가장 긴 판정 창보다 길게, G-17) */
   counterRetentionDays: 2,
   /** G-15: 하루 업로드 URL 발급이 이 수를 넘으면 경고 로그 */
   uploadUrlsWarnPerDay: 300,
 } as const;
 
 /**
- * 정기 정리(Cron, G-05·G-15·G-17).
+ * 정기 정리(Cron, G-05, G-15, G-17).
  * - 유예가 끝난 Space 삭제: 숨기고 파일을 purging으로, 파일이 다 지워지면 행 삭제(G-06)
  * - 지워진 기록에 붙어 있던 파일(purging): 객체를 지우고 deleted로(G-05)
  * - pendingTtl이 지난 미확정 업로드: 객체를 지우고 deleted로(수명주기 규칙의 보조)
- * - 판정 창이 지난 레이트 리밋 카운터·초대 실패 기록 삭제
+ * - 판정 창이 지난 레이트 리밋 카운터, 초대 실패 기록 삭제
  * - 오래 갱신되지 않은 푸시 토큰 삭제(G-17)
  * - 업로드 발급 급증 Space를 로그로 남긴다(개인정보 없이 spaceId만)
  */

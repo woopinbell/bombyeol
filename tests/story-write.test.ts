@@ -28,7 +28,7 @@ async function family() {
   return { ...setup, grandma, grandpa, uncle, parentMember };
 }
 
-describe("story 쓰기·대필", () => {
+describe("story 쓰기, 대필", () => {
   it("어르신이 질문 카드에 직접 답하면 카테고리는 카드를 따르고 대필자는 없다", async () => {
     const { spaceId, grandma } = await family();
     const story = await grandma.api.story.create({
@@ -85,7 +85,7 @@ describe("story 쓰기·대필", () => {
     ).rejects.toMatchObject({ message: "NARRATOR_INVALID" });
   });
 
-  it("relative는 이야기를 쓰거나 대필할 수 없다(열람·반응만)", async () => {
+  it("relative는 이야기를 쓰거나 대필할 수 없다(열람, 반응만)", async () => {
     const { spaceId, grandma, uncle } = await family();
     await expect(uncle.api.story.create({ spaceId, body: "x" })).rejects.toMatchObject({
       code: "FORBIDDEN",
@@ -95,7 +95,7 @@ describe("story 쓰기·대필", () => {
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 
-  it("없는 카드·다른 Space의 화자·반려동물·미래 연도는 거부한다", async () => {
+  it("없는 카드, 다른 Space의 화자, 반려동물, 미래 연도는 거부한다", async () => {
     const { api, spaceId, grandma } = await family();
     const other = await mediaSetup(prisma);
     const otherMember = await prisma.member.findFirstOrThrow({
@@ -132,7 +132,7 @@ describe("story 쓰기·대필", () => {
   });
 });
 
-describe("story 고치기·지우기·목록", () => {
+describe("story 고치기, 지우기, 목록", () => {
   it("고치기는 쓴 사람 또는 화자 본인만, 카드 답의 카테고리는 바꿀 수 없다", async () => {
     const { api, spaceId, grandma, grandpa } = await family();
     const scribed = await api.story.create({
@@ -155,7 +155,7 @@ describe("story 고치기·지우기·목록", () => {
     ).rejects.toMatchObject({ message: "PROMPT_INVALID" });
   });
 
-  it("지우기는 쓴 사람·화자·parent만", async () => {
+  it("지우기는 쓴 사람, 화자, parent만", async () => {
     const { api, spaceId, grandma, grandpa, uncle } = await family();
     const story = await grandpa.api.story.create({ spaceId, body: "내 이야기" });
     await expect(uncle.api.story.delete({ spaceId, storyId: story.id })).rejects.toMatchObject({
@@ -170,7 +170,7 @@ describe("story 고치기·지우기·목록", () => {
     });
   });
 
-  it("목록은 최신순으로 페이지를 넘기고 화자·카테고리·반려동물로 거른다", async () => {
+  it("목록은 최신순으로 페이지를 넘기고 화자, 카테고리, 반려동물로 거른다", async () => {
     const { api, spaceId, grandma, grandpa, uncle } = await family();
     const pet = await api.pet.create({ spaceId, name: "누렁이", species: "dog" });
     for (let i = 0; i < STORY_POLICY.pageSize; i++) {

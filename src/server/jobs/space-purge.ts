@@ -3,9 +3,9 @@ import { DELETION_POLICY } from "@/lib/plan";
 
 /**
  * 유예가 끝난 Space 삭제 요청을 진행한다(G-06, PRIVACY §5). 실행마다 조금씩:
- * 1. Space를 숨기고(deletedAt — 멤버에게 NOT_FOUND) 남은 파일을 모두 purging으로 넘긴다.
+ * 1. Space를 숨기고(deletedAt - 멤버에게 NOT_FOUND) 남은 파일을 모두 purging으로 넘긴다.
  * 2. 파일이 다 지워진(purging이 없는) Space는 행을 지워 DB 연쇄 삭제하고 요청을 완료로 남긴다.
- * R2 객체 삭제 자체는 같은 실행의 purgeAssets가 몫만큼 한다 — 파일이 많으면 여러 번에 걸쳐 끝난다.
+ * R2 객체 삭제 자체는 같은 실행의 purgeAssets가 몫만큼 한다 - 파일이 많으면 여러 번에 걸쳐 끝난다.
  */
 export async function purgeDueSpaces(prisma: PrismaClient, now = new Date()) {
   const due = await prisma.deletionRequest.findMany({

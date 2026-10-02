@@ -16,7 +16,7 @@ describe("공통 화면 조각", () => {
     expect(out).toContain("min-h-(--touch)");
   });
 
-  it("입력칸: 라벨이 칸을 가리키고, 오류·도움말이 aria로 연결된다", () => {
+  it("입력칸: 라벨이 칸을 가리키고, 오류, 도움말이 aria로 연결된다", () => {
     const out = html(h(Field, { label: "가족 이름", name: "name", hint: "도움말", error: "오류" }));
     const id = /<input id="([^"]+)"/.exec(out)?.[1];
     expect(id).toBeTruthy();

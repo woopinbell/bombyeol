@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { signInWith } from "@/app/(onboarding)/login/actions";
 
 /**
- * 카카오·Google 로그인 버튼 — 각 사 공식 가이드 값 그대로(DESIGN §12 외부 로그인 버튼, public/brand/third-party).
+ * 카카오, Google 로그인 버튼 - 각 사 공식 가이드 값 그대로(DESIGN §12 외부 로그인 버튼, public/brand/third-party).
  * 두 버튼은 같은 크기(Google 가이드: 다른 로그인보다 덜 눈에 띄면 안 됨), 카카오가 위(어르신 기본 경로).
  * 자바스크립트 없이 동작하는 폼 전송.
  */
@@ -31,7 +31,7 @@ export function SocialSignIn({ next }: { next: string }) {
           data-press=""
           className="press flex min-h-(--touch-elder) w-full items-center justify-center gap-2.5 rounded-md border border-google-stroke bg-google px-3 text-title-s font-medium text-google-label"
         >
-          {/* 공식 G 로고 그대로 — 라이트·다크 버튼 바탕에 맞는 공식 에셋을 고른다 */}
+          {/* 공식 G 로고 그대로 - 라이트, 다크 버튼 바탕에 맞는 공식 에셋을 고른다 */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/third-party/google-g.svg"

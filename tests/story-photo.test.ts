@@ -24,7 +24,7 @@ describe("story 사진에 얽힌 이야기", () => {
     expect(list.items[0].photo?.assetId).toBe(photo);
   });
 
-  it("G-02: 영상·미확정·다른 Space의 자산은 붙일 수 없다", async () => {
+  it("G-02: 영상, 미확정, 다른 Space의 자산은 붙일 수 없다", async () => {
     const { api, storage, spaceId } = await mediaSetup(prisma);
     const video = await uploadConfirmed(api, storage, spaceId, "video");
     const { assetId: pending } = await api.media.requestUpload({

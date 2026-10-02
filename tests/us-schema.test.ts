@@ -33,8 +33,8 @@ async function family() {
 
 const day = new Date("2026-09-20T00:00:00Z");
 
-describe("우리·임신 스키마 체크 제약", () => {
-  it("약관·처리방침 동의는 Space 없이, 아이 정보·임신 동의는 Space와 함께", async () => {
+describe("우리, 임신 스키마 체크 제약", () => {
+  it("약관, 처리방침 동의는 Space 없이, 아이 정보, 임신 동의는 Space와 함께", async () => {
     const { user, space } = await family();
     const base = { userId: user.id, version: "v1" };
     await expect(prisma.consent.create({ data: { ...base, kind: "terms" } })).resolves.toBeTruthy();

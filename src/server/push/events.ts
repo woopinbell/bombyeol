@@ -7,7 +7,7 @@ import type { PushDeps, PushDispatcher } from "./dispatch";
 import type { PushSender } from "./types";
 
 /**
- * 알림을 일으키는 일(PRD §4.6). 저장이 끝난 뒤 id만 넘기고, 수신자·문구는 발송 시점에 DB에서 다시 정한다.
+ * 알림을 일으키는 일(PRD §4.6). 저장이 끝난 뒤 id만 넘기고, 수신자, 문구는 발송 시점에 DB에서 다시 정한다.
  * 마일스톤은 알리지 않는다(잦은 수치 기록의 소음, COMMIT_PLAN Phase 6 메모 ②).
  */
 export type PushEvent = { spaceId: string; actorId: string } & (
@@ -107,8 +107,8 @@ async function planEvent(prisma: PrismaClient, event: PushEvent): Promise<Plan |
 }
 
 /**
- * 반응 알림은 대상 기록을 쓴 사람에게(이야기는 화자 + 대필자). 같은 대상의 같은 갈래(마음·댓글)는
- * 쿨다운 안에 한 번만 — 받을 사람이 없을 때(자기 기록에 반응)는 쿨다운을 쓰지 않는다.
+ * 반응 알림은 대상 기록을 쓴 사람에게(이야기는 화자 + 대필자). 같은 대상의 같은 갈래(마음, 댓글)는
+ * 쿨다운 안에 한 번만 - 받을 사람이 없을 때(자기 기록에 반응)는 쿨다운을 쓰지 않는다.
  */
 async function planReaction(
   prisma: PrismaClient,

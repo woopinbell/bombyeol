@@ -6,9 +6,9 @@ import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { leftovers } from "./helpers/residual";
 import { callerFor } from "./helpers/trpc";
 
-// G-06: 삭제 후 잔존 데이터 0. 표 목록을 DB에서 직접 읽어 검사하므로(helpers/residual), 앞으로 spaceId·userId
+// G-06: 삭제 후 잔존 데이터 0. 표 목록을 DB에서 직접 읽어 검사하므로(helpers/residual), 앞으로 spaceId, userId
 // 열을 가진 모델이 늘어도 삭제 연쇄에서 빠지면 이 테스트가 잡는다.
-// 구독 해지 호출 검증은 Phase 8(Subscription 모델)에서 이 파일에 더한다 — TODO(G-06).
+// 구독 해지 호출 검증은 Phase 8(Subscription 모델)에서 이 파일에 더한다 - TODO(G-06).
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));

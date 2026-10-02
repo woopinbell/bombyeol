@@ -24,7 +24,7 @@ async function family() {
 }
 
 describe("milestone 기록", () => {
-  it("아이 키·첫 걸음을 기록하고 기록일 최신순으로 본다", async () => {
+  it("아이 키, 첫 걸음을 기록하고 기록일 최신순으로 본다", async () => {
     const { api, spaceId, child } = await family();
     await api.milestone.create({
       spaceId,
@@ -74,7 +74,7 @@ describe("milestone 기록", () => {
     expect(await api.milestone.list({ spaceId, subject: pet })).toHaveLength(2);
   });
 
-  it("대상에 맞지 않는 kind·범위 밖 값·모르는 필드를 거부한다", async () => {
+  it("대상에 맞지 않는 kind, 범위 밖 값, 모르는 필드를 거부한다", async () => {
     const { api, spaceId, child, pet } = await family();
     const base = { spaceId, recordedAt: "2026-09-01" };
     await expect(
@@ -105,7 +105,7 @@ describe("milestone 기록", () => {
     ).rejects.toMatchObject({ message: "DATE_IN_FUTURE" });
   });
 
-  it("권한: 아이는 parent만, 반려동물은 grandparent도, 수정·삭제는 작성자 또는 parent", async () => {
+  it("권한: 아이는 parent만, 반려동물은 grandparent도, 수정, 삭제는 작성자 또는 parent", async () => {
     const { api, spaceId, storage, child, pet } = await family();
     const grandparent = await addMember(prisma, spaceId, "grandparent", storage);
     const relative = await addMember(prisma, spaceId, "relative", storage);
@@ -141,7 +141,7 @@ describe("milestone 기록", () => {
     expect(await prisma.milestone.count()).toBe(0);
   });
 
-  it("다른 Space의 대상·기록에는 접근할 수 없다", async () => {
+  it("다른 Space의 대상, 기록에는 접근할 수 없다", async () => {
     const a = await family();
     const b = await family();
     await expect(

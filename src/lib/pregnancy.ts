@@ -6,7 +6,7 @@ const FULL_TERM_DAYS = 280;
 
 export type GestationalAge = { weeks: number; days: number };
 
-/** 그 날짜의 임신 주수(주·일). 예정일이 없거나 임신 전 날짜면 없음 */
+/** 그 날짜의 임신 주수(주, 일). 예정일이 없거나 임신 전 날짜면 없음 */
 export function gestationalAge(dueDate: Date | null, date: Date): GestationalAge | null {
   if (!dueDate) return null;
   const total = FULL_TERM_DAYS - Math.round((dueDate.getTime() - date.getTime()) / DAY_MS);

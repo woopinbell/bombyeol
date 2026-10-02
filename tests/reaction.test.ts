@@ -37,8 +37,8 @@ async function family() {
   };
 }
 
-describe("reaction 좋아요·댓글", () => {
-  it("좋아요는 토글이고 피드·마일스톤 목록에 요약이 나온다", async () => {
+describe("reaction 좋아요, 댓글", () => {
+  it("좋아요는 토글이고 피드, 마일스톤 목록에 요약이 나온다", async () => {
     const { api, relative, spaceId, childId, moment, milestone } = await family();
     await expect(relative.reaction.toggleLike({ spaceId, target: moment })).resolves.toEqual({
       liked: true,
@@ -106,7 +106,7 @@ describe("reaction 좋아요·댓글", () => {
     expect(await prisma.reaction.count({ where: { kind: "comment" } })).toBe(total - 2);
   });
 
-  it("빈 댓글·너무 긴 댓글·다른 Space의 대상은 거부한다", async () => {
+  it("빈 댓글, 너무 긴 댓글, 다른 Space의 대상은 거부한다", async () => {
     const a = await family();
     const b = await family();
     await expect(
@@ -143,7 +143,7 @@ describe("reaction 좋아요·댓글", () => {
     expect(await prisma.reaction.count({ where: { momentId: moment.momentId } })).toBe(0);
   });
 
-  it("G-07: 좋아요·댓글은 사용자당 리밋에 걸린다", async () => {
+  it("G-07: 좋아요, 댓글은 사용자당 리밋에 걸린다", async () => {
     const { parent, api, spaceId, moment } = await family();
     await exhaustRateLimit(prisma, `like:${parent.id}`, RATE_LIMITS.likePerUser);
     await exhaustRateLimit(prisma, `comment:${parent.id}`, RATE_LIMITS.commentPerUser);

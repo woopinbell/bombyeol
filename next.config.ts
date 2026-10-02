@@ -5,7 +5,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  // 개발 도구(wrangler·workerd·Prisma CLI·PGlite)가 next.config·prisma.config 경유로
+  // 개발 도구(wrangler, workerd, Prisma CLI, PGlite)가 next.config, prisma.config 경유로
   // 서버 번들 추적에 끌려 들어와 Worker 크기를 키우는 것을 막는다(스파이크 S-4: 53 MiB → 12 MiB).
   outputFileTracingExcludes: {
     "*": [

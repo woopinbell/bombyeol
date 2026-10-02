@@ -6,7 +6,7 @@ import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { callerFor } from "./helpers/trpc";
 
 // PRIVACY §3: visibility는 서버가 강제한다. parents_only 기록은 parent가 아닌 멤버의
-// 어떤 응답(목록·상세·페이지 커서·다른 기록에 붙이기)에도 드러나지 않아야 한다.
+// 어떤 응답(목록, 상세, 페이지 커서, 다른 기록에 붙이기)에도 드러나지 않아야 한다.
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -88,7 +88,7 @@ describe("pregnancy parents_only 비노출", () => {
     }
   });
 
-  it("숨은 기록이 한 페이지를 넘게 많아도 다른 멤버의 페이지·커서에 흔적이 없다", async () => {
+  it("숨은 기록이 한 페이지를 넘게 많아도 다른 멤버의 페이지, 커서에 흔적이 없다", async () => {
     const { api, spaceId, childId, shared, grandma } = await family();
     await prisma.pregnancyRecord.createMany({
       data: Array.from({ length: PREGNANCY_POLICY.pageSize + 5 }, (_, i) => ({
@@ -106,7 +106,7 @@ describe("pregnancy parents_only 비노출", () => {
     expect(nextCursor).toBeNull();
   });
 
-  it("parent가 아니면 고치기·지우기·공개 범위 바꾸기를 할 수 없다", async () => {
+  it("parent가 아니면 고치기, 지우기, 공개 범위 바꾸기를 할 수 없다", async () => {
     const { spaceId, hidden, shared, grandma, uncle } = await family();
     for (const viewer of [grandma.api, uncle.api]) {
       for (const recordId of [hidden.id, shared.id]) {
@@ -140,7 +140,7 @@ describe("pregnancy parents_only 비노출", () => {
     expect(JSON.stringify(items)).not.toContain(photo);
   });
 
-  it("공개 범위·역할이 바뀌면 다음 요청부터 바로 반영된다", async () => {
+  it("공개 범위, 역할이 바뀌면 다음 요청부터 바로 반영된다", async () => {
     const { api, spaceId, childId, hidden, shared, grandma } = await family();
     await api.pregnancy.update({ spaceId, recordId: shared.id, visibility: "parents_only" });
     expect((await grandma.api.pregnancy.list({ spaceId, childId })).items).toEqual([]);
