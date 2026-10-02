@@ -113,6 +113,22 @@ export const reactionRouter = router({
       return { starred: on, stars: count };
     }),
 
+  /**
+   * 별 하나를 원하는 상태로(여러 번 보내도 같은 결과). 좋아요처럼 화면은 연달아 누른 것을 모아 마지막 상태만 보낸다.
+   */
+  setStar: spaceProcedure
+    .input(z.object({ target: storyTarget, starred: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const { on, count } = await toggleReaction(
+        ctx,
+        input.target,
+        "star",
+        RATE_LIMITS.starPerUser,
+        input.starred,
+      );
+      return { starred: on, stars: count };
+    }),
+
   /** 댓글 작성 */
   addComment: spaceProcedure
     .input(z.object({ target: reactionTargetInput, body: commentBody }))
