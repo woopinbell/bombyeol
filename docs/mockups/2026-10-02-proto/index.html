@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>봄별 모션 프로토타입</title>
+<link rel="stylesheet" href="../2026-10-02-b-l2/tokens.css">
+<link rel="stylesheet" href="../2026-10-02-b-l2/board.css">
+<link rel="stylesheet" href="motion.css">
+<link rel="stylesheet" href="app.css">
+<style id="proto">
+  /* 프로토타입 전용 앱 스타일 — 토큰·모션 토큰만 쓴다 */
+  button { font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  button.btn, button.tab, button.photo, button.seg-b { color: inherit; }
+  :focus-visible { outline: var(--bw-sel) solid var(--fg); outline-offset: var(--bw-sel); }
+  .phone { transition: background-color var(--d-fast) linear, color var(--d-fast) linear; }
+  .views { flex: 1; min-height: 0; position: relative; }
+  .view { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  .view[hidden] { display: none; }
+  .view.enter { animation: fade-in var(--d-fast) linear; }
+  .screen { overflow-y: auto; scrollbar-width: none; padding-bottom: var(--sp-6); }
+  .screen::-webkit-scrollbar { display: none; }
+  .tabs .tab { background: none; border: 0; }
+  button.photo { display: block; padding: 0; border: 0; width: 100%; }
+  .album .photo svg { pointer-events: none; }
+
+  /* 누름 피드백: 거리 2px 기반 배율(SEED). --ps는 JS가 크기마다 계산 */
+  [data-press] { transition: transform var(--d-press) var(--ease-press); }
+  [data-press].pressed { transform: scale(var(--ps, 0.97)); }
+  :root[data-motion="reduce"] [data-press].pressed { transform: none; opacity: 0.8; }
+
+  .btn.on-like { border-color: var(--fg); }
+  .btn .ic.fill svg { fill: currentColor; }
+  .star-btn { min-height: var(--touch); display: inline-flex; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-3); border-radius: var(--r-m); border: var(--bw) solid var(--line-strong); background: transparent; color: var(--fg); font-weight: var(--w-bold); }
+  .star-btn[aria-pressed="true"] { color: var(--starlight-gold); border-color: var(--starlight-gold); }
+  .star-btn .ic { will-change: transform; }
+  .tile .b .row2 { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-top: auto; }
+
+  /* 마일스톤 반짝임 */
+  .ms-wrap { position: relative; display: inline-block; margin-top: var(--sp-4); }
+  .sparkle { position: absolute; pointer-events: none; color: var(--fg); animation: sparkle calc(750ms * var(--slow)) linear forwards; }
+  .sparkle svg { width: 100%; height: 100%; display: block; }
+  @keyframes sparkle { 0% { transform: scale(0) rotate(0deg); } 50% { transform: scale(1) rotate(90deg); } 100% { transform: scale(0) rotate(180deg); } }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+  /* 시트 */
+  .layer { position: absolute; inset: 0; z-index: 5; }
+  .layer[hidden] { display: none; }
+  .layer .scrim { opacity: 0; }
+  .layer .sheet { transform: translateY(100%); touch-action: none; }
+  .sheet .list { overflow-y: auto; touch-action: pan-y; }
+  .sheet .list .c { animation: comment-in var(--d-base) var(--ease-out); }
+  @keyframes comment-in { from { opacity: 0; transform: translateY(var(--sp-1)); } to { opacity: 1; transform: none; } }
+  :root[data-motion="reduce"] .sheet .list .c { animation: fade-in var(--d-fast) linear; }
+  .field-in { flex: 1; min-width: 0; min-height: var(--touch); border: var(--bw) solid var(--line-strong); border-radius: var(--r-m); padding: 0 var(--sp-4); background: transparent; color: var(--fg); font: inherit; }
+  .field-in::placeholder { color: var(--fg-muted); }
+  .hint { min-height: var(--lh-caption); margin: 0 0 var(--sp-2); }
+
+  /* 토스트 — 하단 하나(최대 3), 시트가 열리면 입력 위로 */
+  .toasts { position: absolute; left: var(--sp-5); right: var(--sp-5); bottom: calc(var(--touch-elder) + var(--sp-5) + var(--touch) + var(--sp-3) * 2 + var(--sp-3)); z-index: 6; display: flex; flex-direction: column; gap: var(--sp-2); pointer-events: none; }
+  .toasts.over-sheet { bottom: calc(var(--sp-5) + var(--touch) + var(--sp-7) + var(--sp-3)); }
+  .toasts.no-dock { bottom: calc(var(--touch-elder) + var(--sp-5) + var(--sp-3)); }
+  .toasts .toast { pointer-events: auto; margin: 0; touch-action: none; transition: transform var(--d-toast) ease, opacity var(--d-toast) ease; }
+  .toasts .toast.from { transform: translateY(100%); opacity: 0; }
+  :root[data-motion="reduce"] .toasts .toast { transition: opacity var(--d-fast) linear; transform: none; }
+  .toasts .toast .msg { flex: 1; }
+</style>
+<style>
+  /* 보드(앱 바깥) */
+  .wrap { display: flex; gap: 40px; align-items: flex-start; }
+  .panel { width: 460px; font-size: 14px; line-height: 1.5; }
+  .panel h2 { font-size: 16px; margin: 18px 0 8px; }
+  .panel .grp { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; align-items: center; }
+  .panel .grp > span { width: 92px; opacity: .8; }
+  .panel button { font: inherit; font-size: 13px; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(127,127,127,.5); background: transparent; color: inherit; cursor: pointer; }
+  .panel button[aria-pressed="true"] { background: #2C2621; color: #F7F1E6; border-color: #2C2621; }
+  :root[data-theme="dark"] .panel button[aria-pressed="true"] { background: #F7F1E6; color: #232B4D; }
+  .panel table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  .panel td, .panel th { border-bottom: 1px solid rgba(127,127,127,.3); padding: 4px 6px; text-align: left; vertical-align: top; }
+  .panel code { font-size: 12px; }
+  .panel ol { padding-left: 18px; margin: 0; }
+</style>
+</head>
+<body>
+<div class="board">
+  <h1 class="bt">봄별 모션 프로토타입 (B안 · L4 맛보기)</h1>
+  <p class="lede">오늘·이야기 화면에서 실제로 눌러 보는 프로토타입이에요. 모션 값은 전부 후보 토큰(<code>motion.css</code>, DESIGN §11)이고 확정이 아니에요. 오른쪽에서 느리게 보기·움직임 줄이기·비교안을 바꿔 볼 수 있어요.</p>
+  <div class="wrap">
+    <div class="phone" id="app">
+      <div class="status">9:41</div>
+      <div class="views">
+        <!-- 오늘 -->
+        <section class="view" id="v-today" aria-label="오늘">
+          <div class="screen" id="today-scroll">
+            <div class="top"><h1>지우네 가족</h1></div>
+            <div class="seg" role="tablist" aria-label="누구의 기록"><span class="on" data-press>모두</span><span data-press>지우</span><span data-press>콩이</span></div>
+            <div id="ms-slot"></div>
+            <div class="day"><b class="num">10월 1일</b><span class="cap-t muted">수요일 · 오늘</span><span class="n cap-t muted num" id="photo-count">사진 3</span></div>
+            <div class="album" id="album">
+              <button class="photo wide" data-scene="park" data-title="놀이터에서" aria-label="놀이터 사진 자세히 보기" data-press></button>
+              <button class="photo" data-scene="cake" data-title="생일 케이크" aria-label="케이크 사진 자세히 보기" data-press></button>
+              <button class="photo" data-scene="hands" data-title="손잡고" aria-label="손 사진 자세히 보기" data-press></button>
+            </div>
+            <p class="say">놀이터에서 혼자 미끄럼틀 탔어요 <span class="cap-t muted">엄마 · 오후 3:20</span></p>
+            <div class="cmt"><b>할머니</b> 우리 강아지 다 컸네</div>
+            <div class="rx">
+              <button class="btn" id="like" aria-pressed="false" data-press><span class="ic s" data-i="heart"></span><span>좋아요 <span class="num" id="like-n">2</span></span></button>
+              <button class="btn" id="open-cmt" data-press><span class="ic s" data-i="talk"></span>댓글 <span class="num" id="cmt-n">1</span></button>
+            </div>
+            <div class="day"><b class="num">9월 30일</b><span class="cap-t muted">화요일</span></div>
+            <span class="ms"><span class="ic s" data-i="spark"></span>콩이가 처음 바다를 봤어요</span>
+          </div>
+          <div class="dock"><button class="btn primary block" id="add-photos" data-press><span class="ic s" data-i="plus"></span>사진 올리기</button></div>
+        </section>
+        <!-- 이야기 -->
+        <section class="view" id="v-story" aria-label="이야기" hidden>
+          <div class="screen">
+            <div class="head2"><h2 class="big">할머니의 이야기</h2><div class="cap-t muted num">이야기 12 · 받은 별 <span id="star-total">23</span></div></div>
+            <div class="ask"><div class="k cap-t"><span class="ic s" data-i="spark"></span>지우 엄마가 물어봤어요</div><div class="q">어린 시절 살던 동네는 어땠어요?</div><button class="btn primary block elder" data-press><span class="ic s" data-i="pen"></span>답하기</button></div>
+            <div class="sec cap-t muted">이야기 모음</div>
+            <div class="tiles">
+              <div class="tile"><div class="photo" data-scene="old"></div><div class="b"><span class="t">시집오던 날 탄 버스</span><div class="row2"><button class="star-btn" data-star="3" aria-pressed="false" aria-label="별 하나 보내기, 지금 별 3개"><span class="ic s" data-i="star"></span><span class="num">3</span></button></div></div></div>
+              <div class="tile"><div class="photo" data-scene="sea"></div><div class="b"><span class="t">부산 이모 집 바다</span><div class="row2"><button class="star-btn" data-star="5" aria-pressed="false" aria-label="별 하나 보내기, 지금 별 5개"><span class="ic s" data-i="star"></span><span class="num">5</span></button></div></div></div>
+            </div>
+          </div>
+        </section>
+        <!-- 우리 -->
+        <section class="view" id="v-us" aria-label="우리" hidden>
+          <div class="screen">
+            <div class="top"><h1>지우네 가족</h1></div>
+            <ul class="up">
+              <li><span class="when num">2일 뒤</span><span class="what">외할아버지 기일</span><span class="cap-t muted num">10월 3일</span></li>
+              <li><span class="when num">12일 뒤</span><span class="what">할머니 생신</span><span class="cap-t muted num">10월 13일</span></li>
+            </ul>
+            <div class="faces cap-t">
+              <div><span class="ava" data-scene="hands"></span>할머니</div>
+              <div class="memo"><span class="ava" data-scene="old"></span>외할아버지<span class="gone muted"><span class="ic s" data-i="star"></span>별</span></div>
+              <div><span class="ava" data-scene="cake"></span>엄마</div>
+              <div><span class="ava" data-scene="park"></span>지우</div>
+              <div><span class="ava" data-scene="dog"></span>콩이</div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <nav class="tabs" aria-label="탭">
+        <button class="tab on" data-tab="today" aria-current="page"><span class="ic"></span><span>오늘</span></button>
+        <button class="tab" data-tab="story"><span class="ic"></span><span>이야기</span></button>
+        <button class="tab" data-tab="us"><span class="ic"></span><span>우리</span></button>
+      </nav>
+      <!-- 시트 -->
+      <div class="layer" id="layer" hidden>
+        <div class="scrim" id="scrim"></div>
+        <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+          <div class="grab" aria-hidden="true"></div>
+          <div class="hd"><div><b id="sheet-title">놀이터에서</b><div class="cap-t muted">엄마 · 10월 1일 오후 3:20</div></div><button class="btn" id="sheet-close" data-press><span class="ic s" data-i="close"></span>닫기</button></div>
+          <div class="photo" id="sheet-photo"></div>
+          <div class="list" id="cmt-list">
+            <div class="c"><b>할머니</b> 우리 강아지 다 컸네 <span class="cap-t muted">오후 3:41</span></div>
+          </div>
+          <p class="hint cap-t muted" id="hint" aria-live="polite"></p>
+          <form class="input" id="cmt-form"><input class="field-in" id="cmt-input" placeholder="댓글 남기기" aria-label="댓글"><button class="btn primary" data-press>보내기</button></form>
+        </div>
+      </div>
+      <div class="toasts" id="toasts" aria-live="polite" role="status"></div>
+    </div>
+
+    <div class="panel">
+      <h2>설정</h2>
+      <div class="grp"><span>테마</span><button data-set="theme" data-v="light" aria-pressed="true">밝게</button><button data-set="theme" data-v="dark">어둡게</button></div>
+      <div class="grp"><span>글자</span><button data-set="text" data-v="" aria-pressed="true">보통</button><button data-set="text" data-v="large">크게</button></div>
+      <div class="grp"><span>움직임 줄이기</span><button data-set="motion" data-v="" aria-pressed="true">끔(기기 설정)</button><button data-set="motion" data-v="reduce">켬</button></div>
+      <div class="grp"><span>느리게 보기</span><button data-set="slow" data-v="" aria-pressed="true">×1</button><button data-set="slow" data-v="on">×5</button></div>
+      <div class="grp"><span>시트 시간</span><button data-set="sheet" data-v="" aria-pressed="true">500ms (Vaul)</button><button data-set="sheet" data-v="fast">350ms</button></div>
+      <div class="grp"><span>토스트 표시</span><button data-set="toast" data-v="" aria-pressed="true">4초 (Sonner)</button><button data-set="toast" data-v="long">6초 (어르신)</button></div>
+      <h2>데모 동작</h2>
+      <div class="grp"><button id="demo-ms">마일스톤 달성(반짝임)</button><button id="demo-photos">사진 2장 올리기(안착)</button><button id="demo-toast">토스트 3개 쌓기</button></div>
+      <h2>해볼 것</h2>
+      <ol>
+        <li>오늘 탭 사진을 눌러 시트 열기 → [닫기], Esc, 아래로 끌기(높이 25% 이상 또는 빠르게 튕기기)로 닫기. 조금만 끌면 제자리로.</li>
+        <li>시트에서 댓글 보내기 → 댓글 등장 + 토스트. 토스트 위에 손을 올리면 시간이 멈추고, 아래로 밀면 닫혀요.</li>
+        <li>이야기 탭의 별 버튼 → "별 하나" boop(스프링). 다시 누르면 취소.</li>
+        <li>버튼을 꾹 누르면 2px만큼 줄어들어요(크기에 상관없이 같은 거리).</li>
+        <li>움직임 줄이기를 켜고 같은 동작을 반복 — 이동 없이 페이드만.</li>
+      </ol>
+      <h2>모션 토큰 후보</h2>
+      <table>
+        <tr><th>이름</th><th>값</th><th>어디에</th></tr>
+        <tr><td><code>ease-sheet</code></td><td>cubic-bezier(.32,.72,0,1) · 500ms</td><td>시트 열기·닫기·되돌아가기 (Vaul)</td></tr>
+        <tr><td><code>ease-out</code></td><td>cubic-bezier(.23,1,.32,1)</td><td>댓글 등장 등 사용자가 부른 것 (Emil)</td></tr>
+        <tr><td><code>ease-press</code></td><td>cubic-bezier(0,0,.15,1) · 150ms</td><td>누름, 2px 거리 배율 (SEED)</td></tr>
+        <tr><td><code>d-fast</code></td><td>200ms linear</td><td>탭 전환 페이드, 감소 모션</td></tr>
+        <tr><td><code>d-toast</code> / 수명</td><td>400ms ease / 4000ms</td><td>토스트 (Sonner), 밀어 닫기 45px·0.11px/ms</td></tr>
+        <tr><td><code>spring-boop</code></td><td>강성 300 · 감쇠 10, 150ms 뒤 복귀</td><td>별 하나 (Josh Boop)</td></tr>
+        <tr><td><code>spring-settle</code></td><td>강성 158 · 감쇠 20 (≈0.5s, bounce .2)</td><td>새 사진 안착 (Emil)</td></tr>
+        <tr><td><code>stagger</code></td><td>50ms</td><td>여러 장 등장 간격</td></tr>
+        <tr><td><code>sparkle</code></td><td>50–450ms 간격, 각 750ms, 전체 ≤2s</td><td>마일스톤 (Josh, SEED 2초 상한)</td></tr>
+        <tr><td>시트 임계값</td><td>25% · 0.4px/ms · 스크롤 후 100ms 잠금</td><td>끌어 닫기 (Vaul 상수)</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+<script src="../2026-10-02-b-l2/mock2.js"></script>
+<script src="proto.js"></script>
+</body>
+</html>

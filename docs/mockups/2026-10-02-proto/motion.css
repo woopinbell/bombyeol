@@ -1,0 +1,17 @@
+/* 봄별 모션 토큰 후보(L4) — DESIGN.md §11. 미확정. 근거: design-research/2026-10-01-primary-sources.md §8
+   느리게 보기(×5)는 --slow 값만 바꾼다. JS 스프링도 같은 배율을 읽는다. */
+:root {
+  --slow: 1;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);        /* Emil — 사용자가 연 것의 등장 */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);    /* Emil — 화면 안에서의 이동 */
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);      /* Vaul — 시트 열기·닫기 */
+  --ease-press: cubic-bezier(0, 0, 0.15, 1);         /* SEED pressed-scale */
+  --d-press: calc(150ms * var(--slow));              /* 누름 피드백 */
+  --d-fast: calc(200ms * var(--slow));               /* 탭 전환 페이드, 감소 모션 페이드, 토글 */
+  --d-base: calc(250ms * var(--slow));               /* 작은 패널·가림막 */
+  --d-sheet: calc(500ms * var(--slow));              /* 시트 — 비교안 350ms(설정판) */
+  --d-toast: calc(400ms * var(--slow));              /* 토스트 이동 */
+  --stagger: calc(50ms * var(--slow));               /* 여러 개 등장 간격 */
+}
+:root[data-sheet="fast"] { --d-sheet: calc(350ms * var(--slow)); }
+:root[data-slow="on"] { --slow: 5; }

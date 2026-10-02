@@ -1,0 +1,119 @@
+/* b2.html의 앱 스타일 복사본(2026-10-02) — 프로토타입 전용 */
+  /* 앱 화면 — tokens.css 변수만 쓴다(scripts: check-scale.py가 검사) */
+  .phone { background: var(--bg); color: var(--fg); font-size: var(--t-body); line-height: var(--lh-body); font-weight: var(--w-regular); }
+  .screen { flex: 1; min-height: 0; overflow: hidden; padding: 0 var(--sp-5); display: flex; flex-direction: column; }
+  .screen > *, .sheet > * { flex-shrink: 0; }
+  .screen > .grow, .screen > .empty, .sheet > .list { flex-shrink: 1; }
+  .ic { display: inline-flex; width: var(--icon); height: var(--icon); flex: none; }
+  .ic svg { width: 100%; height: 100%; }
+  .ic.s { width: var(--icon-s); height: var(--icon-s); }
+  .num { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--fg-muted); }
+  .cap-t { font-size: var(--t-caption); line-height: var(--lh-caption); }
+  .top { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-2) 0 var(--sp-4); }
+  .top h1 { margin: 0; font-size: var(--t-title-s); line-height: var(--lh-title-s); font-weight: var(--w-bold); }
+  h2.big { margin: 0; font-size: var(--t-title); line-height: var(--lh-title); font-weight: var(--w-heavy); letter-spacing: var(--tr-title); }
+
+  /* 버튼 */
+  .btn { min-height: var(--touch); border-radius: var(--r-m); font: inherit; font-weight: var(--w-bold); display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); padding: 0 var(--sp-4); border: var(--bw) solid var(--line-strong); background: transparent; color: var(--fg); }
+  .btn.primary { background: var(--strong); color: var(--on-strong); border-color: var(--strong); }
+  .btn.block { width: 100%; }
+  .btn.elder { min-height: var(--touch-elder); font-size: var(--t-title-s); }
+  .btn.text { border-color: transparent; padding: 0 var(--sp-2); font-weight: var(--w-medium); color: var(--fg-muted); }
+  .kakao { background: var(--spring-yellow); border-color: var(--spring-yellow); color: var(--ink); }
+
+  /* 세그먼트: 바깥 r-m, 안쪽 r-s(=14−4) */
+  .seg { display: flex; gap: var(--sp-1); padding: var(--sp-1); border: var(--bw) solid var(--line-strong); border-radius: var(--r-m); }
+  .seg span { flex: 1; min-height: var(--touch); display: flex; align-items: center; justify-content: center; border-radius: var(--r-s); font-weight: var(--w-medium); color: var(--fg-muted); }
+  .seg span.on { background: var(--strong); color: var(--on-strong); font-weight: var(--w-bold); }
+
+  /* 하단 탭: 선택은 채운 아이콘 + 굵은 글자(밑줄 막대 없음) */
+  .tabs { flex: none; display: flex; border-top: var(--bw-hair) solid var(--line); background: var(--bg); padding-bottom: var(--sp-5); }
+  .tab { flex: 1; min-height: var(--touch-elder); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); font-size: var(--t-caption); line-height: var(--lh-caption); font-weight: var(--w-medium); color: var(--fg-muted); }
+  .tab.on { color: var(--fg); font-weight: var(--w-heavy); }
+  .night .tab.on { color: var(--starlight-gold); }
+  .dock { flex: none; padding: var(--sp-3) var(--sp-5); border-top: var(--bw-hair) solid var(--line); }
+
+  /* 오늘 — 날짜가 앨범의 장 제목 */
+  .day { display: flex; align-items: baseline; gap: var(--sp-2); margin: var(--sp-6) 0 var(--sp-3); }
+  .day:first-of-type { margin-top: var(--sp-5); }
+  .day b { font-size: var(--t-title); line-height: var(--lh-title); font-weight: var(--w-heavy); letter-spacing: var(--tr-title); }
+  .day .n { margin-left: auto; }
+  .album { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-1); border-radius: var(--r-l); overflow: hidden; }
+  .album .photo { aspect-ratio: 1; }
+  .album .photo.wide { grid-column: span 2; aspect-ratio: 16 / 9; }
+  .photo { position: relative; overflow: hidden; }
+  .photo svg { display: block; width: 100%; height: 100%; }
+  .say { margin: var(--sp-3) 0 0; }
+  .say .who { font-weight: var(--w-bold); }
+  .rx { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); }
+  .cmt { margin-top: var(--sp-3); padding-left: var(--sp-3); border-left: var(--bw-sel) solid var(--line); }
+  .ms { display: inline-flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-3); border-radius: var(--r-m); background: var(--spring-pink); color: var(--ink); font-weight: var(--w-bold); }
+
+  /* 이야기 */
+  .head2 { padding: var(--sp-2) 0 var(--sp-4); }
+  .ask { background: var(--surface); border-radius: var(--r-l); padding: var(--sp-5); margin: var(--sp-5) 0 var(--sp-6); }
+  .ask .k { display: flex; align-items: center; gap: var(--sp-2); color: var(--starlight-gold); font-weight: var(--w-bold); }
+  .ask .q { margin: var(--sp-2) 0 var(--sp-4); font-size: var(--t-title); line-height: var(--lh-title); font-weight: var(--w-heavy); letter-spacing: var(--tr-title); }
+  .sec { margin: 0 0 var(--sp-3); font-weight: var(--w-bold); }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+  .tile { background: var(--surface); border-radius: var(--r-l); overflow: hidden; display: flex; flex-direction: column; }
+  .tile .photo { aspect-ratio: 16 / 10; }
+  .tile .b { padding: var(--sp-3) var(--sp-4) var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; }
+  .tile .t { font-weight: var(--w-bold); line-height: var(--lh-title-s); }
+  .tile .s { display: flex; align-items: center; gap: var(--sp-1); margin-top: auto; }
+  .tile .s.done { color: var(--starlight-gold); font-weight: var(--w-bold); }
+
+  /* 우리 */
+  .mon { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-2); }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+  .cal .w { padding: var(--sp-1) 0; font-weight: var(--w-bold); }
+  .cal .d { min-height: var(--touch); display: flex; align-items: center; justify-content: center; position: relative; }
+  .cal .d.today span { display: inline-flex; align-items: center; justify-content: center; width: var(--sp-7); height: var(--sp-7); border-radius: var(--r-full); border: var(--bw-sel) solid var(--fg); font-weight: var(--w-heavy); }
+  .cal .d.ev::after { content: ""; position: absolute; bottom: var(--sp-1); width: var(--sp-2); height: var(--sp-2); border-radius: var(--r-full); background: var(--strong); }
+  .up { list-style: none; margin: var(--sp-4) 0 0; padding: 0; border-top: var(--bw-hair) solid var(--line); }
+  .up li { display: flex; align-items: center; gap: var(--sp-4); min-height: var(--touch-elder); border-bottom: var(--bw-hair) solid var(--line); }
+  .up .when { min-width: calc(var(--sp-8) + var(--sp-6)); font-weight: var(--w-heavy); }
+  .up .what { flex: 1; font-weight: var(--w-medium); }
+  .faces { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--sp-2); margin: var(--sp-6) 0 var(--sp-5); text-align: center; }
+  .faces .ava { display: block; width: var(--sp-8); height: var(--sp-8); margin: 0 auto var(--sp-1); border-radius: var(--r-full); overflow: hidden; }
+  .faces .memo .ava { outline: var(--bw) dashed var(--fg-muted); outline-offset: var(--sp-1); }
+  .faces .gone { display: flex; align-items: center; justify-content: center; gap: var(--sp-1); }
+
+  /* 시트·토스트 */
+  .under { position: absolute; inset: 0; }
+  .scrim { position: absolute; inset: 0; background: var(--scrim); }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; top: var(--sp-8); background: var(--bg); border-radius: var(--r-l) var(--r-l) 0 0; padding: var(--sp-2) var(--sp-5) var(--sp-5); display: flex; flex-direction: column; overscroll-behavior: contain; }
+  .grab { width: var(--sp-7); height: var(--sp-1); border-radius: var(--r-full); background: var(--line-strong); margin: 0 auto var(--sp-2); }
+  .sheet .hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-3); }
+  .sheet .photo { aspect-ratio: 4 / 3; border-radius: var(--r-m); }
+  .sheet .list { flex: 1; display: flex; flex-direction: column; gap: var(--sp-3); margin-top: var(--sp-4); }
+  .input { display: flex; gap: var(--sp-2); }
+  .field { flex: 1; min-height: var(--touch); border: var(--bw) solid var(--line-strong); border-radius: var(--r-m); display: flex; align-items: center; padding: 0 var(--sp-4); }
+  .toast { display: flex; align-items: center; gap: var(--sp-3); background: var(--strong); color: var(--on-strong); border-radius: var(--r-m); padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4); margin-bottom: var(--sp-3); font-weight: var(--w-medium); }
+  .toast .btn { min-height: var(--touch); color: var(--on-strong); border-color: transparent; }
+
+  /* 빈 화면 */
+  .empty { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-3); padding-bottom: var(--sp-8); }
+  .empty .mark { width: var(--sp-8); height: var(--sp-8); color: var(--starlight-gold); }
+  .empty p { margin: 0; }
+
+  /* 온보딩 */
+  .onb { padding: 0 var(--sp-6) var(--sp-7); }
+  .onb .nav { display: flex; align-items: center; justify-content: space-between; min-height: var(--touch-elder); margin-bottom: var(--sp-4); }
+  .steps { display: flex; gap: var(--sp-2); align-items: center; }
+  .steps i { width: var(--sp-3); height: var(--sp-3); border-radius: var(--r-full); border: var(--bw) solid var(--strong); }
+  .steps i.on { background: var(--strong); }
+  .onb h2 { margin: 0; font-size: var(--t-display); line-height: var(--lh-display); font-weight: var(--w-heavy); letter-spacing: var(--tr-display); }
+  .onb .d { margin: var(--sp-3) 0 0; font-size: var(--t-title-s); line-height: var(--lh-body); }
+  .onb .hero { aspect-ratio: 4 / 3; border-radius: var(--r-l); margin: var(--sp-6) 0 0; }
+  .grow { flex: 1; }
+  .lbl { display: block; margin: var(--sp-6) 0 var(--sp-2); font-weight: var(--w-bold); }
+  .inp { min-height: var(--touch-elder); border: var(--bw-sel) solid var(--fg); border-radius: var(--r-m); display: flex; align-items: center; padding: 0 var(--sp-4); font-size: var(--t-title-s); font-weight: var(--w-medium); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+  .chip { min-height: var(--touch); display: inline-flex; align-items: center; padding: 0 var(--sp-4); border-radius: var(--r-m); border: var(--bw) solid var(--line-strong); font-weight: var(--w-medium); }
+  .chip.on { border: var(--bw-sel) solid var(--fg); font-weight: var(--w-bold); }
+  .preview { margin-top: var(--sp-6); padding: var(--sp-4); border-radius: var(--r-m); border: var(--bw-hair) solid var(--line); font-size: var(--t-title); line-height: var(--lh-title); font-weight: var(--w-medium); }
+  .scale { display: flex; gap: var(--sp-2); margin-top: var(--sp-4); }
+  .scale .btn { flex: 1; }
+  .scale .btn.on { border: var(--bw-sel) solid var(--fg); }
