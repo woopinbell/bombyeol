@@ -120,3 +120,24 @@
     -webkit-font-smoothing: antialiased;
   }
 }
+
+/* 누름 피드백(DESIGN §11): PressFeedback이 --ps를 계산한다. 감소 모션이면 변형 대신 투명도만 */
+@layer components {
+  .press {
+    transition: transform var(--d-press) var(--ease-press);
+  }
+  .press[data-pressed],
+  [data-pressed] > .press {
+    transform: scale(var(--ps, 1));
+  }
+  :root[data-motion="reduce"] .press[data-pressed] {
+    transform: none;
+    opacity: 0.8;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .press[data-pressed] {
+      transform: none;
+      opacity: 0.8;
+    }
+  }
+}

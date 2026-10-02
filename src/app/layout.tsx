@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 // Pretendard(OFL 1.1, Reserved Font Name) — 작성자 배포 dynamic subset을 수정 없이 자체 호스팅(DESIGN.md §4)
 import "./fonts/pretendard/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
+import { PressFeedback } from "@/components/ui/press-feedback";
 import { DISPLAY_PREFS_SCRIPT } from "@/lib/display-prefs";
 import tokens from "@/design/tokens.json";
 
@@ -30,6 +31,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <PressFeedback />
       </body>
     </html>
   );
