@@ -80,10 +80,8 @@
   --color-input: var(--line-strong);
   --color-ring: var(--fg);
 
-  --radius-s: var(--r-s);
-  --radius-m: var(--r-m);
-  --radius-l: var(--r-l);
-  --radius-full: var(--r-full);
+  /* 라운드는 rounded-sm(10)·rounded-md(14)·rounded-lg(20)·rounded-full로만 쓴다.
+     rounded-s/e는 Tailwind의 논리 방향(시작·끝 모서리) 유틸리티라 토큰 이름(r-s 등)을 그대로 쓰지 않는다. */
   --radius-sm: var(--r-s);
   --radius-md: var(--r-m);
   --radius-lg: var(--r-l);
