@@ -24,7 +24,7 @@ export function ChoiceChips({
       <legend className="mb-2 font-bold">{legend}</legend>
       <div className="flex flex-wrap gap-2">
         {options.map((option) => (
-          <label key={option.value} className="relative">
+          <label key={option.value} className="relative" data-press="">
             <input
               type="radio"
               name={name}
@@ -34,7 +34,6 @@ export function ChoiceChips({
               id={`${id}-${option.value}`}
             />
             <span
-              data-press=""
               className={cn(
                 "press flex items-center rounded-md border-(length:--bw) border-line-strong px-4 font-medium",
                 "peer-checked:border-(length:--bw-sel) peer-checked:border-fg peer-checked:font-heavy",
