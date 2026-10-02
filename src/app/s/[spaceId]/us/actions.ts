@@ -78,3 +78,42 @@ export async function markChildBorn(
   }
   redirect(`/s/${spaceId}/us`);
 }
+
+const PET_KEYS = [
+  "name",
+  "species",
+  "speciesLabel",
+  "breed",
+  "birthDate",
+  "birthDateEstimated",
+  "adoptedAt",
+];
+
+/** 반려동물 더하기, 고치기(parent). 품종, 날짜는 비워도 되고, 고칠 때 비우면 지운다 */
+export async function savePet(
+  spaceId: string,
+  petId: string | null,
+  prev: ProfileFormState,
+  form: FormData,
+): Promise<ProfileFormState> {
+  const v = values(form, PET_KEYS);
+  const species = (["dog", "cat", "other"] as const).find((s) => s === v.species) ?? "dog";
+  const empty = petId ? clear : blank;
+  const fields = {
+    name: v.name,
+    species,
+    speciesLabel: species === "other" ? empty(v.speciesLabel) : petId ? null : undefined,
+    breed: empty(v.breed),
+    birthDate: empty(v.birthDate),
+    birthDateEstimated: Boolean(v.birthDate && v.birthDateEstimated),
+    adoptedAt: empty(v.adoptedAt),
+  };
+  try {
+    const caller = await serverCaller();
+    if (petId) await caller.pet.update({ spaceId, petId, ...fields });
+    else await caller.pet.create({ spaceId, ...fields });
+  } catch (error) {
+    return { error: toErrorKey(error), values: v, attempt: prev.attempt + 1 };
+  }
+  redirect(`/s/${spaceId}/us`);
+}

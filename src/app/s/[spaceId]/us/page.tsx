@@ -25,7 +25,7 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
   const rows = [
     ...space.children.map((c) => ({
       key: c.id,
-      href: `/s/${space.id}/us/child/${c.id}` as string | null,
+      href: `/s/${space.id}/us/child/${c.id}`,
       name: childName(c),
       detail:
         c.status === "expecting"
@@ -38,9 +38,14 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
     })),
     ...space.pets.map((p) => ({
       key: p.id,
-      href: null as string | null,
+      href: `/s/${space.id}/us/pet/${p.id}`,
       name: p.name,
-      detail: null,
+      detail:
+        p.status === "memorial"
+          ? t("memorial")
+          : p.species === "other" && p.speciesLabel
+            ? p.speciesLabel
+            : t(`species.${p.species}`),
     })),
   ];
 
@@ -64,7 +69,7 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
                         <span className="text-caption text-fg-muted">{row.detail}</span>
                       ) : null}
                     </span>
-                    {isParent && row.href ? (
+                    {isParent ? (
                       <span className="inline-flex items-center gap-1 text-caption font-bold text-fg-muted">
                         {t("edit")}
                         <Icon name="right" size="small" />
@@ -76,7 +81,7 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
                   "flex min-h-(--touch-elder) items-center gap-3 border-b-(length:--bw-hair) border-line py-2";
                 return (
                   <li key={row.key}>
-                    {isParent && row.href ? (
+                    {isParent ? (
                       <Link href={row.href} data-press="" className={cn("press", rowClass)}>
                         {body}
                       </Link>
@@ -95,6 +100,10 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
               <Link href={`/s/${space.id}/us/child/new`} className={buttonClass()}>
                 <Icon name="plus" size="small" />
                 {t("addChild")}
+              </Link>
+              <Link href={`/s/${space.id}/us/pet/new`} className={buttonClass()}>
+                <Icon name="plus" size="small" />
+                {t("addPet")}
               </Link>
             </div>
           ) : null}

@@ -213,7 +213,13 @@
     "childExpecting": "곧 태어나요, {date} 예정",
     "childExpectingNoDate": "곧 태어나요",
     "childNoDate": "생일을 아직 적지 않았어요",
-    "back": "우리"
+    "back": "우리",
+    "species": {
+      "dog": "강아지",
+      "cat": "고양이",
+      "other": "반려동물"
+    },
+    "memorial": "별이 됐어요"
   },
   "ui": {
     "close": "닫기",
@@ -396,5 +402,25 @@
     "bornName": "이름",
     "bornNameHint": "정했으면 적어 주세요",
     "bornSubmit": "태어났어요"
+  },
+  "petForm": {
+    "newTitle": "반려동물 더하기",
+    "editTitle": "{name} 정보 고치기",
+    "name": "이름",
+    "species": "어떤 친구인가요",
+    "dog": "강아지",
+    "cat": "고양이",
+    "other": "다른 동물",
+    "speciesLabel": "어떤 동물인지",
+    "speciesLabelPlaceholder": "토끼, 햄스터",
+    "breed": "품종",
+    "optionalHint": "쓰지 않아도 괜찮아요",
+    "birthDate": "생일",
+    "estimated": "정확한 날이 아니라 짐작한 날이에요",
+    "adoptedAt": "가족이 된 날",
+    "laterHint": "비워 두고 나중에 채워도 괜찮아요",
+    "submitNew": "반려동물 더하기",
+    "submitEdit": "고친 정보 저장",
+    "submitting": "저장하는 중"
   }
 }
