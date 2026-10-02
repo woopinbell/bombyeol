@@ -164,3 +164,13 @@ export async function deleteMoment(spaceId: string, momentId: string) {
     return { error: toErrorKey(error) } satisfies Failed;
   }
 }
+
+/** 성장 기록 지우기(남긴 사람 또는 parent) */
+export async function deleteMilestone(spaceId: string, milestoneId: string) {
+  try {
+    const caller = await serverCaller();
+    return await caller.milestone.delete({ spaceId, milestoneId });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}

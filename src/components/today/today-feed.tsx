@@ -2,10 +2,11 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { deleteMoment, loadMoreMoments } from "@/app/s/[spaceId]/actions";
+import { deleteMilestone, deleteMoment, loadMoreMoments } from "@/app/s/[spaceId]/actions";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
+import { MilestoneDetail, MilestoneSentence } from "./milestone-detail";
 import { MomentSheet } from "./moment-sheet";
 import { LikeButton, useLike, type CommentsChange } from "./reactions";
 import { useToday, type FeedProps } from "./today-state";
@@ -36,7 +37,7 @@ export function TodayFeed() {
 
   const days = groupByDay(
     items.filter((m) => !props.hidden.has(m.id)),
-    props.milestones,
+    props.milestones.filter((m) => !props.hidden.has(m.id)),
     { timeZone, hasMore: cursor !== null },
   );
 
@@ -107,7 +108,7 @@ function DayChapter({ day, todayKey, ...props }: { day: FeedDay } & FeedProps) {
         <ul className="mb-4 flex flex-wrap gap-2">
           {day.milestones.map((m) => (
             <li key={m.id}>
-              <MilestoneStrip milestone={m} />
+              <MilestoneStrip milestone={m} {...props} todayKey={todayKey} />
             </li>
           ))}
         </ul>
@@ -121,13 +122,13 @@ function DayChapter({ day, todayKey, ...props }: { day: FeedDay } & FeedProps) {
   );
 }
 
-export function MilestoneStrip({ milestone }: { milestone: FeedMilestone }) {
-  const t = useTranslations("milestone");
-  const subject = milestone.childId ? "child" : "pet";
-  const value = (milestone.value ?? {}) as { value?: number; title?: string };
-  // 프리셋 키(src/lib/milestones.ts)는 서버가 검증한 값이라 문구 키로 그대로 쓴다
-  const kind = `${subject}.${milestone.kind}` as Parameters<typeof t>[0];
-  const isFresh = useToday().fresh.has(milestone.id);
+function MilestoneStrip({ milestone, ...props }: { milestone: FeedMilestone } & FeedProps) {
+  const t = useTranslations("today");
+  const tm = useTranslations("milestoneDetail");
+  const errors = useTranslations("errors");
+  const { toast } = useToast();
+  const today = useToday();
+  const isFresh = today.fresh.has(milestone.id);
   const wrap = useRef<HTMLSpanElement>(null);
   // 방금 남긴 기록: 띠가 안착하고, "처음" 표시를 켠 기록이면 2초 안에 끝나는 반짝임(DESIGN §9.2, §11)
   useEffect(() => {
@@ -137,21 +138,86 @@ export function MilestoneStrip({ milestone }: { milestone: FeedMilestone }) {
     settle([chip]);
     if (milestone.isFirst && !prefersReducedMotion()) return sparkle(el);
   }, [isFresh, milestone.isFirst]);
+  const [like, setLike] = useState({
+    on: milestone.reactions.likedByMe,
+    count: milestone.reactions.likes,
+  });
+  const [comments, setComments] = useState<CommentsChange>({
+    count: milestone.reactions.comments,
+    latest: null,
+  });
+  const [sheet, setSheet] = useState({ open: false, seq: 0 });
+  const close = () => setSheet((s) => ({ ...s, open: false }));
+  const canDelete = milestone.createdBy.id === props.myUserId || props.canModerate;
+  // 지우기: 시트가 내려간 뒤 숨기고 6초 동안 되돌릴 수 있다. 토스트가 닫히면 실제로 지운다
+  const remove = () => {
+    close();
+    setTimeout(
+      () => today.setHidden(milestone.id, true),
+      prefersReducedMotion() ? motion["d-fast"] : motion["d-sheet"],
+    );
+    toast({
+      message: tm("removed"),
+      action: { label: tm("undo"), onAction: () => today.setHidden(milestone.id, false) },
+      onDismiss: async (reason) => {
+        if (reason === "action") return;
+        const result = await deleteMilestone(props.spaceId, milestone.id);
+        if ("error" in result && result.error !== "ITEM_NOT_FOUND") {
+          today.setHidden(milestone.id, false);
+          toast({ message: errors(result.error) });
+        } else {
+          today.dropMilestone(milestone.id);
+        }
+      },
+    });
+  };
   return (
     <span ref={wrap} className="relative inline-block">
-      <span className="inline-flex items-center gap-2 rounded-md bg-spring-pink py-2 pr-4 pl-3 text-ink">
+      <button
+        type="button"
+        data-press=""
+        onClick={() => setSheet((s) => ({ open: true, seq: s.seq + 1 }))}
+        className="press inline-flex items-center gap-2 rounded-md bg-spring-pink py-2 pr-4 pl-3 text-left text-ink"
+      >
         <Icon name="spark" size="small" />
         <span>
-          <b className="font-bold">{milestone.subjectName}</b>{" "}
-          {t.has(kind)
-            ? t(kind, {
-                value: value.value ?? "",
-                title: value.title ?? "",
-                first: String(milestone.isFirst),
-              })
-            : null}
+          <MilestoneSentence milestone={milestone} />
         </span>
-      </span>
+        {like.count || comments.count ? (
+          <span className="flex items-center gap-2 text-caption tabular-nums">
+            {like.count ? (
+              <span className="inline-flex items-center gap-1">
+                <Icon name={like.on ? "heartOn" : "heart"} size="small" />
+                <span className="sr-only">{t("like", { count: like.count })}</span>
+                <span aria-hidden="true">{like.count}</span>
+              </span>
+            ) : null}
+            {comments.count ? (
+              <span className="inline-flex items-center gap-1">
+                <Icon name="talk" size="small" />
+                <span className="sr-only">{t("comment", { count: comments.count })}</span>
+                <span aria-hidden="true">{comments.count}</span>
+              </span>
+            ) : null}
+          </span>
+        ) : null}
+      </button>
+      {sheet.seq ? (
+        <MilestoneDetail
+          key={sheet.seq}
+          open={sheet.open}
+          onClose={close}
+          milestone={milestone}
+          spaceId={props.spaceId}
+          authors={props.authors}
+          myUserId={props.myUserId}
+          canModerate={props.canModerate}
+          like={like}
+          onLikeChange={setLike}
+          onCommentsChange={setComments}
+          onDelete={canDelete ? remove : undefined}
+        />
+      ) : null}
     </span>
   );
 }

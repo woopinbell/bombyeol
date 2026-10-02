@@ -344,5 +344,12 @@
     "done": "성장 기록을 남겼어요",
     "first": "처음이에요",
     "firstHint": "이 순간이 처음이면 켜 주세요. 처음 표시는 종류마다 하나예요"
+  },
+  "milestoneDetail": {
+    "title": "성장 기록",
+    "byline": "{who}, {when}",
+    "remove": "이 기록 지우기",
+    "removed": "성장 기록을 지웠어요",
+    "undo": "되돌리기"
   }
 }
