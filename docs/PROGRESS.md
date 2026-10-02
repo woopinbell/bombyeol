@@ -55,13 +55,31 @@
 - 작업 메모: `npm test`는 로컬 DB를 비운다(시드한 화면 확인 데이터도 사라짐). 파이프로 grep하면 실패가 가려지니 종료 코드를 따로 본다.
 - 환경 메모: 기존 스위트에서 3번 중 1번 테스트 1건이 실패했다가 재실행에 통과(어떤 테스트인지 기록 못 함 - 다음에 반복 실행으로 찾을 것). Docker Hub 429로 `db:up` 첫 시도 실패, 재시도 성공. 컨테이너에 한글 폰트가 없어 목업 스크린샷은 Pretendard woff2를 받아 Playwright route로 주입(스크래치패드, 리포에 넣지 않음).
 
-### 다음 할 일 (Phase DS 1차 이후)
+### 다음 할 일 (2026-10-02 세션 마감 기준 - 새 세션은 여기부터)
 
-1. ~~PR, main 머지, 스테이징 배포~~ 완료(PR woopinbell/bombyeol#11, d8d76bd, 버전 c97351a3).
-2. ~~온보딩 UI PR, 머지, 스테이징 배포~~ 완료(PR woopinbell/bombyeol#12, 83e574c, 버전 ccf003bf). 남은 것: 사용자가 스테이징에서 실제 카카오와 Google 로그인으로 가족 만들기, 초대, 합류 확인. 오늘 탭 UI도 머지, 스테이징 배포 완료(PR woopinbell/bombyeol#13, 51f1ee9, 버전 531866df) - 사용자가 휴대폰으로 사진, 영상 올리기(스테이징 R2 직접 PUT, iOS HEIC, 영상 썸네일) 확인. 그다음 이야기 탭 UI(Phase 4). 결제는 Q-PAY 결정 후. 사용자: 스테이징(`https://bombyeol-staging.seungwoo7050.workers.dev`)과 프로토타입을 실기기(어르신 폰)에서 열어 보기 권장.
-2. 그 뒤 Phase DS 남은 것: 로고(Q-LOGO), 손글씨(Q-FONT) 결정, 토큰 확정(모션 토큰 후보 표에서 고르기) + 대비 검증 표. 확정 전에는 코드에 토큰을 넣지 않는다.
-3. **사용자**: Q-PAY 선택(선결: 사업자 등록 여부). 고르면 ENV_MANIFEST Phase 8 키 이름부터 채우고 Phase 8 착수.
-4. e2e 커밋(f089b91)은 main 머지 대기 - 사용자 확인 후 PR.
+main 6268009(PR woopinbell/bombyeol#15까지 머지), 스테이징 버전 80da81b6. 작업 브랜치 `claude/jolly-shannon-0ae5z1`은 main과 같다. 열린 PR 없음.
+
+**사용자가 할 일(먼저 확인)**
+1. **Workers Paid 전환**(결정됨, Q-PLAN) - 대시보드 Workers & Pages > Plans. 2026-10-02 13시 기준 아직 무료(1102 계속 관측). 전환 뒤 Cloudflare GraphQL 분석(`workersInvocationsAdaptive`, 스크립트 `bombyeol-staging`)으로 status, cpuTime 확인.
+2. 스테이징 재확인: 아이 날짜 공란 가족 만들기, 탭과 고르기 즉시 반응, 사진 여러 장 올리기 속도와 바로 보이는지, 성장 기록 "처음이에요", 좋아요 연타. 특히 Prisma `relationJoins`(미리 보기 기능)는 로그인 화면에서만 쓰여 아직 스테이징 실사용 확인 전 - 문제면 schema previewFeatures 한 줄 제거.
+3. 실기기: iOS 사진 고르기(HEIC → JPEG 변환), 영상 썸네일, 어르신 폰.
+4. 결정 대기: Q-PAY(결제 공급자, 사업자 등록 여부 선결), Q-ILLUST(일러스트), Q-HONOR(경어 잠정), Q-DOMAIN.
+
+**개발 순서(제안)**
+1. Phase 3 남은 화면: 기록 글 고치기, 마일스톤 고치기("처음" 옮기기)와 좋아요, 댓글, 지우기, 아이, 반려동물 등록과 고치기(가족 만들기 뒤 추가, 날짜 나중에 채우기 - 온보딩 문구가 "비워 둬도 괜찮아요"라 이 화면이 필요), 저장 공간 표시.
+2. **Phase 4 이야기 탭 UI**(`feat(story)`) - 질문 카드, 이야기 모음, 쓰기, 별 하나(좋아요처럼 연타를 모아 마지막 상태만 보낼 것 - `reaction.toggleStar`에도 setLike 같은 멱등 API 추가), 물어보기.
+3. Phase 5 우리 탭 UI(달력, 구성원, D-day, 별이 되신 분, 임신 기록, 설정: 화면 설정 `setDisplayPref`, 초대 관리).
+4. Phase 6 UI: 카카오톡 공유(`feat(share)`), PWA(`feat(pwa)`, 서비스 워커, 푸시 토큰 등록 화면).
+5. Phase 7 UI: 계정, 데이터 삭제 페이지(`feat(privacy)`).
+6. Phase 8 결제(Q-PAY 결정 뒤), 이야기 PDF.
+7. Phase 9: a11y 테스트, 프로덕션 환경(도메인, 시크릿, 리소스 생성은 사용자 승인), 운영 체크리스트, 약관.
+8. 상시: 디자인 폴리시(Phase D, 완료 선언 금지), 스테이징 데이터 비우기 스크립트(요청 시 - 운영은 별도 DB, 버킷).
+
+**알려진 위험, 메모**
+- 무료 플랜에서는 SSR 화면, 서버 액션이 요청당 CPU 10ms를 넘어 가끔 1102. 쿼리 33 → 9, 연타 묶기로 줄였지만 근본은 Paid.
+- 영상은 그대로 올라가 위치 메타데이터가 남을 수 있음(PRIVACY §4 열린 과제).
+- 클라우드 컨테이너가 중간에 재시작될 수 있다: `dockerd`가 containerd 시간 초과로 실패하면 `pkill -x containerd` 후 다시. 로컬 DB는 `npm test`가 비운다.
+- 클라우드의 localhost(개발 서버)는 사용자가 볼 수 없다 - 보여줄 것은 스크린샷, 영상, 스테이징 배포로(CLOUD_SESSION §2.0). 사용자 지적(2026-10-02): 개발 서버를 켜 두는 것은 의미 없음.
 
 ## 현재 상태 - Phase 7 (2026-10-01)
 
