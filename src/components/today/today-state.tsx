@@ -29,10 +29,15 @@ type TodayState = FeedProps & {
   addMilestone: (milestone: FeedMilestone) => void;
   /** 방금 더한 기록, 마일스톤 ID */
   fresh: ReadonlySet<string>;
-  /** 지우기를 누른 기록: 되돌리기 토스트가 닫힐 때까지 숨겨 둔다 */
+  /** 지우기를 누른 기록, 성장 기록: 되돌리기 토스트가 닫힐 때까지 숨겨 둔다 */
   hidden: ReadonlySet<string>;
   setHidden: (id: string, hide: boolean) => void;
   dropMoment: (id: string) => void;
+  dropMilestone: (id: string) => void;
+  /** 고친 성장 기록을 반영한다 */
+  patchMilestone: (id: string, patch: Partial<FeedMilestone>) => void;
+  /** 고친 글을 피드에 반영한다 */
+  setMomentBody: (id: string, body: string | null) => void;
 };
 
 const TodayContext = createContext<TodayState | null>(null);
@@ -87,6 +92,11 @@ export function TodayProvider({ children, ...props }: FeedProps & { children: Re
           return next;
         }),
       dropMoment: (id) => setItems((list) => list.filter((m) => m.id !== id)),
+      dropMilestone: (id) => setMilestones((list) => list.filter((m) => m.id !== id)),
+      patchMilestone: (id, patch) =>
+        setMilestones((list) => list.map((m) => (m.id === id ? { ...m, ...patch } : m))),
+      setMomentBody: (id, body) =>
+        setItems((list) => list.map((m) => (m.id === id ? { ...m, body } : m))),
       setPage: (next, nextCursor) => {
         setItems(next);
         setCursor(nextCursor);

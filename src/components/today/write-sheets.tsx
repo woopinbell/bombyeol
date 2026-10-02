@@ -11,7 +11,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { TextArea } from "@/components/ui/text-area";
 import { useToast } from "@/components/ui/toast";
 import type { ErrorKey } from "@/lib/action-errors";
-import { MILESTONE_KINDS, kindInfo } from "@/lib/milestone-kinds";
+import { MILESTONE_KINDS, kindInfo, type KindInfo } from "@/lib/milestone-kinds";
 import { MOMENT_POLICY } from "@/lib/plan";
 import type { SubjectChoice } from "./upload-sheet";
 import { useToday } from "./today-state";
@@ -162,23 +162,12 @@ export function MilestoneSheet({
   const submit = async (form: FormData) => {
     if (!info) return;
     setError(null);
-    const note = String(form.get("note") ?? "").trim() || undefined;
-    let value: Record<string, unknown> = { note };
-    if (info.input === "measure") {
-      const n = Number(String(form.get("value") ?? "").replace(",", "."));
-      if (!Number.isFinite(n) || n <= 0) {
-        setError("MILESTONE_VALUE_INVALID");
-        return;
-      }
-      value = { value: n, note };
-    } else if (info.input === "title") {
-      const title = String(form.get("title") ?? "").trim();
-      if (!title) {
-        setError("BODY_REQUIRED");
-        return;
-      }
-      value = { title, note };
+    const read = readMilestoneValue(info, form);
+    if ("error" in read) {
+      setError(read.error);
+      return;
     }
+    const { value } = read;
     const id = subject.split(":")[1];
     setSending(true);
     const created = await createMilestone(spaceId, {
@@ -293,17 +282,45 @@ export function MilestoneSheet({
   );
 }
 
+/** 종류에 맞는 값(숫자, 제목)과 메모를 폼에서 읽는다. 만들기와 고치기가 함께 쓴다 */
+export function readMilestoneValue(
+  info: KindInfo,
+  form: FormData,
+): { value: Record<string, unknown> } | { error: ErrorKey } {
+  const note = String(form.get("note") ?? "").trim() || undefined;
+  if (info.input === "measure") {
+    const n = Number(String(form.get("value") ?? "").replace(",", "."));
+    if (!Number.isFinite(n) || n <= 0) return { error: "MILESTONE_VALUE_INVALID" };
+    return { value: { value: n, note } };
+  }
+  if (info.input === "title") {
+    const title = String(form.get("title") ?? "").trim();
+    if (!title) return { error: "BODY_REQUIRED" };
+    return { value: { title, note } };
+  }
+  return { value: { note } };
+}
+
 /**
  * "처음" 표시 켜고 끄기(체크박스, 기본 꺼짐). 첫 기록이라고 자동으로 켜지 않는다 - 그 순간을 놓쳤을 수 있다.
  * 켜짐은 굵은 테두리 + 반짝임 아이콘 + 글자로 보인다(색만으로 구분하지 않음).
  */
-function FirstSwitch({ label, hint }: { label: string; hint: string }) {
+export function FirstSwitch({
+  label,
+  hint,
+  defaultChecked,
+}: {
+  label: string;
+  hint: string;
+  defaultChecked?: boolean;
+}) {
   return (
     <label className="relative flex items-start gap-3" data-press="">
       <input
         type="checkbox"
         name="first"
         value="1"
+        defaultChecked={defaultChecked}
         className="peer absolute inset-0 z-10 size-full opacity-0"
       />
       <span

@@ -16,12 +16,12 @@ export async function loadMoreMoments(spaceId: string, who: Who, cursor: FeedCur
   }
 }
 
+/** 좋아요, 댓글을 남기는 오늘 기록 */
+type TodayTarget =
+  { type: "moment"; momentId: string } | { type: "milestone"; milestoneId: string };
+
 /** 좋아요를 원하는 상태로(여러 번 보내도 같다). 화면은 연달아 누른 것을 모아 마지막 상태만 보낸다 */
-export async function setLike(
-  spaceId: string,
-  target: { type: "moment"; momentId: string } | { type: "milestone"; milestoneId: string },
-  liked: boolean,
-) {
+export async function setLike(spaceId: string, target: TodayTarget, liked: boolean) {
   try {
     const caller = await serverCaller();
     return await caller.reaction.setLike({ spaceId, target, liked });
@@ -30,23 +30,19 @@ export async function setLike(
   }
 }
 
-export async function listComments(spaceId: string, momentId: string) {
+export async function listComments(spaceId: string, target: TodayTarget) {
   try {
     const caller = await serverCaller();
-    return await caller.reaction.listComments({ spaceId, target: { type: "moment", momentId } });
+    return await caller.reaction.listComments({ spaceId, target });
   } catch (error) {
     return { error: toErrorKey(error) } satisfies Failed;
   }
 }
 
-export async function addComment(spaceId: string, momentId: string, body: string) {
+export async function addComment(spaceId: string, target: TodayTarget, body: string) {
   try {
     const caller = await serverCaller();
-    return await caller.reaction.addComment({
-      spaceId,
-      target: { type: "moment", momentId },
-      body,
-    });
+    return await caller.reaction.addComment({ spaceId, target, body });
   } catch (error) {
     return { error: toErrorKey(error) } satisfies Failed;
   }
@@ -149,11 +145,50 @@ export async function createMilestone(
   }
 }
 
+/** 기록 글 고치기(작성자만). null이면 글을 지운다(일기는 서버가 막는다) */
+export async function updateMomentBody(spaceId: string, momentId: string, body: string | null) {
+  try {
+    const caller = await serverCaller();
+    return await caller.moment.update({ spaceId, momentId, body });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}
+
 /** 기록 지우기(작성자 또는 parent). 붙은 파일까지 저장소에서 지운다(G-05) */
 export async function deleteMoment(spaceId: string, momentId: string) {
   try {
     const caller = await serverCaller();
     return await caller.moment.delete({ spaceId, momentId });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}
+
+/** 성장 기록 지우기(남긴 사람 또는 parent) */
+export async function deleteMilestone(spaceId: string, milestoneId: string) {
+  try {
+    const caller = await serverCaller();
+    return await caller.milestone.delete({ spaceId, milestoneId });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}
+
+/** 성장 기록 고치기(남긴 사람 또는 parent). moveFirst면 같은 순간의 "처음" 표시를 이 기록으로 옮긴다 */
+export async function updateMilestone(
+  spaceId: string,
+  input: {
+    milestoneId: string;
+    value: Record<string, unknown>;
+    recordedAt: string;
+    first?: boolean;
+    moveFirst?: boolean;
+  },
+) {
+  try {
+    const caller = await serverCaller();
+    return await caller.milestone.update({ spaceId, ...input });
   } catch (error) {
     return { error: toErrorKey(error) } satisfies Failed;
   }

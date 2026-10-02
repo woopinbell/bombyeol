@@ -1,12 +1,14 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { deleteMoment, loadMoreMoments, setLike as setLikeAction } from "@/app/s/[spaceId]/actions";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { deleteMilestone, deleteMoment, loadMoreMoments } from "@/app/s/[spaceId]/actions";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
-import { MomentSheet, type CommentsChange } from "./moment-sheet";
+import { MilestoneDetail, MilestoneSentence } from "./milestone-detail";
+import { MomentSheet } from "./moment-sheet";
+import { LikeButton, useLike, type CommentsChange } from "./reactions";
 import { useToday, type FeedProps } from "./today-state";
 import { timeZone } from "@/i18n/config";
 import {
@@ -35,7 +37,7 @@ export function TodayFeed() {
 
   const days = groupByDay(
     items.filter((m) => !props.hidden.has(m.id)),
-    props.milestones,
+    props.milestones.filter((m) => !props.hidden.has(m.id)),
     { timeZone, hasMore: cursor !== null },
   );
 
@@ -106,7 +108,7 @@ function DayChapter({ day, todayKey, ...props }: { day: FeedDay } & FeedProps) {
         <ul className="mb-4 flex flex-wrap gap-2">
           {day.milestones.map((m) => (
             <li key={m.id}>
-              <MilestoneStrip milestone={m} />
+              <MilestoneStrip milestone={m} {...props} todayKey={todayKey} />
             </li>
           ))}
         </ul>
@@ -120,13 +122,13 @@ function DayChapter({ day, todayKey, ...props }: { day: FeedDay } & FeedProps) {
   );
 }
 
-export function MilestoneStrip({ milestone }: { milestone: FeedMilestone }) {
-  const t = useTranslations("milestone");
-  const subject = milestone.childId ? "child" : "pet";
-  const value = (milestone.value ?? {}) as { value?: number; title?: string };
-  // 프리셋 키(src/lib/milestones.ts)는 서버가 검증한 값이라 문구 키로 그대로 쓴다
-  const kind = `${subject}.${milestone.kind}` as Parameters<typeof t>[0];
-  const isFresh = useToday().fresh.has(milestone.id);
+function MilestoneStrip({ milestone, ...props }: { milestone: FeedMilestone } & FeedProps) {
+  const t = useTranslations("today");
+  const tm = useTranslations("milestoneDetail");
+  const errors = useTranslations("errors");
+  const { toast } = useToast();
+  const today = useToday();
+  const isFresh = today.fresh.has(milestone.id);
   const wrap = useRef<HTMLSpanElement>(null);
   // 방금 남긴 기록: 띠가 안착하고, "처음" 표시를 켠 기록이면 2초 안에 끝나는 반짝임(DESIGN §9.2, §11)
   useEffect(() => {
@@ -136,21 +138,87 @@ export function MilestoneStrip({ milestone }: { milestone: FeedMilestone }) {
     settle([chip]);
     if (milestone.isFirst && !prefersReducedMotion()) return sparkle(el);
   }, [isFresh, milestone.isFirst]);
+  const [like, setLike] = useState({
+    on: milestone.reactions.likedByMe,
+    count: milestone.reactions.likes,
+  });
+  const [comments, setComments] = useState<CommentsChange>({
+    count: milestone.reactions.comments,
+    latest: null,
+  });
+  const [sheet, setSheet] = useState({ open: false, seq: 0 });
+  const close = () => setSheet((s) => ({ ...s, open: false }));
+  const canDelete = milestone.createdBy.id === props.myUserId || props.canModerate;
+  // 지우기: 시트가 내려간 뒤 숨기고 6초 동안 되돌릴 수 있다. 토스트가 닫히면 실제로 지운다
+  const remove = () => {
+    close();
+    setTimeout(
+      () => today.setHidden(milestone.id, true),
+      prefersReducedMotion() ? motion["d-fast"] : motion["d-sheet"],
+    );
+    toast({
+      message: tm("removed"),
+      action: { label: tm("undo"), onAction: () => today.setHidden(milestone.id, false) },
+      onDismiss: async (reason) => {
+        if (reason === "action") return;
+        const result = await deleteMilestone(props.spaceId, milestone.id);
+        if ("error" in result && result.error !== "ITEM_NOT_FOUND") {
+          today.setHidden(milestone.id, false);
+          toast({ message: errors(result.error) });
+        } else {
+          today.dropMilestone(milestone.id);
+        }
+      },
+    });
+  };
   return (
     <span ref={wrap} className="relative inline-block">
-      <span className="inline-flex items-center gap-2 rounded-md bg-spring-pink py-2 pr-4 pl-3 text-ink">
+      <button
+        type="button"
+        data-press=""
+        onClick={() => setSheet((s) => ({ open: true, seq: s.seq + 1 }))}
+        className="press inline-flex items-center gap-2 rounded-md bg-spring-pink py-2 pr-4 pl-3 text-left text-ink"
+      >
         <Icon name="spark" size="small" />
         <span>
-          <b className="font-bold">{milestone.subjectName}</b>{" "}
-          {t.has(kind)
-            ? t(kind, {
-                value: value.value ?? "",
-                title: value.title ?? "",
-                first: String(milestone.isFirst),
-              })
-            : null}
+          <MilestoneSentence milestone={milestone} />
         </span>
-      </span>
+        {like.count || comments.count ? (
+          <span className="flex items-center gap-2 text-caption tabular-nums">
+            {like.count ? (
+              <span className="inline-flex items-center gap-1">
+                <Icon name={like.on ? "heartOn" : "heart"} size="small" />
+                <span className="sr-only">{t("like", { count: like.count })}</span>
+                <span aria-hidden="true">{like.count}</span>
+              </span>
+            ) : null}
+            {comments.count ? (
+              <span className="inline-flex items-center gap-1">
+                <Icon name="talk" size="small" />
+                <span className="sr-only">{t("comment", { count: comments.count })}</span>
+                <span aria-hidden="true">{comments.count}</span>
+              </span>
+            ) : null}
+          </span>
+        ) : null}
+      </button>
+      {sheet.seq ? (
+        <MilestoneDetail
+          key={sheet.seq}
+          open={sheet.open}
+          onClose={close}
+          milestone={milestone}
+          spaceId={props.spaceId}
+          authors={props.authors}
+          myUserId={props.myUserId}
+          canModerate={props.canModerate}
+          like={like}
+          onLikeChange={setLike}
+          onCommentsChange={setComments}
+          onDelete={canDelete ? remove : undefined}
+          canEdit={canDelete}
+        />
+      ) : null}
     </span>
   );
 }
@@ -238,13 +306,15 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
         canModerate={props.canModerate}
         onCommentsChange={setComments}
         onDelete={canDelete ? remove : undefined}
+        onEdited={
+          moment.createdBy.id === props.myUserId
+            ? (body) => today.setMomentBody(moment.id, body)
+            : undefined
+        }
       />
     </article>
   );
 }
-
-/** 좋아요를 연달아 누를 때 마지막 상태를 보내기 전 기다리는 시간 */
-const LIKE_SETTLE_MS = 500;
 
 function Reactions({
   moment,
@@ -258,72 +328,14 @@ function Reactions({
   onComments: () => void;
 }) {
   const t = useTranslations("today");
-  const errors = useTranslations("errors");
-  const { toast } = useToast();
-  const [like, setLike] = useState({
-    on: moment.reactions.likedByMe,
-    count: moment.reactions.likes,
-  });
-  // 서버가 확인한 상태, 사용자가 원하는 상태. 연달아 누르면 화면만 바로 바꾸고, 손을 멈춘 뒤 마지막 상태만 보낸다
-  // (누를 때마다 요청하면 Workers CPU 한도에 걸린다 - 2026-10-02 스테이징에서 관측)
-  const confirmed = useRef(like);
-  const desired = useRef(like.on);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const sending = useRef(false);
-
-  const flush = useCallback(async () => {
-    timer.current = null;
-    if (sending.current) return;
-    sending.current = true;
-    try {
-      // 보내는 사이에 또 바꿨으면 한 번 더 맞춘다
-      while (desired.current !== confirmed.current.on) {
-        const result = await setLikeAction(
-          spaceId,
-          { type: "moment", momentId: moment.id },
-          desired.current,
-        );
-        if ("error" in result) {
-          desired.current = confirmed.current.on;
-          setLike(confirmed.current);
-          toast({ message: errors(result.error) });
-          return;
-        }
-        confirmed.current = { on: result.liked, count: result.likes };
-      }
-      setLike(confirmed.current);
-    } finally {
-      sending.current = false;
-    }
-  }, [spaceId, moment.id, toast, errors]);
-
-  // 화면을 떠나기 전에 남은 것을 보낸다
-  useEffect(
-    () => () => {
-      if (timer.current) {
-        clearTimeout(timer.current);
-        void flush();
-      }
-    },
-    [flush],
+  const { like, toggle } = useLike(
+    spaceId,
+    { type: "moment", momentId: moment.id },
+    { on: moment.reactions.likedByMe, count: moment.reactions.likes },
   );
-
-  // 좋아요: 누름 피드백 + 상태 변화만(자주 쓰는 동작이라 축하 모션 없음, DESIGN §11)
-  const onLike = () => {
-    desired.current = !desired.current;
-    const base = confirmed.current;
-    const delta = (desired.current ? 1 : 0) - (base.on ? 1 : 0);
-    setLike({ on: desired.current, count: base.count + delta });
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => void flush(), LIKE_SETTLE_MS);
-  };
-
   return (
     <div className="mt-3 flex gap-2">
-      <Button aria-pressed={like.on} onClick={onLike} className={cn(like.on && "border-fg")}>
-        <Icon name={like.on ? "heartOn" : "heart"} size="small" />
-        <span className="tabular-nums">{t("like", { count: like.count })}</span>
-      </Button>
+      <LikeButton like={like} onClick={toggle} />
       <Button onClick={onComments}>
         <Icon name="talk" size="small" />
         <span className="tabular-nums">{t("comment", { count: comments })}</span>

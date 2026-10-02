@@ -5,7 +5,7 @@
  */
 export type KindInput = "none" | "measure" | "title";
 
-type KindInfo = { input: KindInput; unit?: "cm" | "kg"; once: boolean; firstable: boolean };
+export type KindInfo = { input: KindInput; unit?: "cm" | "kg"; once: boolean; firstable: boolean };
 
 const moment = { input: "none", once: false, firstable: true } as const;
 
