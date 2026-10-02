@@ -59,21 +59,31 @@ async function findEditable(
   return milestone;
 }
 
-/** "처음" 표시 검사: 붙일 수 있는 종류인지, 같은 대상, 종류에 이미 "처음"이 있는지(직접 쓰기는 제한 없음) */
+/**
+ * "처음" 표시 검사: 붙일 수 있는 종류인지, 같은 대상, 종류에 이미 "처음"이 있는지(직접 쓰기는 제한 없음).
+ * move를 주면 이미 있는 "처음"을 이 기록으로 옮긴다(그 기록을 고칠 수 있는 사람만 - 남긴 사람 또는 parent).
+ * 옮겼으면 "처음"을 잃은 기록 ID를 돌려준다.
+ */
 async function checkFirst(
   tx: Prisma.TransactionClient,
   subject: { childId: string | null; petId: string | null },
   kind: string,
   exceptId?: string,
-) {
+  move?: { userId: string; role: string },
+): Promise<string | null> {
   const preset = milestonePreset(subject.childId ? "child" : "pet", kind);
   if (!preset?.firstable) throw inputError("MILESTONE_FIRST_INVALID");
-  if (!firstIsUnique(kind)) return;
+  if (!firstIsUnique(kind)) return null;
   await lockKey(tx, `milestone-first:${subject.childId ?? subject.petId}:${kind}`);
-  const exists = await tx.milestone.count({
+  const existing = await tx.milestone.findFirst({
     where: { ...subject, kind, isFirst: true, ...(exceptId && { id: { not: exceptId } }) },
+    select: { id: true, createdById: true },
   });
-  if (exists) throw inputError("MILESTONE_FIRST_EXISTS");
+  if (!existing) return null;
+  const canMove = move && (move.role === "parent" || existing.createdById === move.userId);
+  if (!canMove) throw inputError("MILESTONE_FIRST_EXISTS");
+  await tx.milestone.update({ where: { id: existing.id }, data: { isFirst: false } });
+  return existing.id;
 }
 
 export const milestoneRouter = router({
@@ -198,7 +208,11 @@ export const milestoneRouter = router({
       return suggestChildMilestones(child.status === "born" ? child.birthDate : null, recorded);
     }),
 
-  /** 값, 기록일, "처음" 표시 수정(작성자 또는 parent). kind와 대상은 바꾸지 않는다 */
+  /**
+   * 값, 기록일, "처음" 표시 수정(작성자 또는 parent). kind와 대상은 바꾸지 않는다.
+   * moveFirst면 같은 대상, 종류의 "처음"을 이 기록으로 옮긴다(한 트랜잭션 - 둘 다 "처음"이거나 둘 다 아닌 순간이 없다).
+   * 응답의 movedFromId는 "처음"을 잃은 기록(없으면 null).
+   */
   update: spaceProcedure
     .input(
       z.object({
@@ -206,6 +220,7 @@ export const milestoneRouter = router({
         value: z.unknown().optional(),
         recordedAt: isoDate.optional(),
         first: z.boolean().optional(),
+        moveFirst: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -216,19 +231,22 @@ export const milestoneRouter = router({
           ? undefined
           : parseValue(milestone.childId ? "child" : "pet", milestone.kind, input.value).value;
       return ctx.prisma.$transaction(async (tx) => {
+        let movedFromId: string | null = null;
         if (input.first && !milestone.isFirst) {
-          await checkFirst(
+          movedFromId = await checkFirst(
             tx,
             { childId: milestone.childId, petId: milestone.petId },
             milestone.kind,
             milestone.id,
+            input.moveFirst ? { userId: ctx.userId, role: ctx.member.role } : undefined,
           );
         }
-        return tx.milestone.update({
+        const updated = await tx.milestone.update({
           where: { id: milestone.id },
           data: { value, recordedAt: input.recordedAt, isFirst: input.first },
           select: milestoneSelect,
         });
+        return { ...updated, movedFromId };
       });
     }),
 

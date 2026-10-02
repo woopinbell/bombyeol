@@ -106,6 +106,56 @@ describe("milestone 기록", () => {
     expect(await api.milestone.list({ spaceId, subject: pet })).toHaveLength(3); // 입양일 + 몸무게 2
   });
 
+  it("'처음' 표시는 한 번에 옮길 수 있다(옮길 권한, 동시 요청, 처음을 붙일 수 없는 종류)", async () => {
+    const { api, spaceId, storage, child, pet } = await family();
+    const step = { spaceId, subject: child, kind: "step", value: {}, recordedAt: "2026-09-01" };
+    const old = await api.milestone.create({ ...step, first: true });
+    const [a, b] = [await api.milestone.create(step), await api.milestone.create(step)];
+
+    // moveFirst 없이는 그대로 거절, 있으면 옮기고 잃은 기록을 알려 준다
+    await expect(
+      api.milestone.update({ spaceId, milestoneId: a.id, first: true }),
+    ).rejects.toMatchObject({ message: "MILESTONE_FIRST_EXISTS" });
+    await expect(
+      api.milestone.update({ spaceId, milestoneId: a.id, first: true, moveFirst: true }),
+    ).resolves.toMatchObject({ isFirst: true, movedFromId: old.id });
+    // 이미 처음인 기록을 다시 켜면 옮길 것이 없다
+    await expect(
+      api.milestone.update({ spaceId, milestoneId: a.id, first: true, moveFirst: true }),
+    ).resolves.toMatchObject({ isFirst: true, movedFromId: null });
+
+    // 동시에 두 기록으로 옮겨도 처음은 하나만 남는다
+    await Promise.all(
+      [old, b].map((m) =>
+        api.milestone.update({ spaceId, milestoneId: m.id, first: true, moveFirst: true }),
+      ),
+    );
+    expect(
+      await prisma.milestone.count({
+        where: { childId: child.childId, kind: "step", isFirst: true },
+      }),
+    ).toBe(1);
+
+    // 남의 기록에서 처음을 가져올 수는 없다(그 기록을 고칠 수 없는 사람)
+    const grandparent = await addMember(prisma, spaceId, "grandparent", storage);
+    const walk = { spaceId, subject: pet, kind: "walk", value: {}, recordedAt: "2026-09-01" };
+    await api.milestone.create({ ...walk, first: true });
+    const mine = await grandparent.milestone.create(walk);
+    await expect(
+      grandparent.milestone.update({ spaceId, milestoneId: mine.id, first: true, moveFirst: true }),
+    ).rejects.toMatchObject({ message: "MILESTONE_FIRST_EXISTS" });
+
+    // 측정 기록에는 옮길 수도 없다
+    const height = await api.milestone.create({
+      ...step,
+      kind: "height",
+      value: { value: 70 },
+    });
+    await expect(
+      api.milestone.update({ spaceId, milestoneId: height.id, first: true, moveFirst: true }),
+    ).rejects.toMatchObject({ message: "MILESTONE_FIRST_INVALID" });
+  });
+
   it("가족 전체 마일스톤을 한 번에(대상 거르기 가능), 기록일 최신순", async () => {
     const { api, spaceId, child, pet } = await family();
     await api.milestone.create({
