@@ -94,9 +94,38 @@ describe("space.create", () => {
     ).rejects.toMatchObject({ message: "MEMBERSHIP_LIMIT" });
   });
 
+  it("아이 날짜는 비워도 된다: 고른 상태(곧 태어나요/태어났어요)를 따르고, 없으면 태어난 아이", async () => {
+    const api = callerFor(prisma, (await newUser()).id);
+    const a = await api.space.create({
+      name: "가족",
+      child: { nickname: "콩", status: "expecting" },
+    });
+    const b = await api.space.create({ name: "가족2", child: { name: "봄" } });
+    const children = await prisma.child.findMany({
+      where: { spaceId: { in: [a.id, b.id] } },
+      select: { spaceId: true, status: true, dueDate: true, birthDate: true },
+    });
+    expect(children.find((c) => c.spaceId === a.id)).toMatchObject({
+      status: "expecting",
+      dueDate: null,
+      birthDate: null,
+    });
+    expect(children.find((c) => c.spaceId === b.id)).toMatchObject({
+      status: "born",
+      birthDate: null,
+    });
+    await expect(
+      api.space.create({
+        name: "가족3",
+        child: { name: "봄", status: "expecting", birthDate: "2026-01-01" },
+      }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
   it("입력 검증: 이름, 날짜 규칙", async () => {
     const api = callerFor(prisma, (await newUser()).id);
     await expect(api.space.create({ name: "  " })).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    // 이름, 태명이 없으면 거부(날짜만으로는 안 됨)
     await expect(
       api.space.create({ name: "가족", child: { dueDate: "2027-01-01" } }),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });

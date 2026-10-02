@@ -68,7 +68,7 @@
     "RATE_LIMITED": "잠시 뒤에 다시 해 주세요",
     "SPACE_DELETING": "삭제를 기다리는 가족이라 바꿀 수 없어요",
     "NAME_REQUIRED": "이름이나 태명을 써 주세요",
-    "ONE_DATE_REQUIRED": "생일이나 태어날 날 중 하나를 골라 주세요",
+    "ONE_DATE_REQUIRED": "생일과 태어날 날 중 하나만 골라 주세요",
     "DATE_IN_FUTURE": "생일은 오늘보다 앞선 날이어야 해요",
     "INVALID_INPUT": "입력한 내용을 다시 확인해 주세요",
     "SIGN_IN_REQUIRED": "다시 로그인해 주세요",
@@ -119,7 +119,7 @@
       "childExpecting": "곧 태어나요",
       "childName": "이름(곧 태어나면 태명)",
       "childDate": "생일 또는 태어날 날",
-      "childDateHint": "곧 태어나면 출생 예정일을 골라 주세요",
+      "childDateHint": "아직 모르면 비워 둬도 괜찮아요",
       "submit": "가족 만들기",
       "submitting": "만드는 중이에요"
     },
