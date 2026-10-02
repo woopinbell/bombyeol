@@ -1,12 +1,13 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { deleteMoment, loadMoreMoments, setLike as setLikeAction } from "@/app/s/[spaceId]/actions";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { deleteMoment, loadMoreMoments } from "@/app/s/[spaceId]/actions";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
-import { MomentSheet, type CommentsChange } from "./moment-sheet";
+import { MomentSheet } from "./moment-sheet";
+import { LikeButton, useLike, type CommentsChange } from "./reactions";
 import { useToday, type FeedProps } from "./today-state";
 import { timeZone } from "@/i18n/config";
 import {
@@ -248,9 +249,6 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
   );
 }
 
-/** 좋아요를 연달아 누를 때 마지막 상태를 보내기 전 기다리는 시간 */
-const LIKE_SETTLE_MS = 500;
-
 function Reactions({
   moment,
   spaceId,
@@ -263,72 +261,14 @@ function Reactions({
   onComments: () => void;
 }) {
   const t = useTranslations("today");
-  const errors = useTranslations("errors");
-  const { toast } = useToast();
-  const [like, setLike] = useState({
-    on: moment.reactions.likedByMe,
-    count: moment.reactions.likes,
-  });
-  // 서버가 확인한 상태, 사용자가 원하는 상태. 연달아 누르면 화면만 바로 바꾸고, 손을 멈춘 뒤 마지막 상태만 보낸다
-  // (누를 때마다 요청하면 Workers CPU 한도에 걸린다 - 2026-10-02 스테이징에서 관측)
-  const confirmed = useRef(like);
-  const desired = useRef(like.on);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const sending = useRef(false);
-
-  const flush = useCallback(async () => {
-    timer.current = null;
-    if (sending.current) return;
-    sending.current = true;
-    try {
-      // 보내는 사이에 또 바꿨으면 한 번 더 맞춘다
-      while (desired.current !== confirmed.current.on) {
-        const result = await setLikeAction(
-          spaceId,
-          { type: "moment", momentId: moment.id },
-          desired.current,
-        );
-        if ("error" in result) {
-          desired.current = confirmed.current.on;
-          setLike(confirmed.current);
-          toast({ message: errors(result.error) });
-          return;
-        }
-        confirmed.current = { on: result.liked, count: result.likes };
-      }
-      setLike(confirmed.current);
-    } finally {
-      sending.current = false;
-    }
-  }, [spaceId, moment.id, toast, errors]);
-
-  // 화면을 떠나기 전에 남은 것을 보낸다
-  useEffect(
-    () => () => {
-      if (timer.current) {
-        clearTimeout(timer.current);
-        void flush();
-      }
-    },
-    [flush],
+  const { like, toggle } = useLike(
+    spaceId,
+    { type: "moment", momentId: moment.id },
+    { on: moment.reactions.likedByMe, count: moment.reactions.likes },
   );
-
-  // 좋아요: 누름 피드백 + 상태 변화만(자주 쓰는 동작이라 축하 모션 없음, DESIGN §11)
-  const onLike = () => {
-    desired.current = !desired.current;
-    const base = confirmed.current;
-    const delta = (desired.current ? 1 : 0) - (base.on ? 1 : 0);
-    setLike({ on: desired.current, count: base.count + delta });
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => void flush(), LIKE_SETTLE_MS);
-  };
-
   return (
     <div className="mt-3 flex gap-2">
-      <Button aria-pressed={like.on} onClick={onLike} className={cn(like.on && "border-fg")}>
-        <Icon name={like.on ? "heartOn" : "heart"} size="small" />
-        <span className="tabular-nums">{t("like", { count: like.count })}</span>
-      </Button>
+      <LikeButton like={like} onClick={toggle} />
       <Button onClick={onComments}>
         <Icon name="talk" size="small" />
         <span className="tabular-nums">{t("comment", { count: comments })}</span>

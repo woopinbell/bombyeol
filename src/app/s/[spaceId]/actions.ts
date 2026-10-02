@@ -16,12 +16,12 @@ export async function loadMoreMoments(spaceId: string, who: Who, cursor: FeedCur
   }
 }
 
+/** 좋아요, 댓글을 남기는 오늘 기록 */
+type TodayTarget =
+  { type: "moment"; momentId: string } | { type: "milestone"; milestoneId: string };
+
 /** 좋아요를 원하는 상태로(여러 번 보내도 같다). 화면은 연달아 누른 것을 모아 마지막 상태만 보낸다 */
-export async function setLike(
-  spaceId: string,
-  target: { type: "moment"; momentId: string } | { type: "milestone"; milestoneId: string },
-  liked: boolean,
-) {
+export async function setLike(spaceId: string, target: TodayTarget, liked: boolean) {
   try {
     const caller = await serverCaller();
     return await caller.reaction.setLike({ spaceId, target, liked });
@@ -30,23 +30,19 @@ export async function setLike(
   }
 }
 
-export async function listComments(spaceId: string, momentId: string) {
+export async function listComments(spaceId: string, target: TodayTarget) {
   try {
     const caller = await serverCaller();
-    return await caller.reaction.listComments({ spaceId, target: { type: "moment", momentId } });
+    return await caller.reaction.listComments({ spaceId, target });
   } catch (error) {
     return { error: toErrorKey(error) } satisfies Failed;
   }
 }
 
-export async function addComment(spaceId: string, momentId: string, body: string) {
+export async function addComment(spaceId: string, target: TodayTarget, body: string) {
   try {
     const caller = await serverCaller();
-    return await caller.reaction.addComment({
-      spaceId,
-      target: { type: "moment", momentId },
-      body,
-    });
+    return await caller.reaction.addComment({ spaceId, target, body });
   } catch (error) {
     return { error: toErrorKey(error) } satisfies Failed;
   }

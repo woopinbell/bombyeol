@@ -1,13 +1,8 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState, useTransition } from "react";
-import {
-  addComment,
-  deleteComment,
-  listComments,
-  updateMomentBody,
-} from "@/app/s/[spaceId]/actions";
+import { useState, useTransition } from "react";
+import { updateMomentBody } from "@/app/s/[spaceId]/actions";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Sheet } from "@/components/ui/sheet";
@@ -15,10 +10,9 @@ import { TextArea } from "@/components/ui/text-area";
 import { useToast } from "@/components/ui/toast";
 import type { ErrorKey } from "@/lib/action-errors";
 import { MOMENT_POLICY } from "@/lib/plan";
-import type { FeedComment, FeedMoment } from "@/lib/today-feed";
+import type { FeedMoment } from "@/lib/today-feed";
 import { cn } from "@/lib/utils";
-
-export type CommentsChange = { count: number; latest: FeedComment | null };
+import { CommentForm, CommentList, useComments, type CommentsChange } from "./reactions";
 
 /**
  * 기록 자세히 보기 시트: 사진(이전, 다음 버튼 - 넘기기 대신 누르기, DESIGN §9.1-5), 글, 댓글 목록과 남기기.
@@ -59,98 +53,14 @@ export function MomentSheet({
   const format = useFormatter();
   const { toast } = useToast();
   const [index, setIndex] = useState(startIndex);
-  const [comments, setComments] = useState<FeedComment[] | null>(null);
-  const [hidden, setHidden] = useState<Set<string>>(new Set());
-  // 방금 남긴 댓글만 등장 모션(불러온 목록은 그대로)
-  const [fresh, setFresh] = useState<Set<string>>(new Set());
-  const [loadError, setLoadError] = useState(false);
-  const [draft, setDraft] = useState("");
-  const [hint, setHint] = useState("");
-  const [sending, startSending] = useTransition();
-  const input = useRef<HTMLInputElement>(null);
-  const list = useRef<HTMLOListElement>(null);
-  const hintId = useId();
-
+  const comments = useComments({
+    spaceId,
+    target: { type: "moment", momentId: moment.id },
+    open,
+    focus: focusComment,
+    onChange: onCommentsChange,
+  });
   const who = (id: string, name: string | null) => authors[id] ?? name ?? "";
-
-  // 열릴 때 댓글을 불러온다(피드에는 최근 하나만 있다)
-  useEffect(() => {
-    if (!open) return;
-    let alive = true;
-    listComments(spaceId, moment.id).then((result) => {
-      if (!alive) return;
-      if ("error" in result) setLoadError(true);
-      else setComments(result.items);
-    });
-    if (focusComment) setTimeout(() => input.current?.focus(), 50);
-    return () => {
-      alive = false;
-    };
-  }, [open, spaceId, moment.id, focusComment]);
-
-  const visible = (comments ?? []).filter((c) => !hidden.has(c.id));
-  const report = (next: FeedComment[]) =>
-    onCommentsChange({ count: next.length, latest: next.at(-1) ?? null });
-
-  const send = (e: React.FormEvent) => {
-    e.preventDefault();
-    const body = draft.trim();
-    if (!body) {
-      setHint(t("commentEmpty"));
-      input.current?.focus();
-      return;
-    }
-    setHint("");
-    startSending(async () => {
-      const result = await addComment(spaceId, moment.id, body);
-      if ("error" in result) {
-        toast({ message: errors(result.error) });
-        return;
-      }
-      const next = [...visible, result];
-      setComments((c) => [...(c ?? []), result]);
-      setFresh((f) => new Set(f).add(result.id));
-      setDraft("");
-      report(next);
-      toast({ message: t("commented") });
-      requestAnimationFrame(() =>
-        list.current?.lastElementChild?.scrollIntoView({ block: "nearest" }),
-      );
-    });
-  };
-
-  const remove = (comment: FeedComment) => {
-    setHidden((h) => new Set(h).add(comment.id));
-    report(visible.filter((c) => c.id !== comment.id));
-    toast({
-      message: t("commentRemoved"),
-      action: {
-        label: t("undo"),
-        onAction: () => {
-          setHidden((h) => {
-            const next = new Set(h);
-            next.delete(comment.id);
-            return next;
-          });
-          report(visible);
-        },
-      },
-      onDismiss: async (reason) => {
-        if (reason === "action") return;
-        const result = await deleteComment(spaceId, comment.id);
-        if ("error" in result) {
-          setHidden((h) => {
-            const next = new Set(h);
-            next.delete(comment.id);
-            return next;
-          });
-          toast({ message: errors(result.error) });
-        } else {
-          setComments((c) => (c ?? []).filter((x) => x.id !== comment.id));
-        }
-      },
-    });
-  };
 
   // 글 고치기: 시트 안에서 글 자리가 입력칸으로 바뀌고, 아래 행동은 [고친 글 저장]이 된다
   const [editing, setEditing] = useState(false);
@@ -195,7 +105,7 @@ export function MomentSheet({
       </Button>
       <Button
         type="submit"
-        form={`${hintId}-edit`}
+        form={`${comments.id}-edit`}
         variant="primary"
         className="flex-1"
         disabled={saving}
@@ -210,36 +120,7 @@ export function MomentSheet({
       open={open}
       onClose={onClose}
       title={total ? t("photoTitle", { n: index + 1, total }) : t("textTitle")}
-      footer={
-        editing ? (
-          editFooter
-        ) : (
-          <form onSubmit={send} className="flex flex-col gap-1">
-            <div className="flex gap-2">
-              <label className="sr-only" htmlFor={`${hintId}-input`}>
-                {t("commentLabel")}
-              </label>
-              <input
-                id={`${hintId}-input`}
-                ref={input}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                maxLength={500}
-                enterKeyHint="send"
-                placeholder={t("commentPlaceholder")}
-                aria-describedby={hint ? hintId : undefined}
-                className="min-h-(--touch) min-w-0 flex-1 rounded-md border-(length:--bw) border-line-strong bg-transparent px-4 text-fg placeholder:text-fg-muted focus:border-(length:--bw-sel) focus:border-fg focus:outline-none"
-              />
-              <Button type="submit" variant="primary" disabled={sending} aria-busy={sending}>
-                {t("send")}
-              </Button>
-            </div>
-            <p id={hintId} aria-live="polite" className="text-caption font-bold empty:hidden">
-              {hint}
-            </p>
-          </form>
-        )
-      }
+      footer={editing ? editFooter : <CommentForm comments={comments} />}
     >
       {media ? (
         <figure className="flex flex-col gap-2">
@@ -290,7 +171,7 @@ export function MomentSheet({
         </figure>
       ) : null}
       {editing ? (
-        <form id={`${hintId}-edit`} onSubmit={save} className={cn(media && "mt-3")}>
+        <form id={`${comments.id}-edit`} onSubmit={save} className={cn(media && "mt-3")}>
           <TextArea
             label={t("editLabel")}
             hint={isDiary ? t("editHintDiary") : t("editHintMedia")}
@@ -332,35 +213,12 @@ export function MomentSheet({
         </div>
       ) : null}
 
-      <h3 className="mt-6 mb-2 font-bold">{t("comments", { count: visible.length })}</h3>
-      {loadError ? (
-        <p className="text-fg-muted">{errors("UNKNOWN")}</p>
-      ) : comments === null ? (
-        <p className="text-fg-muted">{t("loading")}</p>
-      ) : visible.length === 0 ? (
-        <p className="text-fg-muted">{t("noComments")}</p>
-      ) : (
-        <ol ref={list} className="flex flex-col gap-3 pb-2">
-          {visible.map((c) => (
-            <li
-              key={c.id}
-              className={cn("flex items-start gap-2", fresh.has(c.id) && "comment-in")}
-            >
-              <p className="flex-1">
-                <b className="font-bold">{who(c.createdBy.id, c.createdBy.name)}</b> {c.body}{" "}
-                <span className="text-caption text-fg-muted">
-                  {format.relativeTime(c.createdAt, new Date())}
-                </span>
-              </p>
-              {c.createdBy.id === myUserId || canModerate ? (
-                <Button variant="text" className="-my-2 -mr-2" onClick={() => remove(c)}>
-                  {t("removeComment")}
-                </Button>
-              ) : null}
-            </li>
-          ))}
-        </ol>
-      )}
+      <CommentList
+        comments={comments}
+        authors={authors}
+        myUserId={myUserId}
+        canModerate={canModerate}
+      />
     </Sheet>
   );
 }
