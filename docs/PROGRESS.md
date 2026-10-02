@@ -48,7 +48,9 @@
   - 커밋: bf415b1 아이 날짜 비워도 됨(상태는 고른 것, 없으면 태어난 아이) → 3d07e81 마일스톤 "처음"을 표시로(`Milestone.isFirst` 마이그레이션 `20261002113256_milestone_first`, 기존 first_* → 같은 종류 + 처음, 처음은 대상, 종류마다 하나, 측정, 입양일에는 없음, 고치기로 옮김) → 987f450 지워진 계정 세션의 로그인 무한 반복 수정 → 0dc00d3 쿼리 33 → 9(요청 안 권한 조회 메모, space.get에 내 역할, milestone.listAll, Prisma `relationJoins` 미리 보기 기능) → f248e81 탭마다 loading.tsx(운영 빌드에서 누르는 즉시 탭 표시와 자리, 서버 1.5초 지연으로 확인) → ecc9e6d 업로드 일괄 API(requestUploads, confirmMany 12건, G-01~04 묶음 단위) → 522fb2c 올리기 묶음, 동시 PUT 4, 서버가 다시 그려도 피드 상태 합치기(⑤ 대비).
   - 검증: Vitest **373건**(367 → 373), next build, OpenNext 18.27 MiB, 로컬 브라우저 흐름(올리기, 탭과 피드, 기록하기 16, 지우기, 빈 가족 올리기) 전부 통과. ⑤는 로컬에서 재현 안 됨 - 서버 재렌더 때 상태를 잃는 경로를 막는 쪽으로 대응.
   - **위험 메모**: `relationJoins`는 Prisma 7 미리 보기 기능 - 로컬 전체 테스트, OpenNext 빌드는 통과, 스테이징(workerd + Hyperdrive) 동작은 배포 후 확인. 문제가 되면 schema의 previewFeatures 한 줄만 빼면 된다.
-  - 사용자 결정 대기: Q-PLAN(Workers Paid 지금 전환, 추천), Q-INVITE(초대 코드 한 번만 유지 여부), 스테이징 데이터 비우기 스크립트 작성 여부(운영은 별도 DB, 버킷이라 스테이징 쓰레기가 넘어가지 않음).
+  - 사용자 결정(2026-10-02 "전부 Recommend로 진행"): Q-PLAN 지금 Workers Paid 전환(사용자가 대시보드에서 직접 - 아직 확인 전), Q-INVITE 유지. 스테이징 데이터 비우기 스크립트는 요청 시.
+  - **PR woopinbell/bombyeol#14 CI 통과(4분) → 머지 커밋으로 main 머지(cf51069)**. `Migrate staging DB` 자동 실행 성공(`milestone_first` 적용, 기존 first_* 기록 변환). **스테이징 배포**(버전 24c04553): `/`, `/s/...` 비로그인 307, `/login` 200, health 200, 내부 스모크 db ok, R2 서명 강제 403/403/200, Head, Copy, 정리 ok, fcm invalid_token(정상). 작업 브랜치는 머지된 main으로 맞춤.
+  - 남은 확인: relationJoins가 스테이징(workerd + Hyperdrive)의 관계 조회에서 동작하는지는 로그인한 화면에서만 확인된다(스테이징에 테스트 계정을 만들지 않음) - 사용자가 다시 써 본 뒤 Cloudflare 분석으로 오류, CPU 확인. Workers Paid 전환 뒤 1102가 사라지는지도 같은 방법으로.
 - 작업 메모: `npm test`는 로컬 DB를 비운다(시드한 화면 확인 데이터도 사라짐). 파이프로 grep하면 실패가 가려지니 종료 코드를 따로 본다.
 - 환경 메모: 기존 스위트에서 3번 중 1번 테스트 1건이 실패했다가 재실행에 통과(어떤 테스트인지 기록 못 함 - 다음에 반복 실행으로 찾을 것). Docker Hub 429로 `db:up` 첫 시도 실패, 재시도 성공. 컨테이너에 한글 폰트가 없어 목업 스크린샷은 Pretendard woff2를 받아 Playwright route로 주입(스크래치패드, 리포에 넣지 않음).
 
