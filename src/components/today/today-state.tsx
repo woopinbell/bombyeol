@@ -33,6 +33,8 @@ type TodayState = FeedProps & {
   hidden: ReadonlySet<string>;
   setHidden: (id: string, hide: boolean) => void;
   dropMoment: (id: string) => void;
+  /** 고친 글을 피드에 반영한다 */
+  setMomentBody: (id: string, body: string | null) => void;
 };
 
 const TodayContext = createContext<TodayState | null>(null);
@@ -87,6 +89,8 @@ export function TodayProvider({ children, ...props }: FeedProps & { children: Re
           return next;
         }),
       dropMoment: (id) => setItems((list) => list.filter((m) => m.id !== id)),
+      setMomentBody: (id, body) =>
+        setItems((list) => list.map((m) => (m.id === id ? { ...m, body } : m))),
       setPage: (next, nextCursor) => {
         setItems(next);
         setCursor(nextCursor);

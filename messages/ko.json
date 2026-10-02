@@ -265,7 +265,14 @@
     "undo": "되돌리기",
     "removeComment": "지우기",
     "remove": "이 기록 지우기",
-    "removed": "기록을 지웠어요"
+    "removed": "기록을 지웠어요",
+    "edit": "글 고치기",
+    "editLabel": "글",
+    "editHintMedia": "비워 두면 사진만 남아요",
+    "editHintDiary": "일기는 글을 비울 수 없어요",
+    "save": "고친 글 저장",
+    "cancelEdit": "그만두기",
+    "edited": "글을 고쳤어요"
   },
   "upload": {
     "title": "사진 올리기",

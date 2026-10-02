@@ -2,11 +2,19 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
-import { addComment, deleteComment, listComments } from "@/app/s/[spaceId]/actions";
+import {
+  addComment,
+  deleteComment,
+  listComments,
+  updateMomentBody,
+} from "@/app/s/[spaceId]/actions";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Sheet } from "@/components/ui/sheet";
+import { TextArea } from "@/components/ui/text-area";
 import { useToast } from "@/components/ui/toast";
+import type { ErrorKey } from "@/lib/action-errors";
+import { MOMENT_POLICY } from "@/lib/plan";
 import type { FeedComment, FeedMoment } from "@/lib/today-feed";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +36,7 @@ export function MomentSheet({
   canModerate,
   onCommentsChange,
   onDelete,
+  onEdited,
 }: {
   open: boolean;
   onClose: () => void;
@@ -42,6 +51,8 @@ export function MomentSheet({
   onCommentsChange: (change: CommentsChange) => void;
   /** 작성자 또는 parent만 */
   onDelete?: () => void;
+  /** 작성자만: 글 고치기가 끝나면 고친 글을 받는다 */
+  onEdited?: (body: string | null) => void;
 }) {
   const t = useTranslations("moment");
   const errors = useTranslations("errors");
@@ -141,38 +152,93 @@ export function MomentSheet({
     });
   };
 
+  // 글 고치기: 시트 안에서 글 자리가 입력칸으로 바뀌고, 아래 행동은 [고친 글 저장]이 된다
+  const [editing, setEditing] = useState(false);
+  const [editDraft, setEditDraft] = useState("");
+  const [editError, setEditError] = useState<ErrorKey | null>(null);
+  const [saving, startSaving] = useTransition();
+  const isDiary = moment.kind === "diary";
+  const startEdit = () => {
+    setEditDraft(moment.body ?? "");
+    setEditError(null);
+    setEditing(true);
+  };
+  const save = (e: React.FormEvent) => {
+    e.preventDefault();
+    const next = editDraft.trim() || null;
+    if (next === (moment.body ?? null)) {
+      setEditing(false);
+      return;
+    }
+    if (isDiary && !next) {
+      setEditError("BODY_REQUIRED");
+      return;
+    }
+    startSaving(async () => {
+      const result = await updateMomentBody(spaceId, moment.id, next);
+      if ("error" in result) {
+        setEditError(result.error);
+        return;
+      }
+      onEdited?.(result.body);
+      setEditing(false);
+      toast({ message: t("edited") });
+    });
+  };
+
   const media = moment.media[index];
   const total = moment.media.length;
+  const editFooter = (
+    <div className="flex gap-2">
+      <Button onClick={() => setEditing(false)} disabled={saving}>
+        {t("cancelEdit")}
+      </Button>
+      <Button
+        type="submit"
+        form={`${hintId}-edit`}
+        variant="primary"
+        className="flex-1"
+        disabled={saving}
+        aria-busy={saving}
+      >
+        {t("save")}
+      </Button>
+    </div>
+  );
   return (
     <Sheet
       open={open}
       onClose={onClose}
       title={total ? t("photoTitle", { n: index + 1, total }) : t("textTitle")}
       footer={
-        <form onSubmit={send} className="flex flex-col gap-1">
-          <div className="flex gap-2">
-            <label className="sr-only" htmlFor={`${hintId}-input`}>
-              {t("commentLabel")}
-            </label>
-            <input
-              id={`${hintId}-input`}
-              ref={input}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              maxLength={500}
-              enterKeyHint="send"
-              placeholder={t("commentPlaceholder")}
-              aria-describedby={hint ? hintId : undefined}
-              className="min-h-(--touch) min-w-0 flex-1 rounded-md border-(length:--bw) border-line-strong bg-transparent px-4 text-fg placeholder:text-fg-muted focus:border-(length:--bw-sel) focus:border-fg focus:outline-none"
-            />
-            <Button type="submit" variant="primary" disabled={sending} aria-busy={sending}>
-              {t("send")}
-            </Button>
-          </div>
-          <p id={hintId} aria-live="polite" className="text-caption font-bold empty:hidden">
-            {hint}
-          </p>
-        </form>
+        editing ? (
+          editFooter
+        ) : (
+          <form onSubmit={send} className="flex flex-col gap-1">
+            <div className="flex gap-2">
+              <label className="sr-only" htmlFor={`${hintId}-input`}>
+                {t("commentLabel")}
+              </label>
+              <input
+                id={`${hintId}-input`}
+                ref={input}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                maxLength={500}
+                enterKeyHint="send"
+                placeholder={t("commentPlaceholder")}
+                aria-describedby={hint ? hintId : undefined}
+                className="min-h-(--touch) min-w-0 flex-1 rounded-md border-(length:--bw) border-line-strong bg-transparent px-4 text-fg placeholder:text-fg-muted focus:border-(length:--bw-sel) focus:border-fg focus:outline-none"
+              />
+              <Button type="submit" variant="primary" disabled={sending} aria-busy={sending}>
+                {t("send")}
+              </Button>
+            </div>
+            <p id={hintId} aria-live="polite" className="text-caption font-bold empty:hidden">
+              {hint}
+            </p>
+          </form>
+        )
       }
     >
       {media ? (
@@ -223,7 +289,21 @@ export function MomentSheet({
           ) : null}
         </figure>
       ) : null}
-      {moment.body ? <p className={cn("text-title-s", media && "mt-3")}>{moment.body}</p> : null}
+      {editing ? (
+        <form id={`${hintId}-edit`} onSubmit={save} className={cn(media && "mt-3")}>
+          <TextArea
+            label={t("editLabel")}
+            hint={isDiary ? t("editHintDiary") : t("editHintMedia")}
+            value={editDraft}
+            onChange={(e) => setEditDraft(e.target.value)}
+            maxLength={MOMENT_POLICY.bodyMaxChars}
+            error={editError ? errors(editError) : undefined}
+            autoFocus
+          />
+        </form>
+      ) : moment.body ? (
+        <p className={cn("text-title-s whitespace-pre-line", media && "mt-3")}>{moment.body}</p>
+      ) : null}
       <p className="mt-1 text-caption text-fg-muted">
         {t("byline", {
           who: who(moment.createdBy.id, moment.createdBy.name),
@@ -236,10 +316,20 @@ export function MomentSheet({
         })}
       </p>
 
-      {onDelete ? (
-        <Button variant="text" className="-ml-2 self-start" onClick={onDelete}>
-          {t("remove")}
-        </Button>
+      {!editing && (onEdited || onDelete) ? (
+        <div className="-ml-2 flex flex-wrap gap-2">
+          {onEdited ? (
+            <Button variant="text" onClick={startEdit}>
+              <Icon name="pen" size="small" />
+              {t("edit")}
+            </Button>
+          ) : null}
+          {onDelete ? (
+            <Button variant="text" onClick={onDelete}>
+              {t("remove")}
+            </Button>
+          ) : null}
+        </div>
       ) : null}
 
       <h3 className="mt-6 mb-2 font-bold">{t("comments", { count: visible.length })}</h3>

@@ -238,6 +238,11 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
         canModerate={props.canModerate}
         onCommentsChange={setComments}
         onDelete={canDelete ? remove : undefined}
+        onEdited={
+          moment.createdBy.id === props.myUserId
+            ? (body) => today.setMomentBody(moment.id, body)
+            : undefined
+        }
       />
     </article>
   );

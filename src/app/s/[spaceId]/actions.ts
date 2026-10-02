@@ -149,6 +149,16 @@ export async function createMilestone(
   }
 }
 
+/** 기록 글 고치기(작성자만). null이면 글을 지운다(일기는 서버가 막는다) */
+export async function updateMomentBody(spaceId: string, momentId: string, body: string | null) {
+  try {
+    const caller = await serverCaller();
+    return await caller.moment.update({ spaceId, momentId, body });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}
+
 /** 기록 지우기(작성자 또는 parent). 붙은 파일까지 저장소에서 지운다(G-05) */
 export async function deleteMoment(spaceId: string, momentId: string) {
   try {
