@@ -51,6 +51,7 @@
   - 사용자 결정(2026-10-02 "전부 Recommend로 진행"): Q-PLAN 지금 Workers Paid 전환(사용자가 대시보드에서 직접 - 아직 확인 전), Q-INVITE 유지. 스테이징 데이터 비우기 스크립트는 요청 시.
   - **PR woopinbell/bombyeol#14 CI 통과(4분) → 머지 커밋으로 main 머지(cf51069)**. `Migrate staging DB` 자동 실행 성공(`milestone_first` 적용, 기존 first_* 기록 변환). **스테이징 배포**(버전 24c04553): `/`, `/s/...` 비로그인 307, `/login` 200, health 200, 내부 스모크 db ok, R2 서명 강제 403/403/200, Head, Copy, 정리 ok, fcm invalid_token(정상). 작업 브랜치는 머지된 main으로 맞춤.
   - 남은 확인: relationJoins가 스테이징(workerd + Hyperdrive)의 관계 조회에서 동작하는지는 로그인한 화면에서만 확인된다(스테이징에 테스트 계정을 만들지 않음) - 사용자가 다시 써 본 뒤 Cloudflare 분석으로 오류, CPU 확인. Workers Paid 전환 뒤 1102가 사라지는지도 같은 방법으로.
+- **2026-10-02 사용자 제보: 좋아요 연타 → `Worker exceeded resource limits`**. 분석: 여전히 무료 플랜(12:49 exceededResources 2건), 좋아요 요청 CPU 중앙 42ms(응답 90바이트 - 화면 다시 그리기 아님, 요청당 고정 비용). 대응: `reaction.setLike`(멱등, 알림은 새로 켤 때만) + 화면은 하트를 바로 바꾸고 500ms 멈춘 뒤 마지막 상태만 전송(9번 연타 요청 1번, 짝수 번 0번, 떠나기 전 전송). PR woopinbell/bombyeol#15 CI 통과 → 머지(6268009) → 스테이징 배포(버전 80da81b6), `/` 307, `/login` 200, health 200. 이야기의 별 하나(Phase 4 UI)도 같은 방식으로 만들 것. 근본 해결은 Workers Paid 전환(사용자 대시보드, 아직 미전환).
 - 작업 메모: `npm test`는 로컬 DB를 비운다(시드한 화면 확인 데이터도 사라짐). 파이프로 grep하면 실패가 가려지니 종료 코드를 따로 본다.
 - 환경 메모: 기존 스위트에서 3번 중 1번 테스트 1건이 실패했다가 재실행에 통과(어떤 테스트인지 기록 못 함 - 다음에 반복 실행으로 찾을 것). Docker Hub 429로 `db:up` 첫 시도 실패, 재시도 성공. 컨테이너에 한글 폰트가 없어 목업 스크린샷은 Pretendard woff2를 받아 Playwright route로 주입(스크래치패드, 리포에 넣지 않음).
 
