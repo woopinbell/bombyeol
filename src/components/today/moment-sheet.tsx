@@ -27,6 +27,7 @@ export function MomentSheet({
   myUserId,
   canModerate,
   onCommentsChange,
+  onDelete,
 }: {
   open: boolean;
   onClose: () => void;
@@ -39,6 +40,8 @@ export function MomentSheet({
   /** parent는 남의 댓글도 지울 수 있다 */
   canModerate: boolean;
   onCommentsChange: (change: CommentsChange) => void;
+  /** 작성자 또는 parent만 */
+  onDelete?: () => void;
 }) {
   const t = useTranslations("moment");
   const errors = useTranslations("errors");
@@ -232,6 +235,12 @@ export function MomentSheet({
           }),
         })}
       </p>
+
+      {onDelete ? (
+        <Button variant="text" className="-ml-2 self-start" onClick={onDelete}>
+          {t("remove")}
+        </Button>
+      ) : null}
 
       <h3 className="mt-6 mb-2 font-bold">{t("comments", { count: visible.length })}</h3>
       {loadError ? (

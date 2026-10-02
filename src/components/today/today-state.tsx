@@ -29,6 +29,10 @@ type TodayState = FeedProps & {
   addMilestone: (milestone: FeedMilestone) => void;
   /** 방금 더한 기록, 마일스톤 ID */
   fresh: ReadonlySet<string>;
+  /** 지우기를 누른 기록: 되돌리기 토스트가 닫힐 때까지 숨겨 둔다 */
+  hidden: ReadonlySet<string>;
+  setHidden: (id: string, hide: boolean) => void;
+  dropMoment: (id: string) => void;
 };
 
 const TodayContext = createContext<TodayState | null>(null);
@@ -39,6 +43,7 @@ export function TodayProvider({ children, ...props }: FeedProps & { children: Re
   const [cursor, setCursor] = useState(props.initialCursor);
   const [milestones, setMilestones] = useState(props.milestones);
   const [fresh, setFresh] = useState<ReadonlySet<string>>(new Set());
+  const [hidden, setHiddenSet] = useState<ReadonlySet<string>>(new Set());
   const matches = (subject: { childId: string | null; petId: string | null }) => {
     const who = props.who;
     return (
@@ -54,6 +59,15 @@ export function TodayProvider({ children, ...props }: FeedProps & { children: Re
       items,
       cursor,
       fresh,
+      hidden,
+      setHidden: (id, hide) =>
+        setHiddenSet((h) => {
+          const next = new Set(h);
+          if (hide) next.add(id);
+          else next.delete(id);
+          return next;
+        }),
+      dropMoment: (id) => setItems((list) => list.filter((m) => m.id !== id)),
       setPage: (next, nextCursor) => {
         setItems(next);
         setCursor(nextCursor);
@@ -71,7 +85,7 @@ export function TodayProvider({ children, ...props }: FeedProps & { children: Re
     }),
     // props는 서버가 매 렌더 새로 넘기므로 필요한 값만 본다
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, cursor, milestones, fresh, props.who, props.authors],
+    [items, cursor, milestones, fresh, hidden, props.who, props.authors],
   );
   return <TodayContext value={value}>{children}</TodayContext>;
 }

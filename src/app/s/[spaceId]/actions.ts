@@ -147,3 +147,13 @@ export async function createMilestone(
     return { error: toErrorKey(error) } satisfies Failed;
   }
 }
+
+/** 기록 지우기(작성자 또는 parent). 붙은 파일까지 저장소에서 지운다(G-05) */
+export async function deleteMoment(spaceId: string, momentId: string) {
+  try {
+    const caller = await serverCaller();
+    return await caller.moment.delete({ spaceId, momentId });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}

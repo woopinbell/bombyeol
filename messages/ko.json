@@ -261,7 +261,9 @@
     "commented": "댓글을 남겼어요",
     "commentRemoved": "댓글을 지웠어요",
     "undo": "되돌리기",
-    "removeComment": "지우기"
+    "removeComment": "지우기",
+    "remove": "이 기록 지우기",
+    "removed": "기록을 지웠어요"
   },
   "upload": {
     "title": "사진 올리기",

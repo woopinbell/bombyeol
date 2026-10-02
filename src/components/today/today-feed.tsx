@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { loadMoreMoments, toggleLike } from "@/app/s/[spaceId]/actions";
+import { deleteMoment, loadMoreMoments, toggleLike } from "@/app/s/[spaceId]/actions";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
@@ -34,7 +34,11 @@ export function TodayFeed() {
   const { toast } = useToast();
   const errors = useTranslations("errors");
 
-  const days = groupByDay(items, props.milestones, { timeZone, hasMore: cursor !== null });
+  const days = groupByDay(
+    items.filter((m) => !props.hidden.has(m.id)),
+    props.milestones,
+    { timeZone, hasMore: cursor !== null },
+  );
 
   const more = () =>
     startLoading(async () => {
@@ -150,7 +154,35 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
   const t = useTranslations("today");
   const format = useFormatter();
   const { authors } = props;
-  const isFresh = useToday().fresh.has(moment.id);
+  const today = useToday();
+  const isFresh = today.fresh.has(moment.id);
+  const ta = useTranslations("moment");
+  const errors = useTranslations("errors");
+  const { toast } = useToast();
+  const canDelete = moment.createdBy.id === props.myUserId || props.canModerate;
+  // 지우기: 바로 숨기고 6초 동안 되돌릴 수 있다. 토스트가 닫히면 실제로 지운다(DESIGN §9.1-7)
+  const remove = () => {
+    setSheet((s) => ({ ...s, open: false }));
+    // 시트가 내려간 뒤에 숨긴다(카드와 함께 시트가 갑자기 사라지지 않게)
+    setTimeout(
+      () => today.setHidden(moment.id, true),
+      prefersReducedMotion() ? motion["d-fast"] : motion["d-sheet"],
+    );
+    toast({
+      message: ta("removed"),
+      action: { label: ta("undo"), onAction: () => today.setHidden(moment.id, false) },
+      onDismiss: async (reason) => {
+        if (reason === "action") return;
+        const result = await deleteMoment(props.spaceId, moment.id);
+        if ("error" in result && result.error !== "ITEM_NOT_FOUND") {
+          today.setHidden(moment.id, false);
+          toast({ message: errors(result.error) });
+        } else {
+          today.dropMoment(moment.id);
+        }
+      },
+    });
+  };
   const who = authors[moment.createdBy.id] ?? moment.createdBy.name ?? "";
   const time = format.dateTime(moment.takenAt, { hour: "numeric", minute: "2-digit" });
   const [comments, setComments] = useState<CommentsChange>({
@@ -200,6 +232,7 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
         myUserId={props.myUserId}
         canModerate={props.canModerate}
         onCommentsChange={setComments}
+        onDelete={canDelete ? remove : undefined}
       />
     </article>
   );
