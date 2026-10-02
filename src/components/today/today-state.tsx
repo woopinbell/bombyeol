@@ -41,7 +41,26 @@ const TodayContext = createContext<TodayState | null>(null);
 export function TodayProvider({ children, ...props }: FeedProps & { children: ReactNode }) {
   const [items, setItems] = useState(props.initialItems);
   const [cursor, setCursor] = useState(props.initialCursor);
+  // 서버가 화면을 새로 그려 보내면(새로 고침, 서버 액션 뒤) 그 첫 페이지를 받아들이되, 방금 더한 기록과
+  // 더 불러온 페이지는 잃지 않는다 - 올린 사진이 화면에서 사라졌다가 나중에 보이는 일이 없게.
+  const [serverItems, setServerItems] = useState(props.initialItems);
+  if (serverItems !== props.initialItems) {
+    setServerItems(props.initialItems);
+    const incoming = new Set(props.initialItems.map((m) => m.id));
+    setItems((list) => {
+      const kept = list.filter((m) => !incoming.has(m.id));
+      return [...props.initialItems, ...kept].sort(
+        (a, b) => b.takenAt.getTime() - a.takenAt.getTime() || (a.id < b.id ? 1 : -1),
+      );
+    });
+  }
+  const [serverMilestones, setServerMilestones] = useState(props.milestones);
   const [milestones, setMilestones] = useState(props.milestones);
+  if (serverMilestones !== props.milestones) {
+    setServerMilestones(props.milestones);
+    const incoming = new Set(props.milestones.map((m) => m.id));
+    setMilestones((list) => [...props.milestones, ...list.filter((m) => !incoming.has(m.id))]);
+  }
   const [fresh, setFresh] = useState<ReadonlySet<string>>(new Set());
   const [hidden, setHiddenSet] = useState<ReadonlySet<string>>(new Set());
   const matches = (subject: { childId: string | null; petId: string | null }) => {
