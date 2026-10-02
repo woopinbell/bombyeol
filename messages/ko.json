@@ -108,6 +108,33 @@
       "childDateHint": "곧 태어나면 출생 예정일을 골라 주세요",
       "submit": "가족 만들기",
       "submitting": "만드는 중이에요"
+    },
+    "invite": {
+      "title": "할머니 할아버지를\n초대해요",
+      "who": "누구를 초대할까요?",
+      "grandma": "할머니",
+      "grandpa": "할아버지",
+      "grandmaMaternal": "외할머니",
+      "grandpaMaternal": "외할아버지",
+      "custom": "직접 쓸게요",
+      "customLabel": "부를 이름",
+      "hint": "초대 링크는 3일 동안 한 번 쓸 수 있어요. 한 분에 하나씩 만들어요.",
+      "create": "초대 링크 만들기",
+      "creating": "만드는 중이에요",
+      "ready": "{who}께 보낼 초대 링크가 준비됐어요",
+      "someone": "가족",
+      "codeLabel": "초대 코드",
+      "expires": "3일 동안 한 번 쓸 수 있어요",
+      "send": "초대 링크 보내기",
+      "copy": "링크 복사하기",
+      "shareTitle": "봄별 가족 앨범 초대",
+      "shareText": "봄별 가족 앨범 초대장이 왔어요. {family}에서 보냈어요. 아래 링크를 눌러 들어와 주세요.",
+      "shared": "초대 링크를 보냈어요",
+      "copied": "초대 링크를 복사했어요. 카카오톡 대화창에 붙여 넣어 보내 주세요",
+      "copyFailed": "복사하지 못했어요. 위의 초대 코드를 알려 드려도 돼요",
+      "later": "나중에 할게요",
+      "again": "다른 분도 초대하기",
+      "done": "가족 앨범으로 가기"
     }
   }
 }
