@@ -3,6 +3,7 @@ import { RATE_LIMITS, REACTION_POLICY } from "@/lib/plan";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup } from "./helpers/media";
 import { addMember } from "./helpers/members";
+import { callerFor } from "./helpers/trpc";
 import { exhaustRateLimit } from "./helpers/rate";
 
 const prisma = createTestPrisma();
@@ -80,6 +81,31 @@ describe("reaction 좋아요, 댓글", () => {
     });
     expect(item.reactions.comments).toBe(2);
     expect(item).not.toHaveProperty("reactions.0");
+  });
+
+  it("setLike는 원하는 상태로 맞추고 여러 번 보내도 같다, 알림은 새로 켤 때만", async () => {
+    const { parent, storage, spaceId, moment } = await family();
+    let deferred = 0;
+    const api = callerFor(prisma, parent.id, "203.0.113.1", storage, {
+      defer: () => void deferred++,
+    });
+    await expect(api.reaction.setLike({ spaceId, target: moment, liked: true })).resolves.toEqual({
+      liked: true,
+      likes: 1,
+    });
+    await expect(api.reaction.setLike({ spaceId, target: moment, liked: true })).resolves.toEqual({
+      liked: true,
+      likes: 1,
+    });
+    await expect(api.reaction.setLike({ spaceId, target: moment, liked: false })).resolves.toEqual({
+      liked: false,
+      likes: 0,
+    });
+    await expect(api.reaction.setLike({ spaceId, target: moment, liked: false })).resolves.toEqual({
+      liked: false,
+      likes: 0,
+    });
+    expect(deferred).toBe(1);
   });
 
   it("동시에 여러 번 눌러도 좋아요 행은 최대 하나다", async () => {
