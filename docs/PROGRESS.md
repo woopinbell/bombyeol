@@ -56,12 +56,13 @@
   - 검증: format, lint, typecheck, Vitest **377건**(374 → 377), next build, OpenNext + `wrangler deploy --dry-run --env staging` 18.48 MiB(gzip 4.66 MiB, 이전 18.27). 로컬 브라우저(next dev, psql 시드 + `@auth/core/jwt`로 만든 세션 쿠키, Playwright): 글 고치기, 성장 기록 좋아요, 댓글, 처음 옮기기, 값 고치기, 지우기(토스트 뒤 DB 삭제 확인), 아이 더하기, 태어났어요, 이름 비움 오류, 반려동물 더하기(다른 동물), 고치기(품종 비우기), 미래 날짜 오류, 할머니 화면(고치기, 지우기, 더하기 없음), 다크 - 전부 통과, 콘솔 오류 0. 스크린샷 `docs/mockups/2026-10-02-phase3-rest/`.
   - 메모: parent가 아닌 사람이 `/us/child/[id]` 주소로 직접 오면 not-found 화면이 나오지만 상태 코드는 200(우리 탭 loading.tsx가 먼저 스트리밍을 시작해서 - 기존 구조, 서버 액션은 parentProcedure가 막음). 저장 공간의 파일 수는 썸네일까지 세므로 표시하지 않았다.
   - 남은 것: 반려동물 커버 사진 고르기(서버는 있음), 아이, 반려동물 지우기 화면(Phase 7 UI), 기록 날짜(takenAt) 고치기는 서버만 있음.
+  - **PR woopinbell/bombyeol#16 CI 통과(4분) → 머지 커밋으로 main 머지(da2074f)**. 스키마 변경 없음. **스테이징 배포**(버전 29ad189c, Startup 20ms): `/`, `/s/...`, `/s/.../us/child/new`, `/s/.../us/pet/new` 비로그인 → 로그인 307, `/login` 200, health ok, 내부 스모크 db ok, R2 서명 강제 403/403/200, Head, Copy, 정리 ok, fcm invalid_token(정상). 작업 브랜치는 머지된 main으로 맞춤. **로그인한 화면은 사용자 확인 대기**(스테이징에 테스트 계정을 만들지 않음).
 - 작업 메모: `npm test`는 로컬 DB를 비운다(시드한 화면 확인 데이터도 사라짐). 파이프로 grep하면 실패가 가려지니 종료 코드를 따로 본다.
 - 환경 메모: 기존 스위트에서 3번 중 1번 테스트 1건이 실패했다가 재실행에 통과(어떤 테스트인지 기록 못 함 - 다음에 반복 실행으로 찾을 것). Docker Hub 429로 `db:up` 첫 시도 실패, 재시도 성공. 컨테이너에 한글 폰트가 없어 목업 스크린샷은 Pretendard woff2를 받아 Playwright route로 주입(스크래치패드, 리포에 넣지 않음).
 
 ### 다음 할 일 (2026-10-02 세션 마감 기준 - 새 세션은 여기부터)
 
-main 6268009(PR woopinbell/bombyeol#15까지 머지), 스테이징 버전 80da81b6. **작업 브랜치 `claude/magical-planck-y1ekem`에 Phase 3 남은 화면 8커밋(푸시 7d0f253, main 미머지, PR 없음)** - 사용자 확인 뒤 PR, CI, 머지, 스테이징 배포. `claude/jolly-shannon-0ae5z1`은 main과 같다.
+main da2074f(PR woopinbell/bombyeol#16까지 머지), 스테이징 버전 29ad189c. 작업 브랜치 `claude/magical-planck-y1ekem`은 main과 같다. 열린 PR 없음.
 
 **사용자가 할 일(먼저 확인)**
 1. **Workers Paid 전환**(결정됨, Q-PLAN) - 대시보드 Workers & Pages > Plans. 2026-10-02 13시 기준 아직 무료(1102 계속 관측). 전환 뒤 Cloudflare GraphQL 분석(`workersInvocationsAdaptive`, 스크립트 `bombyeol-staging`)으로 status, cpuTime 확인.
@@ -70,7 +71,7 @@ main 6268009(PR woopinbell/bombyeol#15까지 머지), 스테이징 버전 80da81
 4. 결정 대기: Q-PAY(결제 공급자, 사업자 등록 여부 선결), Q-ILLUST(일러스트), Q-HONOR(경어 잠정), Q-DOMAIN.
 
 **개발 순서(제안)**
-1. ~~Phase 3 남은 화면~~(2026-10-02 작업 브랜치 `claude/magical-planck-y1ekem` 8커밋, 위 기록) - PR, 머지, 스테이징 배포 남음. 이어서 할 것: 반려동물 커버 사진 고르기.
+1. ~~Phase 3 남은 화면~~(2026-10-02 PR woopinbell/bombyeol#16 머지, 스테이징 배포). 이어서 할 것: 반려동물 커버 사진 고르기. 사용자 확인: 스테이징에서 글 고치기, 성장 기록 시트(좋아요, 댓글, 고치기, 처음 옮기기, 지우기), 우리 탭(아이, 반려동물 더하기, 고치기, 태어났어요, 저장 공간).
 2. **Phase 4 이야기 탭 UI**(`feat(story)`) - 질문 카드, 이야기 모음, 쓰기, 별 하나(좋아요처럼 연타를 모아 마지막 상태만 보낼 것 - `reaction.toggleStar`에도 setLike 같은 멱등 API 추가), 물어보기.
 3. Phase 5 우리 탭 UI(달력, 구성원, D-day, 별이 되신 분, 임신 기록, 설정: 화면 설정 `setDisplayPref`, 초대 관리).
 4. Phase 6 UI: 카카오톡 공유(`feat(share)`), PWA(`feat(pwa)`, 서비스 워커, 푸시 토큰 등록 화면).

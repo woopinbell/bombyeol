@@ -105,7 +105,7 @@
 - [x] `chore(prisma): Reaction 스키마 정의`
 - [x] `feat(reaction): 좋아요, 댓글 구현` [G-07]
 - [x] `feat(today): 오늘 탭 화면 구성` - 2026-10-02 9커밋, main 머지(PR woopinbell/bombyeol#13): 하단 3탭 틀과 아이콘, 로컬 개발 저장소, 피드 최근 댓글(서버), 시트와 토스트, 날짜별 앨범 피드와 좋아요, 사진 보기와 댓글, 사진, 영상 올리기, 기록하기(일기, 성장 기록), 내 기록 지우기(되돌리기)
-- [x] (남았던 화면) 2026-10-02 8커밋, 작업 브랜치 `claude/magical-planck-y1ekem`(main 미머지):
+- [x] (남았던 화면) 2026-10-02 8커밋, main 머지(PR woopinbell/bombyeol#16), 스테이징 배포:
   - [x] `feat(today): 내 기록 글 고치기 구현` - 작성자만, 일기는 비울 수 없음
   - [x] `refactor(today): 좋아요, 댓글을 기록과 성장 기록이 함께 쓰게 분리` - `reactions.tsx`(useLike 연타 묶기, useComments)
   - [x] `feat(milestone): 성장 기록 자세히 보기(좋아요, 댓글, 지우기) 구현` - 띠를 누르면 시트, 띠에 좋아요, 댓글 수
