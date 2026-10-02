@@ -16,9 +16,12 @@ export async function loadMoreMoments(spaceId: string, who: Who, cursor: FeedCur
   }
 }
 
-/** 좋아요, 댓글을 남기는 오늘 기록 */
+/** 좋아요를 남기는 오늘 기록 */
 type TodayTarget =
   { type: "moment"; momentId: string } | { type: "milestone"; milestoneId: string };
+
+/** 댓글을 남기는 대상: 오늘 기록과 이야기 */
+type CommentTarget = TodayTarget | { type: "story"; storyEntryId: string };
 
 /** 좋아요를 원하는 상태로(여러 번 보내도 같다). 화면은 연달아 누른 것을 모아 마지막 상태만 보낸다 */
 export async function setLike(spaceId: string, target: TodayTarget, liked: boolean) {
@@ -30,7 +33,7 @@ export async function setLike(spaceId: string, target: TodayTarget, liked: boole
   }
 }
 
-export async function listComments(spaceId: string, target: TodayTarget) {
+export async function listComments(spaceId: string, target: CommentTarget) {
   try {
     const caller = await serverCaller();
     return await caller.reaction.listComments({ spaceId, target });
@@ -39,7 +42,7 @@ export async function listComments(spaceId: string, target: TodayTarget) {
   }
 }
 
-export async function addComment(spaceId: string, target: TodayTarget, body: string) {
+export async function addComment(spaceId: string, target: CommentTarget, body: string) {
   try {
     const caller = await serverCaller();
     return await caller.reaction.addComment({ spaceId, target, body });
