@@ -1,6 +1,6 @@
 # 로고 v2 후보 (2026-10-02, Q-LOGO)
 
-보드(`image-asset/concept/logo-concepts.png`) 1번 방향 — 꽃 + 남색 별 — 안에서 다시 그린 후보. SVG 원본·생성기는 `image-asset/logo-v2/`(`python3 build.py <PretendardVariable.woff2>`). 검토판 `index.html`, 스크린샷 `shots/logo-board.png`. **확정 아님.**
+보드(`image-asset/concept/logo-concepts.png`) 1번 방향 - 꽃 + 남색 별 - 안에서 다시 그린 후보. SVG 원본, 생성기는 `image-asset/logo-v2/`(`python3 build.py <PretendardVariable.woff2>`). 검토판 `index.html`, 스크린샷 `shots/logo-board.png`. **확정 아님.**
 
 | | 심볼 | 장점 | 약점 |
 |---|---|---|---|
@@ -10,8 +10,8 @@
 
 공통: 별은 둥근 모서리, 꽃과 겹치는 곳은 바탕색 틈으로 분리, 어두운 바탕에서는 별을 silver로(남색 별이 사라지므로), 48px 이하에서는 작은 반짝임 생략, 앱 아이콘은 마스커블 안전 영역(80%) 안.
 
-워드마크(한글은 직접 그린 경로 — 폰트 설치·라이선스와 무관, 영문 BOMBYEOL은 Pretendard(OFL) 윤곽선):
-- W1 둥근 단선 — 차분하고 또렷.
-- W2 손맛 곡선 — 살짝 기운 가로획, ㄹ 끝이 밑줄로 이어지고 골드 반짝임(보드 5·6번의 곡선 계승).
+워드마크(한글은 직접 그린 경로 - 폰트 설치, 라이선스와 무관, 영문 BOMBYEOL은 Pretendard(OFL) 윤곽선):
+- W1 둥근 단선 - 차분하고 또렷.
+- W2 손맛 곡선 - 살짝 기운 가로획, ㄹ 끝이 밑줄로 이어지고 골드 반짝임(보드 5, 6번의 곡선 계승).
 
-정직한 한계: 워드마크는 기하 구성으로 만든 초안이다. 한글 글자꼴의 광학 보정(ㅂ 너비, 획 굵기 대비, 받침 비례)은 전문 서체 디자이너가 다듬으면 더 좋아진다. 고른 뒤 파생 에셋(favicon 16·32, PWA 192·512, maskable, apple-touch 180, OG 1200×630)을 생성기로 다시 만든다.
+정직한 한계: 워드마크는 기하 구성으로 만든 초안이다. 한글 글자꼴의 광학 보정(ㅂ 너비, 획 굵기 대비, 받침 비례)은 전문 서체 디자이너가 다듬으면 더 좋아진다. 고른 뒤 파생 에셋(favicon 16, 32, PWA 192, 512, maskable, apple-touch 180, OG 1200×630)을 생성기로 다시 만든다.
