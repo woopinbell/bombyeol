@@ -34,6 +34,8 @@ type TodayState = FeedProps & {
   setHidden: (id: string, hide: boolean) => void;
   dropMoment: (id: string) => void;
   dropMilestone: (id: string) => void;
+  /** 고친 성장 기록을 반영한다 */
+  patchMilestone: (id: string, patch: Partial<FeedMilestone>) => void;
   /** 고친 글을 피드에 반영한다 */
   setMomentBody: (id: string, body: string | null) => void;
 };
@@ -91,6 +93,8 @@ export function TodayProvider({ children, ...props }: FeedProps & { children: Re
         }),
       dropMoment: (id) => setItems((list) => list.filter((m) => m.id !== id)),
       dropMilestone: (id) => setMilestones((list) => list.filter((m) => m.id !== id)),
+      patchMilestone: (id, patch) =>
+        setMilestones((list) => list.map((m) => (m.id === id ? { ...m, ...patch } : m))),
       setMomentBody: (id, body) =>
         setItems((list) => list.map((m) => (m.id === id ? { ...m, body } : m))),
       setPage: (next, nextCursor) => {

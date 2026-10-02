@@ -216,6 +216,7 @@ function MilestoneStrip({ milestone, ...props }: { milestone: FeedMilestone } & 
           onLikeChange={setLike}
           onCommentsChange={setComments}
           onDelete={canDelete ? remove : undefined}
+          canEdit={canDelete}
         />
       ) : null}
     </span>

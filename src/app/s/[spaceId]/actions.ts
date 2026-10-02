@@ -174,3 +174,22 @@ export async function deleteMilestone(spaceId: string, milestoneId: string) {
     return { error: toErrorKey(error) } satisfies Failed;
   }
 }
+
+/** 성장 기록 고치기(남긴 사람 또는 parent). moveFirst면 같은 순간의 "처음" 표시를 이 기록으로 옮긴다 */
+export async function updateMilestone(
+  spaceId: string,
+  input: {
+    milestoneId: string;
+    value: Record<string, unknown>;
+    recordedAt: string;
+    first?: boolean;
+    moveFirst?: boolean;
+  },
+) {
+  try {
+    const caller = await serverCaller();
+    return await caller.milestone.update({ spaceId, ...input });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}
