@@ -1,0 +1,11 @@
+/* 목업 보드(앱 바깥) 전용 — 앱 UI 값이 아니므로 스케일 검사 대상이 아니다 */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif; background: #E9E4DA; color: #2C2621; -webkit-font-smoothing: antialiased; word-break: keep-all; }
+:root[data-theme="dark"] body { background: #0E1120; color: #F7F1E6; }
+.board { padding: 32px; }
+.board h1.bt { font-size: 22px; margin: 0 0 4px; }
+.board .lede { font-size: 14px; opacity: .8; margin: 0 0 20px; max-width: 1200px; line-height: 1.5; }
+.row { display: flex; gap: 28px; align-items: flex-start; padding: 8px 4px 16px; width: max-content; }
+.cap { font-size: 13px; opacity: .8; margin: 10px 2px 0; max-width: 390px; line-height: 1.45; }
+.phone { width: 390px; height: 844px; border-radius: 36px; overflow: hidden; position: relative; outline: 1px solid rgba(127,127,127,.35); display: flex; flex-direction: column; }
+.status { height: 44px; flex: none; display: flex; align-items: center; padding: 0 26px; font-size: 14px; font-weight: 600; }

@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>봄별 B안 L2</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="board.css">
+<style id="app">
+  /* 앱 화면 — tokens.css 변수만 쓴다(scripts: check-scale.py가 검사) */
+  .phone { background: var(--bg); color: var(--fg); font-size: var(--t-body); line-height: var(--lh-body); font-weight: var(--w-regular); }
+  .screen { flex: 1; min-height: 0; overflow: hidden; padding: 0 var(--sp-5); display: flex; flex-direction: column; }
+  .screen > *, .sheet > * { flex-shrink: 0; }
+  .screen > .grow, .screen > .empty, .sheet > .list { flex-shrink: 1; }
+  .ic { display: inline-flex; width: var(--icon); height: var(--icon); flex: none; }
+  .ic svg { width: 100%; height: 100%; }
+  .ic.s { width: var(--icon-s); height: var(--icon-s); }
+  .num { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--fg-muted); }
+  .cap-t { font-size: var(--t-caption); line-height: var(--lh-caption); }
+  .top { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-2) 0 var(--sp-4); }
+  .top h1 { margin: 0; font-size: var(--t-title-s); line-height: var(--lh-title-s); font-weight: var(--w-bold); }
+  h2.big { margin: 0; font-size: var(--t-title); line-height: var(--lh-title); font-weight: var(--w-heavy); letter-spacing: var(--tr-title); }
+
+  /* 버튼 */
+  .btn { min-height: var(--touch); border-radius: var(--r-m); font: inherit; font-weight: var(--w-bold); display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); padding: 0 var(--sp-4); border: var(--bw) solid var(--line-strong); background: transparent; color: var(--fg); }
+  .btn.primary { background: var(--strong); color: var(--on-strong); border-color: var(--strong); }
+  .btn.block { width: 100%; }
+  .btn.elder { min-height: var(--touch-elder); font-size: var(--t-title-s); }
+  .btn.text { border-color: transparent; padding: 0 var(--sp-2); font-weight: var(--w-medium); color: var(--fg-muted); }
+  .kakao { background: var(--spring-yellow); border-color: var(--spring-yellow); color: var(--ink); }
+
+  /* 세그먼트: 바깥 r-m, 안쪽 r-s(=14−4) */
+  .seg { display: flex; gap: var(--sp-1); padding: var(--sp-1); border: var(--bw) solid var(--line-strong); border-radius: var(--r-m); }
+  .seg span { flex: 1; min-height: var(--touch); display: flex; align-items: center; justify-content: center; border-radius: var(--r-s); font-weight: var(--w-medium); color: var(--fg-muted); }
+  .seg span.on { background: var(--strong); color: var(--on-strong); font-weight: var(--w-bold); }
+
+  /* 하단 탭: 선택은 채운 아이콘 + 굵은 글자(밑줄 막대 없음) */
+  .tabs { flex: none; display: flex; border-top: var(--bw-hair) solid var(--line); background: var(--bg); padding-bottom: var(--sp-5); }
+  .tab { flex: 1; min-height: var(--touch-elder); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); font-size: var(--t-caption); line-height: var(--lh-caption); font-weight: var(--w-medium); color: var(--fg-muted); }
+  .tab.on { color: var(--fg); font-weight: var(--w-heavy); }
+  .night .tab.on { color: var(--starlight-gold); }
+  .dock { flex: none; padding: var(--sp-3) var(--sp-5); border-top: var(--bw-hair) solid var(--line); }
+
+  /* 오늘 — 날짜가 앨범의 장 제목 */
+  .day { display: flex; align-items: baseline; gap: var(--sp-2); margin: var(--sp-6) 0 var(--sp-3); }
+  .day:first-of-type { margin-top: var(--sp-5); }
+  .day b { font-size: var(--t-title); line-height: var(--lh-title); font-weight: var(--w-heavy); letter-spacing: var(--tr-title); }
+  .day .n { margin-left: auto; }
+  .album { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-1); border-radius: var(--r-l); overflow: hidden; }
+  .album .photo { aspect-ratio: 1; }
+  .album .photo.wide { grid-column: span 2; aspect-ratio: 16 / 9; }
+  .photo { position: relative; overflow: hidden; }
+  .photo svg { display: block; width: 100%; height: 100%; }
+  .say { margin: var(--sp-3) 0 0; }
+  .say .who { font-weight: var(--w-bold); }
+  .rx { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); }
+  .cmt { margin-top: var(--sp-3); padding-left: var(--sp-3); border-left: var(--bw-sel) solid var(--line); }
+  .ms { display: inline-flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-3); border-radius: var(--r-m); background: var(--spring-pink); color: var(--ink); font-weight: var(--w-bold); }
+
+  /* 이야기 */
+  .head2 { padding: var(--sp-2) 0 var(--sp-4); }
+  .ask { background: var(--surface); border-radius: var(--r-l); padding: var(--sp-5); margin: var(--sp-5) 0 var(--sp-6); }
+  .ask .k { display: flex; align-items: center; gap: var(--sp-2); color: var(--starlight-gold); font-weight: var(--w-bold); }
+  .ask .q { margin: var(--sp-2) 0 var(--sp-4); font-size: var(--t-title); line-height: var(--lh-title); font-weight: var(--w-heavy); letter-spacing: var(--tr-title); }
+  .sec { margin: 0 0 var(--sp-3); font-weight: var(--w-bold); }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+  .tile { background: var(--surface); border-radius: var(--r-l); overflow: hidden; display: flex; flex-direction: column; }
+  .tile .photo { aspect-ratio: 16 / 10; }
+  .tile .b { padding: var(--sp-3) var(--sp-4) var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; }
+  .tile .t { font-weight: var(--w-bold); line-height: var(--lh-title-s); }
+  .tile .s { display: flex; align-items: center; gap: var(--sp-1); margin-top: auto; }
+  .tile .s.done { color: var(--starlight-gold); font-weight: var(--w-bold); }
+
+  /* 우리 */
+  .mon { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-2); }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+  .cal .w { padding: var(--sp-1) 0; font-weight: var(--w-bold); }
+  .cal .d { min-height: var(--touch); display: flex; align-items: center; justify-content: center; position: relative; }
+  .cal .d.today span { display: inline-flex; align-items: center; justify-content: center; width: var(--sp-7); height: var(--sp-7); border-radius: var(--r-full); border: var(--bw-sel) solid var(--fg); font-weight: var(--w-heavy); }
+  .cal .d.ev::after { content: ""; position: absolute; bottom: var(--sp-1); width: var(--sp-2); height: var(--sp-2); border-radius: var(--r-full); background: var(--strong); }
+  .up { list-style: none; margin: var(--sp-4) 0 0; padding: 0; border-top: var(--bw-hair) solid var(--line); }
+  .up li { display: flex; align-items: center; gap: var(--sp-4); min-height: var(--touch-elder); border-bottom: var(--bw-hair) solid var(--line); }
+  .up .when { min-width: calc(var(--sp-8) + var(--sp-6)); font-weight: var(--w-heavy); }
+  .up .what { flex: 1; font-weight: var(--w-medium); }
+  .faces { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--sp-2); margin: var(--sp-6) 0 var(--sp-5); text-align: center; }
+  .faces .ava { display: block; width: var(--sp-8); height: var(--sp-8); margin: 0 auto var(--sp-1); border-radius: var(--r-full); overflow: hidden; }
+  .faces .memo .ava { outline: var(--bw) dashed var(--fg-muted); outline-offset: var(--sp-1); }
+  .faces .gone { display: flex; align-items: center; justify-content: center; gap: var(--sp-1); }
+
+  /* 시트·토스트 */
+  .under { position: absolute; inset: 0; }
+  .scrim { position: absolute; inset: 0; background: var(--scrim); }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; top: var(--sp-8); background: var(--bg); border-radius: var(--r-l) var(--r-l) 0 0; padding: var(--sp-2) var(--sp-5) var(--sp-5); display: flex; flex-direction: column; overscroll-behavior: contain; }
+  .grab { width: var(--sp-7); height: var(--sp-1); border-radius: var(--r-full); background: var(--line-strong); margin: 0 auto var(--sp-2); }
+  .sheet .hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-3); }
+  .sheet .photo { aspect-ratio: 4 / 3; border-radius: var(--r-m); }
+  .sheet .list { flex: 1; display: flex; flex-direction: column; gap: var(--sp-3); margin-top: var(--sp-4); }
+  .input { display: flex; gap: var(--sp-2); }
+  .field { flex: 1; min-height: var(--touch); border: var(--bw) solid var(--line-strong); border-radius: var(--r-m); display: flex; align-items: center; padding: 0 var(--sp-4); }
+  .toast { display: flex; align-items: center; gap: var(--sp-3); background: var(--strong); color: var(--on-strong); border-radius: var(--r-m); padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4); margin-bottom: var(--sp-3); font-weight: var(--w-medium); }
+  .toast .btn { min-height: var(--touch); color: var(--on-strong); border-color: transparent; }
+
+  /* 빈 화면 */
+  .empty { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-3); padding-bottom: var(--sp-8); }
+  .empty .mark { width: var(--sp-8); height: var(--sp-8); color: var(--starlight-gold); }
+  .empty p { margin: 0; }
+
+  /* 온보딩 */
+  .onb { padding: 0 var(--sp-6) var(--sp-7); }
+  .onb .nav { display: flex; align-items: center; justify-content: space-between; min-height: var(--touch-elder); margin-bottom: var(--sp-4); }
+  .steps { display: flex; gap: var(--sp-2); align-items: center; }
+  .steps i { width: var(--sp-3); height: var(--sp-3); border-radius: var(--r-full); border: var(--bw) solid var(--strong); }
+  .steps i.on { background: var(--strong); }
+  .onb h2 { margin: 0; font-size: var(--t-display); line-height: var(--lh-display); font-weight: var(--w-heavy); letter-spacing: var(--tr-display); }
+  .onb .d { margin: var(--sp-3) 0 0; font-size: var(--t-title-s); line-height: var(--lh-body); }
+  .onb .hero { aspect-ratio: 4 / 3; border-radius: var(--r-l); margin: var(--sp-6) 0 0; }
+  .grow { flex: 1; }
+  .lbl { display: block; margin: var(--sp-6) 0 var(--sp-2); font-weight: var(--w-bold); }
+  .inp { min-height: var(--touch-elder); border: var(--bw-sel) solid var(--fg); border-radius: var(--r-m); display: flex; align-items: center; padding: 0 var(--sp-4); font-size: var(--t-title-s); font-weight: var(--w-medium); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+  .chip { min-height: var(--touch); display: inline-flex; align-items: center; padding: 0 var(--sp-4); border-radius: var(--r-m); border: var(--bw) solid var(--line-strong); font-weight: var(--w-medium); }
+  .chip.on { border: var(--bw-sel) solid var(--fg); font-weight: var(--w-bold); }
+  .preview { margin-top: var(--sp-6); padding: var(--sp-4); border-radius: var(--r-m); border: var(--bw-hair) solid var(--line); font-size: var(--t-title); line-height: var(--lh-title); font-weight: var(--w-medium); }
+  .scale { display: flex; gap: var(--sp-2); margin-top: var(--sp-4); }
+  .scale .btn { flex: 1; }
+  .scale .btn.on { border: var(--bw-sel) solid var(--fg); }
+</style>
+</head>
+<body>
+<div class="board">
+  <h1 class="bt">B안 · L2 시스템 제안</h1>
+  <p class="lede">간격 8단계·라운드 3단계·선 3단계·글자 5단계(전부 rem — 글자 크게는 루트만 바꾼다)·심볼에서 뽑은 아이콘. 화면 제목 중복 제거, 테두리 상자 대신 여백·면, "정원" 대신 "이야기 모음", "D-12" 대신 "2일 뒤". 값은 전부 tokens.css 후보이고 확정 아님.</p>
+
+  <div class="row" id="tabs">
+    <div>
+      <div class="phone"><div class="status">9:41</div>
+        <div class="screen">
+          <div class="top"><h1>지우네 가족</h1></div>
+          <div class="seg"><span class="on">모두</span><span>지우</span><span>콩이</span></div>
+          <div class="day"><b class="num">10월 1일</b><span class="cap-t muted">수요일 · 오늘</span><span class="n cap-t muted num">사진 3</span></div>
+          <div class="album"><div class="photo wide" data-scene="park"></div><div class="photo" data-scene="cake"></div><div class="photo" data-scene="hands"></div></div>
+          <p class="say">놀이터에서 혼자 미끄럼틀 탔어요 <span class="cap-t muted">엄마 · 오후 3:20</span></p>
+          <div class="cmt"><span class="who" style="font-weight:var(--w-bold)">할머니</span> 우리 강아지 다 컸네</div>
+          <div class="rx"><span class="btn"><span class="ic s" data-i="heart"></span>좋아요 2</span><span class="btn"><span class="ic s" data-i="talk"></span>댓글 1</span></div>
+          <div class="day"><b class="num">9월 30일</b><span class="cap-t muted">화요일</span></div>
+          <span class="ms"><span class="ic s" data-i="spark"></span>콩이가 처음 바다를 봤어요</span>
+        </div>
+        <div class="dock"><span class="btn primary block"><span class="ic s" data-i="plus"></span>사진 올리기</span></div>
+        <div class="tabs" data-tabs="today"></div>
+      </div>
+      <p class="cap"><b>오늘</b> — 화면 제목 "오늘"을 지우고(탭이 이미 말함) 날짜를 앨범의 장 제목으로. 사진은 4px 간격 한 묶음, 바깥 모서리만 둥글게. 할머니 댓글은 인용선으로 바로 보이게. 반응은 테두리 있는 버튼(3.2:1).</p>
+    </div>
+    <div>
+      <div class="phone night"><div class="status">9:41</div>
+        <div class="screen">
+          <div class="head2"><h2 class="big">할머니의 이야기</h2><div class="cap-t muted num">이야기 12 · 받은 별 23</div></div>
+          <div class="seg"><span class="on">모두</span><span>별 받은</span><span>질문 2</span></div>
+          <div class="ask"><div class="k cap-t"><span class="ic s" data-i="spark"></span>지우 엄마가 물어봤어요</div><div class="q">어린 시절 살던 동네는 어땠어요?</div><span class="btn primary block elder"><span class="ic s" data-i="pen"></span>답하기</span></div>
+          <div class="sec cap-t muted">이야기 모음</div>
+          <div class="tiles">
+            <div class="tile"><div class="photo" data-scene="old"></div><div class="b"><span class="t">시집오던 날 탄 버스</span><span class="s done cap-t"><span class="ic s" data-i="starOn"></span>별 3</span></div></div>
+            <div class="tile"><div class="photo" data-scene="sea"></div><div class="b"><span class="t">부산 이모 집 바다</span><span class="s done cap-t"><span class="ic s" data-i="starOn"></span>별 5</span></div></div>
+            <div class="tile"><div class="b"><span class="t">처음 끓여 본 된장찌개</span><span class="s cap-t muted"><span class="ic s" data-i="pen"></span>쓰는 중</span></div></div>
+            <div class="tile"><div class="b"><span class="t">손주가 태어난 날</span><span class="s cap-t muted"><span class="ic s" data-i="spark"></span>질문만 있어요</span></div></div>
+          </div>
+        </div>
+        <div class="tabs" data-tabs="story"></div>
+      </div>
+      <p class="cap"><b>이야기</b> — 질문 카드를 위로 키우고 버튼을 가로 전체로(글자 크게에서도 안 깨짐). 타일은 테두리 대신 한 단계 밝은 면. 골드는 반짝임·별 표식과 라벨에만.</p>
+    </div>
+    <div>
+      <div class="phone"><div class="status">9:41</div>
+        <div class="screen">
+          <div class="top"><h1>지우네 가족</h1></div>
+          <div class="mon"><h2 class="big num">10월</h2><span class="btn text">달력 크게 보기<span class="ic s" data-i="right"></span></span></div>
+          <div class="cal num cap-t">
+            <span class="w">일</span><span class="w">월</span><span class="w">화</span><span class="w">수</span><span class="w">목</span><span class="w">금</span><span class="w">토</span>
+            <span class="d muted">28</span><span class="d muted">29</span><span class="d muted">30</span><span class="d today"><span>1</span></span><span class="d">2</span><span class="d ev">3</span><span class="d">4</span>
+            <span class="d">5</span><span class="d">6</span><span class="d">7</span><span class="d">8</span><span class="d">9</span><span class="d">10</span><span class="d">11</span>
+            <span class="d">12</span><span class="d ev">13</span><span class="d">14</span><span class="d">15</span><span class="d">16</span><span class="d">17</span><span class="d">18</span>
+          </div>
+          <ul class="up">
+            <li><span class="when num">2일 뒤</span><span class="what">외할아버지 기일</span><span class="cap-t muted num">10월 3일</span></li>
+            <li><span class="when num">12일 뒤</span><span class="what">할머니 생신</span><span class="cap-t muted num">10월 13일</span></li>
+          </ul>
+          <div class="faces cap-t">
+            <div><span class="ava" data-scene="hands"></span>할머니</div>
+            <div class="memo"><span class="ava" data-scene="old"></span>외할아버지<span class="gone muted"><span class="ic s" data-i="star"></span>별</span></div>
+            <div><span class="ava" data-scene="cake"></span>엄마</div>
+            <div><span class="ava" data-scene="park"></span>지우</div>
+            <div><span class="ava" data-scene="dog"></span>콩이</div>
+          </div>
+          <span class="btn block"><span class="ic s" data-i="invite"></span>가족 초대하기</span>
+        </div>
+        <div class="tabs" data-tabs="us"></div>
+      </div>
+      <p class="cap"><b>우리</b> — "D-12" 대신 "12일 뒤", 날짜는 고정폭 숫자. 별이 되신 분은 점선 테두리 + "별" 글자(색만으로 구분 안 함). 초대하기를 화면 안에 하나.</p>
+    </div>
+  </div>
+
+  <div class="row" id="more">
+    <div>
+      <div class="phone"><div class="status">9:41</div>
+        <div class="under"><div class="scrim"></div></div>
+        <div class="sheet" role="dialog" aria-label="사진 자세히">
+          <div class="grab"></div>
+          <div class="hd"><div><b>놀이터에서</b><div class="cap-t muted">엄마 · 10월 1일 오후 3:20</div></div><span class="btn"><span class="ic s" data-i="close"></span>닫기</span></div>
+          <div class="photo" data-scene="park"></div>
+          <div class="list">
+            <div><b>할머니</b> 우리 강아지 다 컸네 <span class="cap-t muted">오후 3:41</span></div>
+            <div><b>외삼촌</b> 벌써 혼자 타네! <span class="cap-t muted">방금</span></div>
+          </div>
+          <div class="toast" role="status" aria-live="polite"><span style="flex:1">댓글을 남겼어요</span><span class="btn">닫기</span></div>
+          <div class="input"><span class="field muted">댓글 남기기</span><span class="btn primary">보내기</span></div>
+        </div>
+      </div>
+      <p class="cap"><b>사진 시트 + 토스트</b> — 늘 보이는 [닫기](드래그는 보조), 가림막은 ink 45%. 토스트는 입력 위 하나, 닫기 버튼 동반, aria-live.</p>
+    </div>
+    <div>
+      <div class="phone night"><div class="status">9:41</div>
+        <div class="screen">
+          <div class="head2"><h2 class="big">할머니의 이야기</h2></div>
+          <div class="empty">
+            <span class="mark" data-i="spark"></span>
+            <h2 class="big">아직 남긴 이야기가 없어요</h2>
+            <p class="muted">가족이 물어본 질문에 답하면 여기에 하나씩 모여요.</p>
+            <span class="btn primary block elder" style="margin-top:var(--sp-4)">첫 질문 고르기</span>
+          </div>
+        </div>
+        <div class="tabs" data-tabs="story"></div>
+      </div>
+      <p class="cap"><b>이야기 빈 화면</b> — 일러스트 없이(Q-ILLUST 미정) 심볼의 반짝임 하나 + 한 문장 + 행동 하나.</p>
+    </div>
+  </div>
+
+  <div class="row" id="large">
+    <div>
+      <div class="phone"><div class="status">9:41</div>
+        <div class="screen">
+          <div class="top"><h1>지우네 가족</h1></div>
+          <div class="seg"><span class="on">모두</span><span>지우</span><span>콩이</span></div>
+          <div class="day"><b class="num">10월 1일</b><span class="cap-t muted">오늘</span></div>
+          <div class="album"><div class="photo wide" data-scene="park"></div></div>
+          <p class="say">놀이터에서 혼자 미끄럼틀 탔어요 <span class="cap-t muted">엄마</span></p>
+          <div class="rx"><span class="btn"><span class="ic s" data-i="heart"></span>좋아요 2</span><span class="btn"><span class="ic s" data-i="talk"></span>댓글 1</span></div>
+        </div>
+        <div class="tabs" data-tabs="today"></div>
+      </div>
+      <p class="cap"><b>글자 크게(루트 20px, 1.25배)</b> — 같은 화면을 값 하나로 키움. 간격은 px라 유지, 글자·버튼 글자만 커짐. 사진 묶음은 한 장씩 보이게 바뀌어야 함(구현 시 컨테이너 쿼리).</p>
+    </div>
+    <div>
+      <div class="phone night"><div class="status">9:41</div>
+        <div class="screen">
+          <div class="head2"><h2 class="big">할머니의 이야기</h2></div>
+          <div class="ask"><div class="k cap-t"><span class="ic s" data-i="spark"></span>지우 엄마가 물어봤어요</div><div class="q">어린 시절 살던 동네는 어땠어요?</div><span class="btn primary block elder"><span class="ic s" data-i="pen"></span>답하기</span></div>
+          <div class="sec cap-t muted">이야기 모음</div>
+          <div class="tiles" style="grid-template-columns:1fr">
+            <div class="tile"><div class="b"><span class="t">시집오던 날 탄 버스</span><span class="s done cap-t"><span class="ic s" data-i="starOn"></span>별 3</span></div></div>
+          </div>
+        </div>
+        <div class="tabs" data-tabs="story"></div>
+      </div>
+      <p class="cap"><b>글자 크게 — 이야기</b> — 타일은 1열로. 질문 카드는 그대로 읽힘.</p>
+    </div>
+  </div>
+
+  <div class="row" id="onb">
+    <div>
+      <div class="phone"><div class="status">9:41</div>
+        <div class="screen onb">
+          <div class="nav"><span></span><span class="steps"><i class="on"></i><i></i><i></i></span></div>
+          <h2>지우 엄마가<br>가족 앨범에 초대했어요</h2>
+          <div class="photo hero" data-scene="park"></div>
+          <p class="d">카카오로 들어오시면 바로 보실 수 있어요.</p>
+          <div class="grow"></div>
+          <span class="btn kakao block elder">카카오로 시작하기</span>
+        </div>
+      </div>
+      <p class="cap"><b>1. 초대 + 로그인</b> (카카오 버튼은 자리 표시 — 카카오 가이드를 따름)</p>
+    </div>
+    <div>
+      <div class="phone"><div class="status">9:41</div>
+        <div class="screen onb">
+          <div class="nav"><span class="btn text" style="padding-left:0"><span class="ic s" data-i="left"></span>이전</span><span class="steps"><i class="on"></i><i class="on"></i><i></i></span></div>
+          <h2>가족이 어떻게<br>불러드리면 될까요?</h2>
+          <span class="lbl">부를 이름</span>
+          <div class="inp">할머니</div>
+          <div class="chips"><span class="chip on">할머니</span><span class="chip">외할머니</span><span class="chip">할아버지</span><span class="chip">외할아버지</span></div>
+          <div class="grow"></div>
+          <span class="btn primary block elder">다음</span>
+        </div>
+      </div>
+      <p class="cap"><b>2. 부를 이름</b> — 초대 값 미리 채움.</p>
+    </div>
+    <div>
+      <div class="phone"><div class="status">9:41</div>
+        <div class="screen onb">
+          <div class="nav"><span class="btn text" style="padding-left:0"><span class="ic s" data-i="left"></span>이전</span><span class="steps"><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+          <h2>글자가 잘 보이세요?</h2>
+          <div class="preview">지우가 오늘 놀이터에서 미끄럼틀을 탔어요</div>
+          <div class="scale"><span class="btn elder">보통</span><span class="btn elder on">크게</span><span class="btn elder">더 크게</span></div>
+          <div class="grow"></div>
+          <span class="btn primary block elder">이대로 시작하기</span>
+        </div>
+      </div>
+      <p class="cap"><b>3. 글자 크기</b> — 슬라이더 대신 세 단계 버튼(드래그 없음). 고른 값 = 루트 글자 크기.</p>
+    </div>
+  </div>
+</div>
+<script src="mock2.js"></script>
+</body>
+</html>
