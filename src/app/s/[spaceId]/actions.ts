@@ -138,6 +138,7 @@ export async function createMilestone(
     kind: string;
     value: Record<string, unknown>;
     recordedAt: string;
+    first: boolean;
   },
 ) {
   try {

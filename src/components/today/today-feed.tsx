@@ -19,7 +19,6 @@ import {
 } from "@/lib/today-feed";
 import { cn } from "@/lib/utils";
 import { motion, prefersReducedMotion } from "@/lib/design-tokens";
-import { kindInfo } from "@/lib/milestone-kinds";
 import { springCurve } from "@/lib/spring";
 
 /**
@@ -129,21 +128,27 @@ export function MilestoneStrip({ milestone }: { milestone: FeedMilestone }) {
   const kind = `${subject}.${milestone.kind}` as Parameters<typeof t>[0];
   const isFresh = useToday().fresh.has(milestone.id);
   const wrap = useRef<HTMLSpanElement>(null);
-  // 방금 남긴 기록: 띠가 안착하고, "처음" 기록(대상당 하나)이면 2초 안에 끝나는 반짝임(DESIGN §9.2, §11)
+  // 방금 남긴 기록: 띠가 안착하고, "처음" 표시를 켠 기록이면 2초 안에 끝나는 반짝임(DESIGN §9.2, §11)
   useEffect(() => {
     const el = wrap.current;
     if (!isFresh || !el) return;
     const chip = el.firstElementChild as HTMLElement;
     settle([chip]);
-    if (kindInfo(subject, milestone.kind)?.once && !prefersReducedMotion()) return sparkle(el);
-  }, [isFresh, subject, milestone.kind]);
+    if (milestone.isFirst && !prefersReducedMotion()) return sparkle(el);
+  }, [isFresh, milestone.isFirst]);
   return (
     <span ref={wrap} className="relative inline-block">
       <span className="inline-flex items-center gap-2 rounded-md bg-spring-pink py-2 pr-4 pl-3 text-ink">
         <Icon name="spark" size="small" />
         <span>
           <b className="font-bold">{milestone.subjectName}</b>{" "}
-          {t.has(kind) ? t(kind, { value: value.value ?? "", title: value.title ?? "" }) : null}
+          {t.has(kind)
+            ? t(kind, {
+                value: value.value ?? "",
+                title: value.title ?? "",
+                first: String(milestone.isFirst),
+              })
+            : null}
         </span>
       </span>
     </span>

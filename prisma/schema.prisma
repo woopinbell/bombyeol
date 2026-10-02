@@ -272,6 +272,7 @@ model Milestone {
   childId     String?
   petId       String?
   kind        String // 프리셋 키(src/lib/milestones.ts) 또는 custom
+  isFirst     Boolean  @default(false) // "처음" 표시(사람이 켠다, 대상, 종류마다 하나 - 직접 쓰기 제외)
   value       Json
   recordedAt  DateTime @db.Date
   createdById String

@@ -23,7 +23,7 @@ async function family() {
   const milestone = await setup.api.milestone.create({
     spaceId: setup.spaceId,
     subject: { type: "child", childId: child.id },
-    kind: "first_tooth",
+    kind: "tooth",
     value: {},
     recordedAt: "2026-09-01",
   });

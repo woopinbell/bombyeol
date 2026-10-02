@@ -13,22 +13,25 @@ describe("마일스톤 프리셋", () => {
   it("나이 창에 들어온 기록하지 않은 '처음'을 먼저 제안한다", () => {
     const birth = d("2026-01-01");
     expect(suggestChildMilestones(birth, new Set(), d("2026-07-10"))).toEqual([
-      "first_roll",
-      "first_sit",
-      "first_tooth",
-      "first_crawl",
+      "roll",
+      "sit",
+      "tooth",
+      "crawl",
       "height",
       "weight",
     ]);
-    expect(
-      suggestChildMilestones(birth, new Set(["first_roll", "first_sit"]), d("2026-07-10")),
-    ).toEqual(["first_tooth", "first_crawl", "height", "weight"]);
+    expect(suggestChildMilestones(birth, new Set(["roll", "sit"]), d("2026-07-10"))).toEqual([
+      "tooth",
+      "crawl",
+      "height",
+      "weight",
+    ]);
     expect(suggestChildMilestones(birth, new Set(), d("2026-02-01"))).toEqual(["height", "weight"]);
     expect(suggestChildMilestones(null, new Set())).toEqual([]);
   });
 
   it("대상별 프리셋만 허용하고 상속 키는 프리셋이 아니다", () => {
-    expect(milestonePreset("child", "first_step")).not.toBeNull();
+    expect(milestonePreset("child", "step")).not.toBeNull();
     expect(milestonePreset("child", "adoption")).toBeNull();
     expect(milestonePreset("pet", "adoption")).not.toBeNull();
     expect(milestonePreset("pet", "toString")).toBeNull();

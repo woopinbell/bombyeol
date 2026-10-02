@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import type { Prisma } from "@/generated/prisma/client";
-import { suggestChildMilestones, milestonePreset } from "@/lib/milestones";
+import { firstIsUnique, milestonePreset, suggestChildMilestones } from "@/lib/milestones";
 import { RATE_LIMITS } from "@/lib/plan";
 import { inputError, limitError, notFound } from "@/server/errors";
 import { lockKey } from "@/server/locks";
@@ -29,6 +29,7 @@ const milestoneSelect = {
   childId: true,
   petId: true,
   kind: true,
+  isFirst: true,
   value: true,
   recordedAt: true,
   createdAt: true,
@@ -46,7 +47,7 @@ async function findEditable(
 ) {
   const milestone = await ctx.prisma.milestone.findFirst({
     where: { id: milestoneId, spaceId: ctx.member.spaceId },
-    select: { id: true, childId: true, kind: true, createdById: true },
+    select: { id: true, childId: true, petId: true, kind: true, isFirst: true, createdById: true },
   });
   if (!milestone) throw notFound("ITEM_NOT_FOUND");
   if (milestone.createdById !== ctx.userId && ctx.member.role !== "parent") {
@@ -55,10 +56,27 @@ async function findEditable(
   return milestone;
 }
 
+/** "처음" 표시 검사: 붙일 수 있는 종류인지, 같은 대상, 종류에 이미 "처음"이 있는지(직접 쓰기는 제한 없음) */
+async function checkFirst(
+  tx: Prisma.TransactionClient,
+  subject: { childId: string | null; petId: string | null },
+  kind: string,
+  exceptId?: string,
+) {
+  const preset = milestonePreset(subject.childId ? "child" : "pet", kind);
+  if (!preset?.firstable) throw inputError("MILESTONE_FIRST_INVALID");
+  if (!firstIsUnique(kind)) return;
+  await lockKey(tx, `milestone-first:${subject.childId ?? subject.petId}:${kind}`);
+  const exists = await tx.milestone.count({
+    where: { ...subject, kind, isFirst: true, ...(exceptId && { id: { not: exceptId } }) },
+  });
+  if (exists) throw inputError("MILESTONE_FIRST_EXISTS");
+}
+
 export const milestoneRouter = router({
   /**
    * 마일스톤 기록. 아이는 parent만, 반려동물은 parent, grandparent(canRecordFor).
-   * "처음" 기록(첫 걸음, 입양일 등)은 대상당 하나. 글 쓰기 폭주는 사용자당 리밋(G-07).
+   * 입양일처럼 한 번뿐인 기록은 대상당 하나, "처음" 표시(first)는 대상, 종류마다 하나. 글 쓰기 폭주는 사용자당 리밋(G-07).
    */
   create: spaceProcedure
     .input(
@@ -67,6 +85,7 @@ export const milestoneRouter = router({
         kind: kindInput,
         value: z.unknown(),
         recordedAt: isoDate,
+        first: z.boolean().default(false),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -98,11 +117,13 @@ export const milestoneRouter = router({
           const exists = await tx.milestone.count({ where: { ...subject, kind: input.kind } });
           if (exists) throw inputError("MILESTONE_EXISTS");
         }
+        if (input.first) await checkFirst(tx, subject, input.kind);
         return tx.milestone.create({
           data: {
             spaceId,
             ...subject,
             kind: input.kind,
+            isFirst: input.first,
             value,
             recordedAt: input.recordedAt,
             createdById: ctx.userId,
@@ -131,26 +152,31 @@ export const milestoneRouter = router({
       return rows.map((m) => ({ ...m, reactions: reactions.get(m.id)! }));
     }),
 
-  /** 아이 나이 기반 제안(PRD §4.2): 나이에 맞고 아직 기록하지 않은 "처음" 기록 + 키, 몸무게 */
+  /** 아이 나이 기반 제안(PRD §4.2): 나이에 맞고 아직 "처음"이 붙지 않은 순간 + 키, 몸무게 */
   suggestions: spaceProcedure
     .input(z.object({ childId: entityId }))
     .query(async ({ ctx, input }) => {
       const child = await ctx.prisma.child.findFirst({
         where: { id: input.childId, spaceId: ctx.member.spaceId },
-        select: { birthDate: true, status: true, milestones: { select: { kind: true } } },
+        select: {
+          birthDate: true,
+          status: true,
+          milestones: { where: { isFirst: true }, select: { kind: true } },
+        },
       });
       if (!child) throw notFound("SUBJECT_NOT_FOUND");
       const recorded = new Set(child.milestones.map((m) => m.kind));
       return suggestChildMilestones(child.status === "born" ? child.birthDate : null, recorded);
     }),
 
-  /** 값, 기록일 수정(작성자 또는 parent). kind와 대상은 바꾸지 않는다 */
+  /** 값, 기록일, "처음" 표시 수정(작성자 또는 parent). kind와 대상은 바꾸지 않는다 */
   update: spaceProcedure
     .input(
       z.object({
         milestoneId: entityId,
         value: z.unknown().optional(),
         recordedAt: isoDate.optional(),
+        first: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -160,10 +186,20 @@ export const milestoneRouter = router({
         input.value === undefined
           ? undefined
           : parseValue(milestone.childId ? "child" : "pet", milestone.kind, input.value).value;
-      return ctx.prisma.milestone.update({
-        where: { id: milestone.id },
-        data: { value, recordedAt: input.recordedAt },
-        select: milestoneSelect,
+      return ctx.prisma.$transaction(async (tx) => {
+        if (input.first && !milestone.isFirst) {
+          await checkFirst(
+            tx,
+            { childId: milestone.childId, petId: milestone.petId },
+            milestone.kind,
+            milestone.id,
+          );
+        }
+        return tx.milestone.update({
+          where: { id: milestone.id },
+          data: { value, recordedAt: input.recordedAt, isFirst: input.first },
+          select: milestoneSelect,
+        });
       });
     }),
 
