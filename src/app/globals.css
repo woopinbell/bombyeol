@@ -33,6 +33,14 @@
   /* 곡선은 tokens.css의 --ease-*(같은 이름)가 맡는다 - Tailwind 기본값과 겹치지 않게 지운다 */
   --ease-*: initial;
   --spacing: 4px;
+
+  /* 탭 전환: 이동 없이 페이드만(DESIGN §11 d-fast, 감소 모션에서도 같은 값) */
+  --animate-tab-in: fade-in var(--d-fast) linear;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
 }
 
 @theme inline {
@@ -138,6 +146,136 @@
     .press[data-pressed] {
       transform: none;
       opacity: 0.8;
+    }
+  }
+
+  /* 시트(DESIGN §11): 열기, 닫기 모두 ease-sheet 350ms. 끄는 동안은 손가락을 그대로 따른다 */
+  .sheet-scrim {
+    opacity: 0;
+    transition: opacity var(--d-sheet) var(--ease-sheet);
+  }
+  .sheet-panel {
+    transform: translateY(100%);
+    transition: transform var(--d-sheet) var(--ease-sheet);
+  }
+  .sheet[data-state="open"] .sheet-scrim {
+    opacity: 1;
+  }
+  .sheet[data-state="open"] .sheet-panel {
+    transform: none;
+  }
+  .sheet[data-dragging] .sheet-panel,
+  .sheet[data-dragging] .sheet-scrim {
+    transition: none;
+  }
+  /* 감소 모션: 이동 없이 200ms 페이드만 */
+  :root[data-motion="reduce"] .sheet-scrim,
+  :root[data-motion="reduce"] .sheet-panel {
+    transition: opacity var(--d-fast) linear;
+  }
+  :root[data-motion="reduce"] .sheet-panel {
+    transform: none;
+    opacity: 0;
+  }
+  :root[data-motion="reduce"] .sheet[data-state="open"] .sheet-panel {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sheet-scrim,
+    .sheet-panel {
+      transition: opacity var(--d-fast) linear;
+    }
+    .sheet-panel {
+      transform: none;
+      opacity: 0;
+    }
+    .sheet[data-state="open"] .sheet-panel {
+      opacity: 1;
+    }
+  }
+
+  /* 토스트(DESIGN §11): 아래에서 400ms로 올라오고 같은 길로 내려간다. 감소 모션은 페이드만 */
+  .toast {
+    transform: translateY(100%);
+    opacity: 0;
+    transition:
+      transform var(--d-toast) ease,
+      opacity var(--d-toast) ease;
+  }
+  .toast[data-state="open"] {
+    transform: none;
+    opacity: 1;
+  }
+  .toast[data-swiping] {
+    transition: none;
+  }
+  :root[data-motion="reduce"] .toast {
+    transform: none;
+    transition: opacity var(--d-fast) linear;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .toast {
+      transform: none;
+      transition: opacity var(--d-fast) linear;
+    }
+  }
+  /* 화면 토스트 자리: 하단 탭 위, 아래 고정 행동(dock)이 있으면 그 위 */
+  .toast-region-page {
+    position: fixed;
+    z-index: 20;
+    inset-inline: 0;
+    margin-inline: auto;
+    max-width: var(--content-max);
+    padding-inline: var(--sp-5);
+    bottom: calc(var(--touch-elder) + env(safe-area-inset-bottom) + var(--sp-3));
+  }
+  :root:has([data-dock]) .toast-region-page {
+    bottom: calc(
+      var(--touch-elder) + env(safe-area-inset-bottom) + var(--sp-3) + var(--touch) + var(--sp-6) +
+        var(--bw-hair)
+    );
+  }
+
+  /* 방금 남긴 댓글: 250ms ease-out, 4px 위로(감소 모션은 페이드만) */
+  .comment-in {
+    animation: comment-in var(--d-base) var(--ease-out);
+  }
+  :root[data-motion="reduce"] .comment-in {
+    animation: fade-in var(--d-fast) linear;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .comment-in {
+      animation: fade-in var(--d-fast) linear;
+    }
+  }
+  @keyframes comment-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--sp-1));
+    }
+  }
+
+  /* 마일스톤 반짝임 한 개(750ms). 감소 모션에서는 만들지 않는다 */
+  .sparkle {
+    position: absolute;
+    pointer-events: none;
+    color: var(--fg);
+    animation: sparkle 750ms linear forwards;
+  }
+  .sparkle svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  @keyframes sparkle {
+    0% {
+      transform: scale(0) rotate(0deg);
+    }
+    50% {
+      transform: scale(1) rotate(90deg);
+    }
+    100% {
+      transform: scale(0) rotate(180deg);
     }
   }
 }

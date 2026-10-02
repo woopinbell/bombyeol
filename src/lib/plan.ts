@@ -81,6 +81,20 @@ export const MEDIA_POLICY = {
 } as const;
 
 /** 오늘(봄) 기록 정책(요금제 무관) */
+/**
+ * 올리기 전 브라우저에서 하는 처리(ARCHITECTURE §1 이미지 - 변환 과금 없이 클라이언트가 만든다).
+ * 사진은 늘 JPEG로 다시 인코딩한다: 긴 변을 줄여 저장 공간을 아끼고(G-03), EXIF(위치 정보 포함)가 지워진다(PRIVACY).
+ * 촬영 시각은 다시 인코딩하기 전에 EXIF에서 읽어 둔다.
+ */
+export const UPLOAD_PREP = {
+  imageMaxEdge: 2560,
+  imageQuality: 0.88,
+  thumbnailMaxEdge: 480,
+  thumbnailQuality: 0.8,
+  /** 영상 썸네일로 쓸 프레임 위치(초) */
+  videoPosterAt: 0.1,
+} as const;
+
 export const MOMENT_POLICY = {
   /** Moment 하나에 붙일 수 있는 사진, 영상 수 */
   maxMediaPerMoment: 10,

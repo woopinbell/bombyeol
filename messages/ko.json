@@ -72,6 +72,20 @@
     "DATE_IN_FUTURE": "생일은 오늘보다 앞선 날이어야 해요",
     "INVALID_INPUT": "입력한 내용을 다시 확인해 주세요",
     "SIGN_IN_REQUIRED": "다시 로그인해 주세요",
+    "FILE_TOO_LARGE": "파일이 너무 커요. 더 짧은 영상을 골라 주세요",
+    "STORAGE_LIMIT": "가족 앨범의 저장 공간이 다 찼어요",
+    "PENDING_LIMIT": "올리는 중인 파일이 많아요. 잠시 뒤에 다시 해 주세요",
+    "UNSUPPORTED_TYPE": "올릴 수 없는 파일이에요. 사진이나 영상을 골라 주세요",
+    "UPLOAD_FAILED": "파일을 올리지 못했어요. 인터넷 연결을 확인하고 다시 해 주세요",
+    "UPLOAD_MISMATCH": "파일을 올리지 못했어요. 다시 해 주세요",
+    "MEDIA_REQUIRED": "사진이나 영상을 하나 이상 골라 주세요",
+    "BODY_REQUIRED": "내용을 써 주세요",
+    "MILESTONE_EXISTS": "이미 남긴 처음 기록이에요",
+    "MILESTONE_VALUE_INVALID": "숫자를 다시 확인해 주세요",
+    "MEMORIAL_READ_ONLY": "별이 된 가족에게는 새 기록을 남기지 않아요",
+    "ITEM_NOT_FOUND": "이미 지워진 기록이에요",
+    "SUBJECT_NOT_FOUND": "가족 구성원을 찾지 못했어요",
+    "FORBIDDEN": "이 기록은 남길 수 없어요",
     "UNKNOWN": "문제가 생겼어요. 잠시 뒤에 다시 해 주세요"
   },
   "auth": {
@@ -172,9 +186,152 @@
       "createFamily": "우리 가족 만들기"
     }
   },
-  "home": {
+  "tabs": {
+    "label": "가족 홈 메뉴",
+    "today": "오늘",
+    "story": "이야기",
+    "us": "우리"
+  },
+  "storyTab": {
+    "title": "이야기",
+    "empty": "할머니 할아버지의 이야기가 여기에 모여요. 이야기 화면은 곧 열려요."
+  },
+  "usTab": {
+    "empty": "가족 달력과 구성원 화면은 곧 열려요.",
+    "invite": "할머니 할아버지 초대하기"
+  },
+  "ui": {
+    "close": "닫기",
+    "notifications": "알림"
+  },
+  "today": {
+    "whoLabel": "누구의 기록을 볼까요",
+    "all": "모두",
+    "today": "오늘",
+    "photos": "사진 {count}",
+    "byline": "{who}, {time}",
+    "diaryBy": "{who}의 일기",
+    "photoAlt": "사진 {n}/{total}",
+    "video": "영상",
+    "rest": "{count}장 더",
+    "like": "좋아요 {count}",
+    "comment": "댓글 {count}",
+    "more": "지난 기록 더 보기",
+    "loading": "불러오는 중",
     "emptyTitle": "아직 올라온 사진이 없어요",
     "emptyLead": "가족이 사진과 이야기를 올리면 여기에 모여요.",
-    "invite": "할머니 할아버지 초대하기"
+    "emptyWhoTitle": "아직 {name} 기록이 없어요"
+  },
+  "milestone": {
+    "child": {
+      "height": "키 {value}cm",
+      "weight": "몸무게 {value}kg",
+      "head": "머리둘레 {value}cm",
+      "first_roll": "처음 뒤집었어요",
+      "first_sit": "처음 혼자 앉았어요",
+      "first_crawl": "처음 기었어요",
+      "first_tooth": "첫 이가 났어요",
+      "first_step": "처음 걸었어요",
+      "first_word": "처음 말했어요",
+      "custom": "{title}"
+    },
+    "pet": {
+      "adoption": "가족이 된 날",
+      "first_walk": "첫 산책",
+      "weight": "몸무게 {value}kg",
+      "vaccination": "예방접종",
+      "vet_visit": "병원 다녀왔어요",
+      "custom": "{title}"
+    }
+  },
+  "moment": {
+    "photoTitle": "사진 {n}/{total}",
+    "textTitle": "기록",
+    "photoAlt": "사진 {n}/{total}",
+    "prev": "이전 사진",
+    "next": "다음 사진",
+    "byline": "{who}, {when}",
+    "comments": "댓글 {count}",
+    "loading": "불러오는 중",
+    "noComments": "아직 댓글이 없어요. 첫 마음을 남겨 보세요.",
+    "commentLabel": "댓글",
+    "commentPlaceholder": "따뜻한 한마디를 남겨 주세요",
+    "send": "남기기",
+    "commentEmpty": "남길 말을 먼저 써 주세요",
+    "commented": "댓글을 남겼어요",
+    "commentRemoved": "댓글을 지웠어요",
+    "undo": "되돌리기",
+    "removeComment": "지우기",
+    "remove": "이 기록 지우기",
+    "removed": "기록을 지웠어요"
+  },
+  "upload": {
+    "title": "사진 올리기",
+    "video": "영상",
+    "picked": "{count}개 골랐어요.",
+    "tooMany": "한 번에 {max}개까지 올릴 수 있어요.",
+    "skipped": "올릴 수 없는 파일 {count}개는 뺐어요.",
+    "subject": "누구의 기록인가요",
+    "family": "가족 모두",
+    "body": "한 줄 남기기",
+    "bodyHint": "쓰지 않아도 괜찮아요",
+    "preparing": "사진을 준비하고 있어요",
+    "uploading": "올리는 중 {done}/{total}",
+    "submit": "올리기",
+    "donePhotos": "사진 {count}장을 올렸어요",
+    "doneVideos": "영상 {count}개를 올렸어요",
+    "doneMixed": "사진과 영상을 올렸어요"
+  },
+  "milestoneKind": {
+    "child": {
+      "first_roll": "처음 뒤집기",
+      "first_sit": "처음 혼자 앉기",
+      "first_crawl": "처음 기기",
+      "first_tooth": "첫 이",
+      "first_step": "첫 걸음",
+      "first_word": "첫 말",
+      "height": "키",
+      "weight": "몸무게",
+      "head": "머리둘레",
+      "custom": "직접 쓰기"
+    },
+    "pet": {
+      "adoption": "가족이 된 날",
+      "first_walk": "첫 산책",
+      "weight": "몸무게",
+      "vaccination": "예방접종",
+      "vet_visit": "병원",
+      "custom": "직접 쓰기"
+    }
+  },
+  "record": {
+    "open": "기록하기",
+    "chooseTitle": "무엇을 남길까요",
+    "photo": "사진 올리기",
+    "photoHint": "사진과 영상을 골라 올려요",
+    "diary": "일기 쓰기",
+    "diaryHint": "아이에게 남기는 짧은 글이에요",
+    "milestone": "성장 기록 남기기",
+    "milestoneHint": "첫 걸음, 키, 몸무게 같은 순간이에요"
+  },
+  "diary": {
+    "title": "일기 쓰기",
+    "child": "누구에게 남길까요",
+    "body": "오늘의 이야기",
+    "draftHint": "쓰는 중인 글은 이 기기에 남아 있어요",
+    "submit": "일기 올리기",
+    "done": "일기를 올렸어요"
+  },
+  "milestoneSheet": {
+    "title": "성장 기록 남기기",
+    "who": "누구의 기록인가요",
+    "what": "어떤 순간인가요",
+    "value": "얼마인가요({unit})",
+    "titleLabel": "어떤 순간인지 짧게",
+    "date": "날짜",
+    "note": "메모",
+    "noteHint": "쓰지 않아도 괜찮아요",
+    "submit": "기록 남기기",
+    "done": "성장 기록을 남겼어요"
   }
 }

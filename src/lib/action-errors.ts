@@ -18,6 +18,20 @@ export const ERROR_KEYS = [
   "ONE_DATE_REQUIRED",
   "DATE_IN_FUTURE",
   "INVALID_INPUT",
+  "FILE_TOO_LARGE",
+  "STORAGE_LIMIT",
+  "PENDING_LIMIT",
+  "UNSUPPORTED_TYPE",
+  "UPLOAD_FAILED",
+  "UPLOAD_MISMATCH",
+  "MEDIA_REQUIRED",
+  "BODY_REQUIRED",
+  "MILESTONE_EXISTS",
+  "MILESTONE_VALUE_INVALID",
+  "MEMORIAL_READ_ONLY",
+  "ITEM_NOT_FOUND",
+  "SUBJECT_NOT_FOUND",
+  "FORBIDDEN",
   "SIGN_IN_REQUIRED",
   "UNKNOWN",
 ] as const;
@@ -35,6 +49,7 @@ export function toErrorKey(error: unknown): ErrorKey {
     return issues.map((i) => i.message).find(isKey) ?? "INVALID_INPUT";
   }
   if (error.code === "UNAUTHORIZED") return "SIGN_IN_REQUIRED";
+  if (error.code === "FORBIDDEN") return "FORBIDDEN";
   if (error.code === "TOO_MANY_REQUESTS") return "RATE_LIMITED";
   return "UNKNOWN";
 }

@@ -145,7 +145,13 @@ export const spaceRouter = router({
         name: true,
         members: {
           orderBy: { joinedAt: "asc" },
-          select: { id: true, role: true, relationLabel: true, user: { select: { name: true } } },
+          select: {
+            id: true,
+            userId: true,
+            role: true,
+            relationLabel: true,
+            user: { select: { name: true } },
+          },
         },
         children: {
           orderBy: { createdAt: "asc" },
