@@ -172,10 +172,6 @@
       "createFamily": "우리 가족 만들기"
     }
   },
-  "home": {
-    "emptyTitle": "아직 올라온 사진이 없어요",
-    "emptyLead": "가족이 사진과 이야기를 올리면 여기에 모여요."
-  },
   "tabs": {
     "label": "가족 홈 메뉴",
     "today": "오늘",
@@ -193,5 +189,64 @@
   "ui": {
     "close": "닫기",
     "notifications": "알림"
+  },
+  "today": {
+    "whoLabel": "누구의 기록을 볼까요",
+    "all": "모두",
+    "today": "오늘",
+    "photos": "사진 {count}",
+    "byline": "{who}, {time}",
+    "diaryBy": "{who}의 일기",
+    "photoAlt": "사진 {n}/{total}",
+    "video": "영상",
+    "rest": "{count}장 더",
+    "like": "좋아요 {count}",
+    "comment": "댓글 {count}",
+    "more": "지난 기록 더 보기",
+    "loading": "불러오는 중",
+    "emptyTitle": "아직 올라온 사진이 없어요",
+    "emptyLead": "가족이 사진과 이야기를 올리면 여기에 모여요.",
+    "emptyWhoTitle": "아직 {name} 기록이 없어요"
+  },
+  "milestone": {
+    "child": {
+      "height": "키 {value}cm",
+      "weight": "몸무게 {value}kg",
+      "head": "머리둘레 {value}cm",
+      "first_roll": "처음 뒤집었어요",
+      "first_sit": "처음 혼자 앉았어요",
+      "first_crawl": "처음 기었어요",
+      "first_tooth": "첫 이가 났어요",
+      "first_step": "처음 걸었어요",
+      "first_word": "처음 말했어요",
+      "custom": "{title}"
+    },
+    "pet": {
+      "adoption": "가족이 된 날",
+      "first_walk": "첫 산책",
+      "weight": "몸무게 {value}kg",
+      "vaccination": "예방접종",
+      "vet_visit": "병원 다녀왔어요",
+      "custom": "{title}"
+    }
+  },
+  "moment": {
+    "photoTitle": "사진 {n}/{total}",
+    "textTitle": "기록",
+    "photoAlt": "사진 {n}/{total}",
+    "prev": "이전 사진",
+    "next": "다음 사진",
+    "byline": "{who}, {when}",
+    "comments": "댓글 {count}",
+    "loading": "불러오는 중",
+    "noComments": "아직 댓글이 없어요. 첫 마음을 남겨 보세요.",
+    "commentLabel": "댓글",
+    "commentPlaceholder": "따뜻한 한마디를 남겨 주세요",
+    "send": "남기기",
+    "commentEmpty": "남길 말을 먼저 써 주세요",
+    "commented": "댓글을 남겼어요",
+    "commentRemoved": "댓글을 지웠어요",
+    "undo": "되돌리기",
+    "removeComment": "지우기"
   }
 }

@@ -235,4 +235,23 @@
         var(--bw-hair)
     );
   }
+
+  /* 방금 남긴 댓글: 250ms ease-out, 4px 위로(감소 모션은 페이드만) */
+  .comment-in {
+    animation: comment-in var(--d-base) var(--ease-out);
+  }
+  :root[data-motion="reduce"] .comment-in {
+    animation: fade-in var(--d-fast) linear;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .comment-in {
+      animation: fade-in var(--d-fast) linear;
+    }
+  }
+  @keyframes comment-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--sp-1));
+    }
+  }
 }
