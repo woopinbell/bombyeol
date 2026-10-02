@@ -4,17 +4,19 @@ import { TabPage, TabTitle } from "@/components/family/tab-page";
 import { buttonClass } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Lead } from "@/components/ui/screen";
+import { StorageMeter } from "@/components/us/storage-meter";
 import { childName } from "@/lib/today-feed";
 import { cn } from "@/lib/utils";
 import { loadFamily } from "@/server/family";
 
 /**
  * 우리 탭. 달력, 구성원 화면은 Phase 5 UI에서 채운다 - 지금은 아이와 반려동물(부모는 더하기, 고치기),
- * 초대 바로가기(부모).
+ * 가족 앨범 저장 공간, 초대 바로가기(부모).
  */
 export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
   const { spaceId } = await params;
-  const { space, role } = await loadFamily(spaceId);
+  const { space, role, caller } = await loadFamily(spaceId);
+  const usage = await caller.media.usage({ spaceId });
   const t = await getTranslations("usTab");
   const format = await getFormatter();
   const isParent = role === "parent";
@@ -108,6 +110,11 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
             </div>
           ) : null}
         </section>
+
+        <StorageMeter
+          usedBytes={usage.confirmedBytes + usage.pendingBytes}
+          limitBytes={usage.limitBytes}
+        />
 
         {isParent ? (
           <Link href={`/start/invite/${space.id}`} className={buttonClass({ block: true })}>
