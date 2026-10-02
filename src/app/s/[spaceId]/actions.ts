@@ -58,3 +58,62 @@ export async function deleteComment(spaceId: string, commentId: string) {
     return { error: toErrorKey(error) } satisfies Failed;
   }
 }
+
+/** 올리기 1단계: 서명된 업로드 URL(G-01, G-03, G-04 검사는 프로시저) */
+export async function requestUpload(
+  spaceId: string,
+  file: { kind: "image" | "video"; contentType: string; bytes: number },
+) {
+  try {
+    const caller = await serverCaller();
+    return await caller.media.requestUpload({
+      spaceId,
+      kind: file.kind,
+      // 허용 형식은 프로시저의 입력 검사가 거른다
+      contentType: file.contentType as "image/jpeg",
+      bytes: file.bytes,
+    });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}
+
+/** 올리기 2단계: 저장소의 실제 크기, 형식 확인(G-02) */
+export async function confirmUpload(spaceId: string, assetId: string) {
+  try {
+    const caller = await serverCaller();
+    return await caller.media.confirm({ spaceId, assetId });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}
+
+/** 기록에 붙이지 못한 파일 치우기(중간에 실패했을 때) */
+export async function discardUpload(spaceId: string, assetId: string) {
+  try {
+    const caller = await serverCaller();
+    return await caller.media.delete({ spaceId, assetId });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}
+
+type Subject =
+  { type: "child"; childId: string } | { type: "pet"; petId: string } | { type: "family" };
+
+export async function createMoment(
+  spaceId: string,
+  input: {
+    subject: Subject;
+    body?: string;
+    takenAt?: Date;
+    media: { assetId: string; thumbnailAssetId?: string }[];
+  },
+) {
+  try {
+    const caller = await serverCaller();
+    return await caller.moment.create({ spaceId, ...input });
+  } catch (error) {
+    return { error: toErrorKey(error) } satisfies Failed;
+  }
+}

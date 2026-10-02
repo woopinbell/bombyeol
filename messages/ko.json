@@ -72,6 +72,20 @@
     "DATE_IN_FUTURE": "생일은 오늘보다 앞선 날이어야 해요",
     "INVALID_INPUT": "입력한 내용을 다시 확인해 주세요",
     "SIGN_IN_REQUIRED": "다시 로그인해 주세요",
+    "FILE_TOO_LARGE": "파일이 너무 커요. 더 짧은 영상을 골라 주세요",
+    "STORAGE_LIMIT": "가족 앨범의 저장 공간이 다 찼어요",
+    "PENDING_LIMIT": "올리는 중인 파일이 많아요. 잠시 뒤에 다시 해 주세요",
+    "UNSUPPORTED_TYPE": "올릴 수 없는 파일이에요. 사진이나 영상을 골라 주세요",
+    "UPLOAD_FAILED": "파일을 올리지 못했어요. 인터넷 연결을 확인하고 다시 해 주세요",
+    "UPLOAD_MISMATCH": "파일을 올리지 못했어요. 다시 해 주세요",
+    "MEDIA_REQUIRED": "사진이나 영상을 하나 이상 골라 주세요",
+    "BODY_REQUIRED": "내용을 써 주세요",
+    "MILESTONE_EXISTS": "이미 남긴 처음 기록이에요",
+    "MILESTONE_VALUE_INVALID": "숫자를 다시 확인해 주세요",
+    "MEMORIAL_READ_ONLY": "별이 된 가족에게는 새 기록을 남기지 않아요",
+    "ITEM_NOT_FOUND": "이미 지워진 기록이에요",
+    "SUBJECT_NOT_FOUND": "가족 구성원을 찾지 못했어요",
+    "FORBIDDEN": "이 기록은 남길 수 없어요",
     "UNKNOWN": "문제가 생겼어요. 잠시 뒤에 다시 해 주세요"
   },
   "auth": {
@@ -248,5 +262,23 @@
     "commentRemoved": "댓글을 지웠어요",
     "undo": "되돌리기",
     "removeComment": "지우기"
+  },
+  "upload": {
+    "open": "사진 올리기",
+    "title": "사진 올리기",
+    "video": "영상",
+    "picked": "{count}개 골랐어요.",
+    "tooMany": "한 번에 {max}개까지 올릴 수 있어요.",
+    "skipped": "올릴 수 없는 파일 {count}개는 뺐어요.",
+    "subject": "누구의 기록인가요",
+    "family": "가족 모두",
+    "body": "한 줄 남기기",
+    "bodyHint": "쓰지 않아도 괜찮아요",
+    "preparing": "사진을 준비하고 있어요",
+    "uploading": "올리는 중 {done}/{total}",
+    "submit": "올리기",
+    "donePhotos": "사진 {count}장을 올렸어요",
+    "doneVideos": "영상 {count}개를 올렸어요",
+    "doneMixed": "사진과 영상을 올렸어요"
   }
 }

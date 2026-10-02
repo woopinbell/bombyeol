@@ -1,49 +1,34 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { loadMoreMoments, toggleLike } from "@/app/s/[spaceId]/actions";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import { MomentSheet, type CommentsChange } from "./moment-sheet";
+import { useToday, type FeedProps } from "./today-state";
 import { timeZone } from "@/i18n/config";
 import {
   appendPage,
   dayDate,
   groupByDay,
-  type FeedCursor,
   type FeedDay,
   type FeedMilestone,
   type FeedMoment,
-  type Who,
 } from "@/lib/today-feed";
 import { cn } from "@/lib/utils";
-
-export type FeedProps = {
-  spaceId: string;
-  who: Who;
-  initialItems: FeedMoment[];
-  initialCursor: FeedCursor | null;
-  milestones: FeedMilestone[];
-  /** 사용자 ID → 가족 안 호칭 */
-  authors: Record<string, string>;
-  /** 서버가 정한 오늘(자정 무렵 서버, 브라우저 렌더 차이 방지) */
-  todayKey: string;
-  emptyName?: string;
-  myUserId: string;
-  /** parent: 남의 댓글도 지울 수 있다 */
-  canModerate: boolean;
-};
+import { motion, prefersReducedMotion } from "@/lib/design-tokens";
+import { springCurve } from "@/lib/spring";
 
 /**
  * 오늘(봄) 피드(DESIGN §9.2, §10.6 B안): 날짜가 앨범의 장 제목이고, 기록 하나 = 사진 묶음 + 한 줄 글 + 누가, 언제 +
  * 최근 댓글(인용선) + 반응. 마일스톤은 그 날 장의 맨 위 띠. 지난 기록은 버튼으로 더 불러온다(자동 무한 스크롤 없음).
  */
-export function TodayFeed(props: FeedProps) {
+export function TodayFeed() {
   const t = useTranslations("today");
-  const [items, setItems] = useState(props.initialItems);
-  const [cursor, setCursor] = useState(props.initialCursor);
+  const props = useToday();
+  const { items, cursor } = props;
   const [loading, startLoading] = useTransition();
   const { toast } = useToast();
   const errors = useTranslations("errors");
@@ -58,8 +43,7 @@ export function TodayFeed(props: FeedProps) {
         toast({ message: errors(result.error) });
         return;
       }
-      setItems((list) => appendPage(list, result.items));
-      setCursor(result.nextCursor);
+      props.setPage(appendPage(items, result.items), result.nextCursor);
     });
 
   if (days.length === 0) {
@@ -154,6 +138,7 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
   const t = useTranslations("today");
   const format = useFormatter();
   const { authors } = props;
+  const isFresh = useToday().fresh.has(moment.id);
   const who = authors[moment.createdBy.id] ?? moment.createdBy.name ?? "";
   const time = format.dateTime(moment.takenAt, { hour: "numeric", minute: "2-digit" });
   const [comments, setComments] = useState<CommentsChange>({
@@ -167,7 +152,9 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
   const comment = comments.latest;
   return (
     <article className="flex flex-col">
-      {moment.media.length ? <Album media={moment.media} onOpen={(i) => open(i)} /> : null}
+      {moment.media.length ? (
+        <Album media={moment.media} onOpen={(i) => open(i)} fresh={isFresh} />
+      ) : null}
       {moment.kind === "diary" ? (
         <p className="mb-1 text-caption font-bold text-fg-muted">{t("diaryBy", { who })}</p>
       ) : null}
@@ -261,13 +248,27 @@ function Reactions({
  */
 const VISIBLE = 5;
 
-function Album({ media, onOpen }: { media: FeedMoment["media"]; onOpen: (index: number) => void }) {
+function Album({
+  media,
+  onOpen,
+  fresh,
+}: {
+  media: FeedMoment["media"];
+  onOpen: (index: number) => void;
+  fresh: boolean;
+}) {
   const t = useTranslations("today");
+  const grid = useRef<HTMLDivElement>(null);
+  // 방금 올린 사진: 제자리에 안착(spring-settle, 50ms 간격). 감소 모션이면 페이드만
+  useEffect(() => {
+    if (!fresh || !grid.current) return;
+    settle([...grid.current.children] as HTMLElement[]);
+  }, [fresh]);
   const shown = media.slice(0, VISIBLE);
   const rest = media.length - shown.length;
   const wideFirst = shown.length % 2 === 1;
   return (
-    <div className="grid grid-cols-2 gap-1 overflow-hidden rounded-lg">
+    <div ref={grid} className="grid grid-cols-2 gap-1 overflow-hidden rounded-lg">
       {shown.map((m, i) => (
         <button
           type="button"
@@ -294,6 +295,11 @@ function Album({ media, onOpen }: { media: FeedMoment["media"]; onOpen: (index: 
               className="size-full object-cover"
             />
           ) : null}
+          {m.kind === "video" && !m.thumbnailUrl ? (
+            <span className="absolute inset-0 flex items-center justify-center">
+              <Icon name="play" />
+            </span>
+          ) : null}
           {m.kind === "video" ? (
             <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-sm bg-strong px-2 text-caption font-bold text-on-strong">
               <Icon name="play" size="small" />
@@ -311,5 +317,34 @@ function Album({ media, onOpen }: { media: FeedMoment["media"]; onOpen: (index: 
         </button>
       ))}
     </div>
+  );
+}
+
+function settle(elements: HTMLElement[]) {
+  if (prefersReducedMotion()) {
+    for (const el of elements) {
+      el.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: motion["d-fast"],
+        easing: "linear",
+      });
+    }
+    return;
+  }
+  const spring = motion["spring-settle"];
+  const curve = springCurve(spring);
+  const easing = CSS.supports("animation-timing-function", curve.easing)
+    ? curve.easing
+    : motion["ease-out"];
+  elements.forEach((el, i) =>
+    el.animate(
+      [
+        {
+          opacity: 0,
+          transform: `translateY(${spring["from-y"]}px) scale(${spring["from-scale"]})`,
+        },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: curve.duration, easing, delay: i * motion.stagger, fill: "backwards" },
+    ),
   );
 }

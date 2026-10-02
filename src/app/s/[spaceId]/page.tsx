@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { TabPage, TabTitle } from "@/components/family/tab-page";
+import { RecordDock } from "@/components/today/record-dock";
 import { TodayFeed } from "@/components/today/today-feed";
+import { TodayProvider } from "@/components/today/today-state";
 import { timeZone } from "@/i18n/config";
 import {
   authorNames,
@@ -57,51 +59,75 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/s/
     ...space.pets.map((p) => ({ who: { type: "pet", petId: p.id } as Who, label: p.name })),
   ];
   const current = whoParam(who);
+
+  // 올릴 수 있는 대상(서버 canRecordFor와 같은 규칙): 아이는 parent, 반려동물과 가족 모두는 grandparent도
+  const tu = await getTranslations("upload");
+  const recordable =
+    family.role === "relative"
+      ? []
+      : [
+          ...(family.role === "parent"
+            ? space.children.map((c) => ({ value: `child:${c.id}`, label: childName(c) }))
+            : []),
+          ...space.pets.map((p) => ({ value: `pet:${p.id}`, label: p.name })),
+          { value: "family", label: tu("family") },
+        ];
+  const defaultSubject =
+    recordable.find((r) => current && r.value === current)?.value ?? recordable[0]?.value;
   const emptyName = choices.find((c) => current && whoParam(c.who) === current)?.label;
 
   return (
-    <TabPage header={<TabTitle>{space.name}</TabTitle>}>
-      {choices.length > 1 ? (
-        <nav aria-label={t("whoLabel")} className="mt-2">
-          <ul className="flex gap-1 overflow-x-auto rounded-md border-(length:--bw) border-line-strong p-1">
-            {choices.map((c) => {
-              const param = whoParam(c.who);
-              const on = param === current;
-              return (
-                <li key={param ?? "all"} className="min-w-20 flex-1">
-                  <Link
-                    href={
-                      param ? `/s/${spaceId}?who=${encodeURIComponent(param)}` : `/s/${spaceId}`
-                    }
-                    aria-current={on ? "page" : undefined}
-                    scroll={false}
-                    data-press=""
-                    className={cn(
-                      "press flex min-h-(--touch) items-center justify-center rounded-sm px-3 whitespace-nowrap",
-                      on ? "bg-strong font-bold text-on-strong" : "font-medium text-fg-muted",
-                    )}
-                  >
-                    {c.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      ) : null}
-      <TodayFeed
-        key={current ?? "all"}
-        spaceId={spaceId}
-        who={who}
-        initialItems={feed.items}
-        initialCursor={feed.nextCursor}
-        milestones={milestones}
-        authors={Object.fromEntries(authorNames(space))}
-        todayKey={dayKey(new Date(), timeZone)}
-        emptyName={emptyName}
-        myUserId={family.userId}
-        canModerate={family.role === "parent"}
-      />
-    </TabPage>
+    <TodayProvider
+      key={current ?? "all"}
+      spaceId={spaceId}
+      who={who}
+      initialItems={feed.items}
+      initialCursor={feed.nextCursor}
+      milestones={milestones}
+      authors={Object.fromEntries(authorNames(space))}
+      todayKey={dayKey(new Date(), timeZone)}
+      emptyName={emptyName}
+      myUserId={family.userId}
+      canModerate={family.role === "parent"}
+    >
+      <TabPage
+        header={<TabTitle>{space.name}</TabTitle>}
+        dock={
+          defaultSubject ? (
+            <RecordDock subjects={recordable} defaultSubject={defaultSubject} />
+          ) : undefined
+        }
+      >
+        {choices.length > 1 ? (
+          <nav aria-label={t("whoLabel")} className="mt-2">
+            <ul className="flex gap-1 overflow-x-auto rounded-md border-(length:--bw) border-line-strong p-1">
+              {choices.map((c) => {
+                const param = whoParam(c.who);
+                const on = param === current;
+                return (
+                  <li key={param ?? "all"} className="min-w-20 flex-1">
+                    <Link
+                      href={
+                        param ? `/s/${spaceId}?who=${encodeURIComponent(param)}` : `/s/${spaceId}`
+                      }
+                      aria-current={on ? "page" : undefined}
+                      scroll={false}
+                      data-press=""
+                      className={cn(
+                        "press flex min-h-(--touch) items-center justify-center rounded-sm px-3 whitespace-nowrap",
+                        on ? "bg-strong font-bold text-on-strong" : "font-medium text-fg-muted",
+                      )}
+                    >
+                      {c.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        ) : null}
+        <TodayFeed />
+      </TabPage>
+    </TodayProvider>
   );
 }
