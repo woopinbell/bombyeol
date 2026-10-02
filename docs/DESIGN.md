@@ -249,7 +249,7 @@
 
 ## 12. 확정 토큰 v1 (2026-10-02)
 
-사용자 결정: 다크 모드 지원(§3.1), B안 + L2 스케일(§10), 시트 350ms·토스트 6초(§11), 로고 S2 + W2(§1), Pretendard 단일(§4) → 토큰 v1 확정. **원본 `image-asset/brand/tokens.json`**, CSS 변수판 `tokens.css`, 대비 검사 `check-contrast.py`. 코드에는 Phase 0 `chore(design-system): 확정 토큰 이식`으로 옮기고 같은 대비 표를 단위 테스트로 만든다.
+사용자 결정: 다크 모드 지원(§3.1), B안 + L2 스케일(§10), 시트 350ms·토스트 6초(§11), 로고 S2 + W2(§1), Pretendard 단일(§4) → 토큰 v1 확정. **원본 `image-asset/brand/tokens.json`**, CSS 변수판 `tokens.css`, 대비 검사 `check-contrast.py`. 코드 이식 완료(2026-10-02, 작업 브랜치): `src/design/tokens.json`(사본) · `src/app/tokens.css` · Tailwind 테마는 토큰만(`globals.css`) · 대비·일치 테스트 `tests/design-tokens.test.ts` · 화면 설정 `src/lib/display-prefs.ts`(`data-theme`·`data-text`·`data-motion`). 토큰을 바꾸면 docs 원본 → 이 문서 → 코드 사본 순서로 맞춘다(테스트가 CSS와 사본의 차이를 잡는다).
 
 | 묶음 | 확정 값 |
 |---|---|

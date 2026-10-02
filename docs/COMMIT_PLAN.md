@@ -37,12 +37,12 @@
 - [x] `chore(repo): Next.js(App Router) + TypeScript 프로젝트 초기화` — Next 16.3.8, `node_modules/next/dist/docs/` 확인. main에 `AGENTS.md`(Next 관리 블록)만 두고 루트 `CLAUDE.md`는 docs 링크 유지
 - [x] `chore(tooling): ESLint/Prettier 설정`
 - [x] `chore(tooling): Tailwind CSS 및 shadcn/ui(Radix) 초기화` — Tailwind 4.3, shadcn 4.21(radix-nova). shadcn 기본 팔레트·폰트·예제 버튼은 넣지 않음(토큰은 Phase DS 이후)
-- [ ] `chore(design-system): DESIGN.md 확정 토큰 이식` — 토큰 v1(2026-10-02). 2026-10-02 원자 단위로 쪼갬:
-  - [ ] `chore(design-system): 확정 토큰 v1 이식` — `src/design/tokens.json`(docs `image-asset/brand/tokens.json` 사본) + `src/app/tokens.css` + Tailwind 테마를 토큰으로 제한(기본 색·라운드·글자·그림자 제거, 간격 4px 고정) + shadcn 변수 → 역할 + `src/lib/design-tokens.ts`(모션 상수)
-  - [ ] `test(design-system): 토큰 대비·CSS 일치 검증` — DESIGN §12.1 표 + tokens.css 값이 tokens.json과 같은지
-  - [ ] `chore(design-system): Pretendard 자체 호스팅` — 작성자 배포 dynamic subset(가변) 그대로 + OFL 사본
-  - [ ] `chore(design-system): 테마·글자 크기·감소 모션 루트 속성` — 첫 페인트 전 인라인 스크립트(`data-theme`·`data-text`·`data-motion`, Next 가이드 "Preventing Flash")
-  - [ ] `chore(design-system): 로고·파비콘·앱 아이콘·OG 이식` — 메타데이터 파일 규약(`icon.svg`·`apple-icon.png`·`opengraph-image.png`), PWA 매니페스트는 `feat(pwa)` 때
+- [x] `chore(design-system): DESIGN.md 확정 토큰 이식` — 토큰 v1(2026-10-02). 2026-10-02 원자 단위로 쪼갬(작업 브랜치 `claude/jolly-shannon-0ae5z1`, main 미머지):
+  - [x] `chore(design-system): 확정 토큰 v1 이식`(67d2278) — `src/design/tokens.json`(docs `image-asset/brand/tokens.json` 사본) + `src/app/tokens.css` + Tailwind 테마를 토큰으로 제한(기본 색·라운드·글자·그림자 제거, 간격 4px 고정) + shadcn 변수 → 역할 + `src/lib/design-tokens.ts`(모션 상수)
+  - [x] `test(design-system): 토큰 대비·CSS 일치 검증`(4e4578f) — DESIGN §12.1 표 + tokens.css 값이 tokens.json과 같은지
+  - [x] `chore(design-system): Pretendard 자체 호스팅`(fd71702) — 작성자 배포 dynamic subset(가변) 그대로 + OFL 사본
+  - [x] `chore(design-system): 테마·글자 크기·감소 모션 루트 속성 적용`(417db84) — 첫 페인트 전 인라인 스크립트(`data-theme`·`data-text`·`data-motion`, Next 가이드 "Preventing Flash")
+  - [x] `chore(design-system): 로고·파비콘·앱 아이콘·공유 이미지 이식`(262e7f7) — `favicon.ico`(16·32·48)·`icon.svg`·`apple-icon.png`은 메타데이터 파일 규약, 로고·PWA 아이콘·OG 이미지는 `public/brand/`. **OG 메타 태그는 아직 안 붙임**: `metadataBase`(절대 URL)가 없으면 Next가 `http://localhost:3000`으로 채운다 → 도메인(Q-DOMAIN)·`APP_URL` 변수 결정 때 `opengraph-image` 연결(카카오톡 공유 `feat(share)` 전에). PWA 매니페스트는 `feat(pwa)` 때
 - [x] `chore(infra): Cloudflare Workers(OpenNext) 배포 구성` — wrangler 최상위=로컬, `env.staging`(bombyeol-staging)·`env.production`(bombyeol). 번들 3.9 MiB(빈 앱). **실제 배포·Hyperdrive 생성은 사용자 승인 대기**, R2 바인딩은 Phase 2(버킷 생성과 함께)
 - [x] `chore(prisma): Prisma 초기화 및 서버리스 Postgres 연결` — 요청 단위 클라이언트, 로컬 Hyperdrive `localConnectionString`, docker-compose `postgres:17.11`, 로컬 DB 가드 스크립트
 - [x] `chore(testing): Vitest 설정` (로컬 Postgres 통합 테스트 가드) — Vitest 5, workerd용 Prisma 클라이언트를 Node에서 쓰도록 `.wasm?module` 로더 플러그인
