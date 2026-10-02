@@ -53,6 +53,18 @@ const momentSelect = {
       thumbnail: { select: { id: true, status: true } },
     },
   },
+  // 피드에 바로 보이는 가장 최근 댓글 하나(DESIGN §10.6 - 할머니 댓글을 인용선으로)
+  reactions: {
+    where: { kind: "comment" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: 1,
+    select: {
+      id: true,
+      body: true,
+      createdAt: true,
+      createdBy: { select: { id: true, name: true } },
+    },
+  },
 } satisfies Prisma.MomentSelect;
 
 type SpaceCtx = Context & { userId: string; member: { spaceId: string } };
@@ -60,7 +72,8 @@ type SpaceCtx = Context & { userId: string; member: { spaceId: string } };
 type MomentRow = Prisma.MomentGetPayload<{ select: typeof momentSelect }>;
 
 /** 응답용: 파일 키 대신 짧은 TTL 읽기 URL(영구 public URL 금지, ARCHITECTURE §4) */
-async function withReadUrls(storage: MediaStorage, spaceId: string, moment: MomentRow) {
+async function withReadUrls(storage: MediaStorage, spaceId: string, row: MomentRow) {
+  const { reactions: comments, ...moment } = row;
   const sign = (assetId: string) =>
     storage.presignGet(mediaKeys.final(spaceId, assetId), MEDIA_POLICY.readUrlTtlSec);
   const media = await Promise.all(
@@ -72,7 +85,7 @@ async function withReadUrls(storage: MediaStorage, spaceId: string, moment: Mome
       thumbnailUrl: thumbnail?.status === "confirmed" ? await sign(thumbnail.id) : null,
     })),
   );
-  return { ...moment, media };
+  return { ...moment, media, latestComment: comments[0] ?? null };
 }
 
 type CreateInput = {

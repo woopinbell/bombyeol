@@ -66,6 +66,22 @@ describe("reaction 좋아요, 댓글", () => {
     expect(milestones[0].reactions).toEqual({ likes: 1, comments: 0, likedByMe: true });
   });
 
+  it("피드에 가장 최근 댓글 하나가 쓴 사람과 함께 나온다", async () => {
+    const { api, relative, spaceId, moment } = await family();
+    expect((await api.moment.list({ spaceId })).items[0].latestComment).toBeNull();
+    await api.reaction.addComment({ spaceId, target: moment, body: "첫 댓글" });
+    const last = await relative.reaction.addComment({ spaceId, target: moment, body: "다 컸네" });
+    const [item] = (await api.moment.list({ spaceId })).items;
+    expect(item.latestComment).toEqual({
+      id: last.id,
+      body: "다 컸네",
+      createdAt: last.createdAt,
+      createdBy: last.createdBy,
+    });
+    expect(item.reactions.comments).toBe(2);
+    expect(item).not.toHaveProperty("reactions.0");
+  });
+
   it("동시에 여러 번 눌러도 좋아요 행은 최대 하나다", async () => {
     const { api, spaceId, moment } = await family();
     await Promise.all(
