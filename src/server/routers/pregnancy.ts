@@ -84,7 +84,7 @@ async function findChild(prisma: PrismaClient, spaceId: string, childId: string)
 type Child = Awaited<ReturnType<typeof findChild>>;
 
 /**
- * 날짜 규칙: 검진은 앞으로의 일정도 받는다(예정일 — 없으면 오늘 — 뒤 checkupMaxDaysAhead일까지).
+ * 날짜 규칙: 검진은 앞으로의 일정도 받는다(예정일 - 없으면 오늘 - 뒤 checkupMaxDaysAhead일까지).
  * 나머지는 미래 불가. 태어난 아이에게는 생일 이전 날짜로만 남긴다(출생 후 소급 정리).
  */
 function checkDate(child: Child, kind: PregnancyRecordKind, date: Date) {
@@ -106,7 +106,7 @@ async function checkPhoto(ctx: SpaceCtx, assetId: string) {
   await requireAttachableAssets(ctx.prisma, ctx.member.spaceId, [assetId], ["image"]);
 }
 
-/** 보이는 기록만 찾는다 — 숨은 기록은 없는 것처럼 NOT_FOUND */
+/** 보이는 기록만 찾는다 - 숨은 기록은 없는 것처럼 NOT_FOUND */
 async function findVisible(ctx: SpaceCtx, recordId: string) {
   const found = await ctx.prisma.pregnancyRecord.findFirst({
     where: { id: recordId, spaceId: ctx.member.spaceId, ...visibleRecordWhere(ctx.member.role) },
@@ -157,9 +157,9 @@ export async function retractPregnancyRecords(
 }
 
 /**
- * 임신 기록(태명 시절, PRD §4.2) — 건강 정보(PRIVACY §3).
+ * 임신 기록(태명 시절, PRD §4.2) - 건강 정보(PRIVACY §3).
  * 쓰기는 임신 정보에 동의한 parent. 기본은 parents_only, 가족 공개는 쓴 사람이 항목마다 고른다.
- * 반응(좋아요·댓글)은 붙이지 않는다(노출면 최소화). 새 기록 알림은 민감하지 않은 고정 문구로만.
+ * 반응(좋아요, 댓글)은 붙이지 않는다(노출면 최소화). 새 기록 알림은 민감하지 않은 고정 문구로만.
  */
 export const pregnancyRouter = router({
   /** 기록 남기기(parent, 임신 동의 필요). 초음파는 사진 한 장 필수, 메모는 글 필수. 글 기록 리밋(G-07) */
@@ -214,7 +214,7 @@ export const pregnancyRouter = router({
     }),
 
   /**
-   * 고치기: 내용·공개 범위는 쓴 사람만(임신 동의 필요 — 가족 공개는 쓴 사람의 결정).
+   * 고치기: 내용, 공개 범위는 쓴 사람만(임신 동의 필요 - 가족 공개는 쓴 사람의 결정).
    * 다른 parent는 parents_only로 좁히기만 할 수 있다(안전 방향, 동의 불필요).
    * 초음파 사진을 바꾸면 이전 파일을 지운다(G-05).
    */
@@ -269,7 +269,7 @@ export const pregnancyRouter = router({
     }),
 
   /**
-   * 지우기(parent — 쓴 사람이든 아니든). 사진을 R2에서 먼저 지우고(G-05) 기록을 지운다.
+   * 지우기(parent - 쓴 사람이든 아니든). 사진을 R2에서 먼저 지우고(G-05) 기록을 지운다.
    * 중간에 실패하면 기록이 남아 다시 시도할 수 있다.
    */
   delete: parentProcedure
@@ -332,7 +332,7 @@ export const pregnancyRouter = router({
   }),
 
   /**
-   * 오늘의 주차와 출생 예정일까지 남은 날(모든 멤버 — 예정일은 아이 프로필에 이미 보인다).
+   * 오늘의 주차와 출생 예정일까지 남은 날(모든 멤버 - 예정일은 아이 프로필에 이미 보인다).
    * today는 클라이언트 현지 날짜(YYYY-MM-DD), 없으면 UTC 오늘.
    */
   progress: spaceProcedure

@@ -7,7 +7,7 @@ import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { FakeSender, giveToken, testPush, TEST_ORIGIN } from "./helpers/push";
 import { callerFor } from "./helpers/trpc";
 
-// PRD §4.6 알림 연결. 수신자·문구는 발송 시점(응답 뒤)에 DB에서 다시 정한다(ARCHITECTURE §7, PRIVACY §3).
+// PRD §4.6 알림 연결. 수신자, 문구는 발송 시점(응답 뒤)에 DB에서 다시 정한다(ARCHITECTURE §7, PRIVACY §3).
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -43,7 +43,7 @@ async function family() {
 
 const sorted = (...tokens: string[]) => [...tokens].sort();
 
-describe("새 사진·일기 알림", () => {
+describe("새 사진, 일기 알림", () => {
   it("보낸 사람을 뺀 모든 멤버에게 고정 문구로 알린다", async () => {
     const f = await family();
     const asset = await uploadConfirmed(f.api, f.storage, f.spaceId);
@@ -114,8 +114,8 @@ describe("새 사진·일기 알림", () => {
   });
 });
 
-describe("이야기·물어보기 알림", () => {
-  it("이야기는 쓴 사람을 뺀 모든 멤버에게 — 대필이면 화자 어르신도 받는다", async () => {
+describe("이야기, 물어보기 알림", () => {
+  it("이야기는 쓴 사람을 뺀 모든 멤버에게 - 대필이면 화자 어르신도 받는다", async () => {
     const f = await family();
     await f.api.story.create({
       spaceId: f.spaceId,

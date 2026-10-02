@@ -52,7 +52,7 @@ describe("invite.preview / accept", () => {
     expect(await prisma.member.count({ where: { spaceId } })).toBe(2);
   });
 
-  it("만료·회수·삭제된 Space의 초대는 거부한다", async () => {
+  it("만료, 회수, 삭제된 Space의 초대는 거부한다", async () => {
     const { api, spaceId, invite } = await setup();
     const user = callerFor(prisma, (await newUser("x")).id);
 
@@ -115,7 +115,7 @@ describe("invite.preview / accept", () => {
   });
 });
 
-describe("초대코드 brute-force 방지 (G-07·G-11)", () => {
+describe("초대코드 brute-force 방지 (G-07, G-11)", () => {
   it("사용자당 실패 한도에 이르면 맞는 코드도 막는다", async () => {
     const { invite } = await setup();
     const user = callerFor(prisma, (await newUser("공격자")).id, "198.51.100.1");

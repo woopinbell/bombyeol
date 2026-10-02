@@ -9,7 +9,7 @@ import { mediaKeys, type MediaStorage } from "@/server/storage/types";
 import { periodKey } from "./usage";
 
 /**
- * G-02: 콘텐츠를 참조하는 mutation(moment·story 등)은 이 함수로 자산을 검증한다.
+ * G-02: 콘텐츠를 참조하는 mutation(moment, story 등)은 이 함수로 자산을 검증한다.
  * 같은 Space의 confirmed 자산만 통과하고, 키 문자열은 받지 않는다(ID만).
  */
 export async function requireConfirmedAssets(
@@ -28,7 +28,7 @@ export async function requireConfirmedAssets(
 }
 
 /**
- * 자산이 어딘가(반려동물 커버·Moment 첨부·이야기 사진·초음파 사진)에 붙어 있지 않은 조건.
+ * 자산이 어딘가(반려동물 커버, Moment 첨부, 이야기 사진, 초음파 사진)에 붙어 있지 않은 조건.
  * 초음파 사진도 여기 있어야 id를 아는 다른 멤버가 Moment 등에 붙여 visibility를 우회할 수 없다(PRIVACY §3).
  */
 export const unattachedAssetWhere = {
@@ -41,7 +41,7 @@ export const unattachedAssetWhere = {
 
 /**
  * 새로 붙일 자산 검증: requireConfirmedAssets(G-02)에 더해 종류가 맞고 아직 다른 곳에 붙지 않았어야 한다.
- * 자산 하나는 한 곳에만 붙는다 — 삭제 연쇄(G-05)가 다른 기록의 파일을 지우지 않도록.
+ * 자산 하나는 한 곳에만 붙는다 - 삭제 연쇄(G-05)가 다른 기록의 파일을 지우지 않도록.
  */
 export async function requireAttachableAssets(
   prisma: Pick<PrismaClient, "mediaAsset">,

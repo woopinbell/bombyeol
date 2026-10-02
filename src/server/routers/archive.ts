@@ -10,7 +10,7 @@ import { entityId } from "./inputs";
 const cursorInput = z.object({ createdAt: z.date(), id: entityId }).optional();
 type Cursor = z.infer<typeof cursorInput>;
 
-/** (createdAt, id) 오름차순 커서 — 내보내는 동안 새 기록이 생겨도 빠지거나 겹치지 않는다 */
+/** (createdAt, id) 오름차순 커서 - 내보내는 동안 새 기록이 생겨도 빠지거나 겹치지 않는다 */
 function after(cursor: Cursor) {
   return cursor
     ? {
@@ -46,8 +46,8 @@ const recordKinds = [
 ] as const;
 
 /**
- * 데이터 내보내기(PRIVACY §2.5, Space 삭제 유예 중에도). parent만 — 임신 기록 열람 규칙과 같다.
- * 서버는 목록과 짧은 TTL 읽기 URL만 주고 ZIP은 브라우저가 만든다(Worker CPU·메모리 보호, S-7과 같은 원칙).
+ * 데이터 내보내기(PRIVACY §2.5, Space 삭제 유예 중에도). parent만 - 임신 기록 열람 규칙과 같다.
+ * 서버는 목록과 짧은 TTL 읽기 URL만 주고 ZIP은 브라우저가 만든다(Worker CPU, 메모리 보호, S-7과 같은 원칙).
  * 페이지 요청은 사용자당 리밋(G-07).
  */
 export const archiveRouter = router({
@@ -101,7 +101,7 @@ export const archiveRouter = router({
     return { items, nextCursor: result.nextCursor };
   }),
 
-  /** 글 기록(종류별 페이지): 아이·반려동물 프로필, 사진 설명·일기, 마일스톤, 이야기, 일정, 임신 기록 */
+  /** 글 기록(종류별 페이지): 아이, 반려동물 프로필, 사진 설명, 일기, 마일스톤, 이야기, 일정, 임신 기록 */
   records: parentProcedure
     .input(z.object({ kind: z.enum(recordKinds), cursor: cursorInput }))
     .query(async ({ ctx, input }) => {

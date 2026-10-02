@@ -1,4 +1,4 @@
-# 로컬 개발·테스트용 Postgres. Supabase와 같은 메이저(17)로 고정한다(CLOUD_SESSION §2.1).
+# 로컬 개발, 테스트용 Postgres. Supabase와 같은 메이저(17)로 고정한다(CLOUD_SESSION §2.1).
 services:
   postgres:
     image: postgres:17.11

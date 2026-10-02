@@ -21,8 +21,8 @@ const allContentTypes = [...MEDIA_CONTENT_TYPES.image, ...MEDIA_CONTENT_TYPES.vi
 
 export const mediaRouter = router({
   /**
-   * 업로드 요청: 형식·크기(G-01), Space 총량(G-03), 발급 횟수·미확정 수(G-04)를 검사하고
-   * Content-Length·Content-Type을 서명한 업로드 URL을 발급한다.
+   * 업로드 요청: 형식, 크기(G-01), Space 총량(G-03), 발급 횟수, 미확정 수(G-04)를 검사하고
+   * Content-Length, Content-Type을 서명한 업로드 URL을 발급한다.
    */
   /** Space 저장 사용량과 한도(화면의 "저장 공간" 표시용) */
   usage: spaceProcedure.query(({ ctx }) => spaceUsage(ctx.prisma, ctx.member.spaceId)),
@@ -90,7 +90,7 @@ export const mediaRouter = router({
 
   /**
    * 업로드 확인(G-02): 올린 사람이 자기 Space의 미확정 자산만 확정할 수 있다.
-   * 저장소의 실제 크기·타입이 발급 때 선언과 같아야 하고, 다르면 객체를 지우고 거부한다.
+   * 저장소의 실제 크기, 타입이 발급 때 선언과 같아야 하고, 다르면 객체를 지우고 거부한다.
    * 통과하면 서버 측 복사로 spaces/ 키에 옮기고 pending 객체를 지운다.
    */
   confirm: spaceProcedure

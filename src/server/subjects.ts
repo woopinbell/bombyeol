@@ -13,21 +13,21 @@ export const subjectInput = z.discriminatedUnion("type", [
   z.object({ type: z.literal("family") }),
 ]);
 
-/** 마일스톤처럼 한 구성원(아이·반려동물)만 대상이 되는 기록 */
+/** 마일스톤처럼 한 구성원(아이, 반려동물)만 대상이 되는 기록 */
 export const memberSubjectInput = z.discriminatedUnion("type", [childSubject, petSubject]);
 
 export type SubjectInput = z.infer<typeof subjectInput>;
 
 /**
  * 누가 어떤 대상에 기록할 수 있나(COMMIT_PLAN Phase 3 설계):
- * 아이 기록은 parent만(PRIVACY §4), 반려동물·가족 전체는 parent·grandparent. relative는 열람·댓글만.
+ * 아이 기록은 parent만(PRIVACY §4), 반려동물, 가족 전체는 parent, grandparent. relative는 열람, 댓글만.
  */
 export function canRecordFor(role: MemberRole, subject: SubjectInput["type"]) {
   if (subject === "child") return role === "parent";
   return role === "parent" || role === "grandparent";
 }
 
-/** 대상이 같은 Space에 있는지 확인하고 Moment·Milestone의 FK 값으로 바꾼다 */
+/** 대상이 같은 Space에 있는지 확인하고 Moment, Milestone의 FK 값으로 바꾼다 */
 export async function resolveSubject(
   prisma: Pick<PrismaClient, "child" | "pet">,
   spaceId: string,

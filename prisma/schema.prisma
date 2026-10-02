@@ -10,7 +10,7 @@ datasource db {
 }
 
 // ---------------------------------------------------------------------------
-// 계정 — Auth.js는 JWT 세션(DB 어댑터 없음). 로그인 시 Account로 User를 찾거나 만든다.
+// 계정 - Auth.js는 JWT 세션(DB 어댑터 없음). 로그인 시 Account로 User를 찾거나 만든다.
 // 카카오 이메일은 수집하지 않는다(PRIVACY §2 최소 수집).
 // ---------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ model Account {
 }
 
 // ---------------------------------------------------------------------------
-// 가족 Space · 멤버 · 초대
+// 가족 Space , 멤버 , 초대
 // ---------------------------------------------------------------------------
 
 enum MemberRole {
@@ -98,7 +98,7 @@ model Member {
   spaceId       String
   userId        String
   role          MemberRole
-  relationLabel String? // 할머니·외할아버지 등 자유 입력
+  relationLabel String? // 할머니, 외할아버지 등 자유 입력
   joinedAt      DateTime   @default(now())
 
   space          Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
@@ -132,7 +132,7 @@ model Invite {
   @@index([spaceId, createdAt])
 }
 
-// 초대 코드 입력 실패 기록(brute-force 방지, G-07·G-11). 보관: 판정 창보다 긴 기간만 필요 → 정리 Cron 대상(G-17).
+// 초대 코드 입력 실패 기록(brute-force 방지, G-07, G-11). 보관: 판정 창보다 긴 기간만 필요 → 정리 Cron 대상(G-17).
 model InviteCodeAttempt {
   id        String   @id @default(cuid())
   userId    String
@@ -144,7 +144,7 @@ model InviteCodeAttempt {
 }
 
 // ---------------------------------------------------------------------------
-// 아이 — Space 생성 직후 등록(태명/이름, 출생 예정일 또는 생일)
+// 아이 - Space 생성 직후 등록(태명/이름, 출생 예정일 또는 생일)
 // ---------------------------------------------------------------------------
 
 enum ChildStatus {
@@ -156,7 +156,7 @@ model Child {
   id          String      @id @default(cuid())
   spaceId     String
   name        String?
-  nickname    String? // 태명·애칭
+  nickname    String? // 태명, 애칭
   dueDate     DateTime?   @db.Date
   birthDate   DateTime?   @db.Date
   status      ChildStatus
@@ -174,7 +174,7 @@ model Child {
 }
 
 // ---------------------------------------------------------------------------
-// 반려동물 — 계정 없는 가족 구성원(PRD §4.2.1). 기념 상태 전환은 Phase 4(memorial).
+// 반려동물 - 계정 없는 가족 구성원(PRD §4.2.1). 기념 상태 전환은 Phase 4(memorial).
 // ---------------------------------------------------------------------------
 
 enum PetSpecies {
@@ -193,7 +193,7 @@ model Pet {
   spaceId            String
   name               String
   species            PetSpecies
-  speciesLabel       String? // other일 때 자유 입력(토끼·햄스터 등)
+  speciesLabel       String? // other일 때 자유 입력(토끼, 햄스터 등)
   breed              String?
   birthDate          DateTime?  @db.Date
   birthDateEstimated Boolean    @default(false)
@@ -217,8 +217,8 @@ model Pet {
 }
 
 // ---------------------------------------------------------------------------
-// 오늘(봄) — Moment는 사진·영상 기록(media) 또는 부모 일기(diary).
-// 대상: childId·petId 중 최대 하나(둘 다 비면 가족 전체) — 마이그레이션의 체크 제약으로 강제.
+// 오늘(봄) - Moment는 사진, 영상 기록(media) 또는 부모 일기(diary).
+// 대상: childId, petId 중 최대 하나(둘 다 비면 가족 전체) - 마이그레이션의 체크 제약으로 강제.
 // ---------------------------------------------------------------------------
 
 enum MomentKind {
@@ -233,7 +233,7 @@ model Moment {
   petId       String?
   kind        MomentKind
   body        String?
-  takenAt     DateTime // 촬영·기록 시각(피드 정렬 기준)
+  takenAt     DateTime // 촬영, 기록 시각(피드 정렬 기준)
   createdById String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -250,7 +250,7 @@ model Moment {
   @@index([petId, takenAt(sort: Desc)])
 }
 
-// Moment 첨부. 자산 하나는 한 곳에만 붙는다(unique) — 삭제 연쇄(G-05)와 사용량 계산을 단순하게.
+// Moment 첨부. 자산 하나는 한 곳에만 붙는다(unique) - 삭제 연쇄(G-05)와 사용량 계산을 단순하게.
 model MomentMedia {
   momentId         String
   position         Int
@@ -264,8 +264,8 @@ model MomentMedia {
   @@id([momentId, position])
 }
 
-// 마일스톤 — 키·몸무게·첫 걸음 등. 값은 kind별 스키마(zod)로 검증한 JSON.
-// 대상: childId·petId 중 정확히 하나 — 체크 제약.
+// 마일스톤 - 키, 몸무게, 첫 걸음 등. 값은 kind별 스키마(zod)로 검증한 JSON.
+// 대상: childId, petId 중 정확히 하나 - 체크 제약.
 model Milestone {
   id          String   @id @default(cuid())
   spaceId     String
@@ -289,7 +289,7 @@ model Milestone {
 }
 
 // ---------------------------------------------------------------------------
-// 반응 — 좋아요·별 하나·댓글(가족 멤버만). 대상(Moment·Milestone·StoryEntry)은 정확히 하나(체크 제약).
+// 반응 - 좋아요, 별 하나, 댓글(가족 멤버만). 대상(Moment, Milestone, StoryEntry)은 정확히 하나(체크 제약).
 // 다형 targetId 대신 대상별 FK를 둬서 대상 삭제 시 반응이 함께 지워진다.
 // 별 하나(star)는 이야기에 남기는 세대 교차 1비트 신호(PRD §2), 좋아요(like)는 오늘 기록용.
 // ---------------------------------------------------------------------------
@@ -325,10 +325,10 @@ model Reaction {
 }
 
 // ---------------------------------------------------------------------------
-// 이야기(별) — 어르신의 기억(PRD §4.3). 질문 카드는 코드 카탈로그(src/lib/story-prompts.ts)이고
-// 문구는 messages의 키로 찾는다 — DB에는 promptKey만 남긴다(시드·번역 동기화 불필요).
-// 화자(narrator)·대필자(scribe)는 Member를 가리키되 이름 스냅샷을 함께 저장한다
-// (계정·멤버가 사라져도 이야기는 남는다, PRIVACY §5).
+// 이야기(별) - 어르신의 기억(PRD §4.3). 질문 카드는 코드 카탈로그(src/lib/story-prompts.ts)이고
+// 문구는 messages의 키로 찾는다 - DB에는 promptKey만 남긴다(시드, 번역 동기화 불필요).
+// 화자(narrator), 대필자(scribe)는 Member를 가리키되 이름 스냅샷을 함께 저장한다
+// (계정, 멤버가 사라져도 이야기는 남는다, PRIVACY §5).
 // ---------------------------------------------------------------------------
 
 model StoryEntry {
@@ -364,8 +364,8 @@ model StoryEntry {
   @@index([petId])
 }
 
-// 물어보기 — 가족이 어르신께 질문 카드(또는 직접 쓴 질문)를 보낸다. 답한 이야기가 생기면 entryId로 닫힌다.
-// promptKey·question 중 정확히 하나(체크 제약).
+// 물어보기 - 가족이 어르신께 질문 카드(또는 직접 쓴 질문)를 보낸다. 답한 이야기가 생기면 entryId로 닫힌다.
+// promptKey, question 중 정확히 하나(체크 제약).
 model StoryAsk {
   id         String   @id @default(cuid())
   spaceId    String
@@ -385,8 +385,8 @@ model StoryAsk {
   @@index([spaceId, createdAt])
 }
 
-// 기념 상태(별이 되신 가족·반려동물, PRD §4.5). 행이 있으면 기념 상태 — 지우면 되돌린다.
-// 만들 때는 memberId·petId 중 정확히 하나. 멤버가 사라지면 memberId만 null이 되고 이름·관계 스냅샷이 남는다
+// 기념 상태(별이 되신 가족, 반려동물, PRD §4.5). 행이 있으면 기념 상태 - 지우면 되돌린다.
+// 만들 때는 memberId, petId 중 정확히 하나. 멤버가 사라지면 memberId만 null이 되고 이름, 관계 스냅샷이 남는다
 // (그래서 체크 제약은 "최대 하나").
 model MemorialProfile {
   id            String    @id @default(cuid())
@@ -410,8 +410,8 @@ model MemorialProfile {
 }
 
 // ---------------------------------------------------------------------------
-// 동의 기록(PRIVACY §2.4) — 누가·무엇에·언제·어느 버전에 동의했나. 추가 전용(철회는 withdrawnAt).
-// terms·privacy는 사용자 단위(spaceId 없음), child_data·pregnancy는 Space 단위. 현재 버전은 src/lib/consents.ts.
+// 동의 기록(PRIVACY §2.4) - 누가, 무엇에, 언제, 어느 버전에 동의했나. 추가 전용(철회는 withdrawnAt).
+// terms, privacy는 사용자 단위(spaceId 없음), child_data, pregnancy는 Space 단위. 현재 버전은 src/lib/consents.ts.
 // ---------------------------------------------------------------------------
 
 enum ConsentKind {
@@ -437,7 +437,7 @@ model Consent {
 }
 
 // ---------------------------------------------------------------------------
-// 임신 기록(태명 시절, PRD §4.2) — 건강 정보. visibility는 서버가 강제한다(PRIVACY §3):
+// 임신 기록(태명 시절, PRD §4.2) - 건강 정보. visibility는 서버가 강제한다(PRIVACY §3):
 // parents_only(기본)는 parent에게만, family는 모든 멤버에게. 주차는 저장하지 않고 조회 시점에
 // 아이의 출생 예정일로 계산한다(예정일이 바뀌어도 맞도록).
 // ---------------------------------------------------------------------------
@@ -459,7 +459,7 @@ model PregnancyRecord {
   spaceId      String
   childId      String
   kind         PregnancyRecordKind
-  date         DateTime            @db.Date // 기록·검진 날짜(검진은 예정일 수 있다)
+  date         DateTime            @db.Date // 기록, 검진 날짜(검진은 예정일 수 있다)
   note         String?
   photoAssetId String?             @unique // 초음파 사진(한 장, 이미지 자산)
   visibility   PregnancyVisibility @default(parents_only)
@@ -477,7 +477,7 @@ model PregnancyRecord {
 }
 
 // ---------------------------------------------------------------------------
-// 가족 캘린더(PRD §4.4) — 시각 있는 일정은 UTC 순간으로 저장하고 클라이언트가 현지 시각으로 보여준다.
+// 가족 캘린더(PRD §4.4) - 시각 있는 일정은 UTC 순간으로 저장하고 클라이언트가 현지 시각으로 보여준다.
 // 종일 일정은 그 날의 UTC 자정(날짜만 의미)으로 저장하고 시간대 변환 없이 날짜로 보여준다.
 // 매년 반복은 조회 시점에 펼친다(정시 push 없음).
 // ---------------------------------------------------------------------------
@@ -516,7 +516,7 @@ model FamilyEvent {
 }
 
 // ---------------------------------------------------------------------------
-// 웹푸시(FCM) 기기 토큰 — 기기(브라우저)마다 하나. 같은 토큰은 마지막으로 등록한 계정에만 붙는다.
+// 웹푸시(FCM) 기기 토큰 - 기기(브라우저)마다 하나. 같은 토큰은 마지막으로 등록한 계정에만 붙는다.
 // 사용자가 사라지면 함께 지운다(G-06 연쇄). 보관: 오래 갱신되지 않은 토큰은 정리 Cron이 지운다(G-17).
 // ---------------------------------------------------------------------------
 
@@ -534,9 +534,9 @@ model PushToken {
 }
 
 // ---------------------------------------------------------------------------
-// 삭제 요청(PRIVACY §2.5, G-06) — 계정 삭제(즉시)와 Space 삭제(유예 후 파기)의 기록.
-// 대상이 사라진 뒤에도 남아야 하므로(재생성 쿨다운 G-11, 처리 확인) Space·User에 FK를 걸지 않는다.
-// 개인정보는 넣지 않는다(id만). Space당 진행 중 요청은 하나 — 마이그레이션의 부분 unique 인덱스.
+// 삭제 요청(PRIVACY §2.5, G-06) - 계정 삭제(즉시)와 Space 삭제(유예 후 파기)의 기록.
+// 대상이 사라진 뒤에도 남아야 하므로(재생성 쿨다운 G-11, 처리 확인) Space, User에 FK를 걸지 않는다.
+// 개인정보는 넣지 않는다(id만). Space당 진행 중 요청은 하나 - 마이그레이션의 부분 unique 인덱스.
 // ---------------------------------------------------------------------------
 
 enum DeletionKind {
@@ -562,7 +562,7 @@ model DeletionRequest {
 }
 
 // ---------------------------------------------------------------------------
-// 레이트 리밋 — DB 고정 창 카운터(S-6: 비용 게이트의 정확한 판정용). 정리 Cron 대상(G-17).
+// 레이트 리밋 - DB 고정 창 카운터(S-6: 비용 게이트의 정확한 판정용). 정리 Cron 대상(G-17).
 // ---------------------------------------------------------------------------
 
 model RateCounter {
@@ -575,7 +575,7 @@ model RateCounter {
 }
 
 // ---------------------------------------------------------------------------
-// 미디어 — 업로드는 pending → confirmed. 참조 mutation은 자기 Space의 confirmed 자산만 받는다(G-02).
+// 미디어 - 업로드는 pending → confirmed. 참조 mutation은 자기 Space의 confirmed 자산만 받는다(G-02).
 // 키: pending/{spaceId}/{id} → 확인 후 spaces/{spaceId}/{id} (ARCHITECTURE §5)
 // ---------------------------------------------------------------------------
 
@@ -584,8 +584,8 @@ enum MediaKind {
   video
 }
 
-// purging: 붙은 기록이 지워져(아이·반려동물·계정 삭제) R2 객체 삭제를 기다리는 자산. 사용량에서 빠지고,
-// 정리 Cron이 객체를 지운 뒤 deleted로 바꾼다 — 큰 삭제를 한 요청에서 하지 않기 위해(하위 요청 한도).
+// purging: 붙은 기록이 지워져(아이, 반려동물, 계정 삭제) R2 객체 삭제를 기다리는 자산. 사용량에서 빠지고,
+// 정리 Cron이 객체를 지운 뒤 deleted로 바꾼다 - 큰 삭제를 한 요청에서 하지 않기 위해(하위 요청 한도).
 enum MediaStatus {
   pending
   confirmed
@@ -617,7 +617,7 @@ model MediaAsset {
   @@index([status, createdAt])
 }
 
-// Space별 일 단위 사용량(G-15 가시성). 판정은 MediaAsset 합계·RateCounter로 하고, 이 표는 집계·이상치 감시용.
+// Space별 일 단위 사용량(G-15 가시성). 판정은 MediaAsset 합계, RateCounter로 하고, 이 표는 집계, 이상치 감시용.
 model UsageCounter {
   spaceId          String
   periodKey        String // YYYY-MM-DD (UTC)

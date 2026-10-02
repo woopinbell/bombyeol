@@ -5,8 +5,8 @@ import { fcmConfigFromEnv, probeFcm } from "@/server/push/fcm";
 import { storageFromEnv } from "@/server/storage/from-env";
 
 /**
- * 배포 스모크(CLOUD_SESSION §2.1): Worker → Hyperdrive → DB, Worker → R2(presign 서명 강제·Head·Copy·Delete),
- * Worker → FCM(서비스 계정 토큰 교환·발송 호출).
+ * 배포 스모크(CLOUD_SESSION §2.1): Worker → Hyperdrive → DB, Worker → R2(presign 서명 강제, Head, Copy, Delete),
+ * Worker → FCM(서비스 계정 토큰 교환, 발송 호출).
  * 내부 토큰 없이는 404. 시험 객체는 `pending/_smoke/`에만 만들고 끝나면 지운다.
  */
 export async function POST(req: Request) {
@@ -55,8 +55,8 @@ export async function POST(req: Request) {
     checks.r2 = `fail: ${(error as Error).message.slice(0, 120)}`;
   }
 
-  // 가짜 등록 토큰으로 보낸다 — 실제 알림은 나가지 않는다. 기대값 invalid_token(키·토큰 교환·FCM 호출 정상),
-  // 아니면 멈춘 단계(key·token·send)를 값 없이 보여준다.
+  // 가짜 등록 토큰으로 보낸다 - 실제 알림은 나가지 않는다. 기대값 invalid_token(키, 토큰 교환, FCM 호출 정상),
+  // 아니면 멈춘 단계(key, token, send)를 값 없이 보여준다.
   const fcm = fcmConfigFromEnv(env);
   checks.fcm = fcm ? await probeFcm(fcm, new URL("/", req.url).toString()) : "not configured";
   return Response.json(checks);

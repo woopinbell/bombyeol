@@ -4,7 +4,7 @@ import type { Context } from "./context";
 
 /** 프로시저 메타 */
 export type Meta = {
-  /** Space 삭제 유예 중에도 허용하는 쓰기(취소·나가기·동의 철회처럼 거두는 동작만) */
+  /** Space 삭제 유예 중에도 허용하는 쓰기(취소, 나가기, 동의 철회처럼 거두는 동작만) */
   allowWhileDeleting?: boolean;
 };
 

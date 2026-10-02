@@ -8,7 +8,7 @@
       "childhood": "어린 시절",
       "youth": "젊은 시절",
       "work": "일",
-      "love": "사랑·결혼",
+      "love": "사랑과 결혼",
       "parenting": "자녀 키우기",
       "food": "음식",
       "holidays": "명절",
@@ -31,7 +31,7 @@
       "love_wedding": "결혼식 날은 어땠어요?",
       "parenting_first_child": "첫 아이가 태어난 날을 기억하세요?",
       "parenting_hard_times": "아이들을 키우면서 가장 어려웠던 때는요?",
-      "parenting_child_memory": "우리 엄마·아빠는 어릴 때 어떤 아이였어요?",
+      "parenting_child_memory": "우리 엄마 아빠는 어릴 때 어떤 아이였어요?",
       "food_mothers_dish": "어머니가 해 주시던 음식 중 생각나는 게 있어요?",
       "food_signature": "가족에게 꼭 물려주고 싶은 음식 솜씨가 있어요?",
       "food_hungry_days": "먹을 것이 귀하던 시절 이야기를 들려주세요.",
@@ -56,5 +56,125 @@
       "comment": "내 기록에 댓글이 달렸어요",
       "news": "새 소식이 있어요"
     }
+  },
+  "errors": {
+    "INVITE_INVALID": "초대 링크가 만료됐거나 이미 쓰였어요. 초대한 가족에게 새 링크를 부탁해 주세요",
+    "ALREADY_MEMBER": "이미 이 가족과 함께하고 있어요",
+    "MEMBERSHIP_LIMIT": "함께할 수 있는 가족 수를 넘었어요",
+    "MEMBER_ROLE_LIMIT": "이 가족은 더 초대할 수 없어요. 초대한 가족에게 알려 주세요",
+    "SPACE_CREATE_LIMIT": "가족을 더 만들 수 없어요",
+    "CHILD_LIMIT": "아이를 더 등록할 수 없어요",
+    "INVITE_ACTIVE_LIMIT": "아직 쓰지 않은 초대가 많아요. 먼저 보낸 초대를 써 주세요",
+    "RATE_LIMITED": "잠시 뒤에 다시 해 주세요",
+    "SPACE_DELETING": "삭제를 기다리는 가족이라 바꿀 수 없어요",
+    "NAME_REQUIRED": "이름이나 태명을 써 주세요",
+    "ONE_DATE_REQUIRED": "생일이나 태어날 날 중 하나를 골라 주세요",
+    "DATE_IN_FUTURE": "생일은 오늘보다 앞선 날이어야 해요",
+    "INVALID_INPUT": "입력한 내용을 다시 확인해 주세요",
+    "SIGN_IN_REQUIRED": "다시 로그인해 주세요",
+    "UNKNOWN": "문제가 생겼어요. 잠시 뒤에 다시 해 주세요"
+  },
+  "auth": {
+    "logoAlt": "봄별",
+    "title": "손주의 봄과\n할머니 할아버지의 별을\n한곳에",
+    "lead": "가족끼리만 보는 사진과 이야기 앨범이에요.",
+    "inviteNote": "가족에게 초대 링크를 받았다면, 그 링크를 눌러 들어오면 바로 가족 앨범으로 가요.",
+    "kakao": "카카오 로그인",
+    "google": "Google로 계속하기",
+    "haveCode": "초대 코드가 있어요"
+  },
+  "onboarding": {
+    "steps": {
+      "oneLeft": "1단계 남았어요",
+      "last": "마지막 단계예요",
+      "twoLeft": "2단계 남았어요"
+    },
+    "family": {
+      "title": "우리 가족을\n만들어요",
+      "name": "가족 이름",
+      "namePlaceholder": "예) 지우네 가족",
+      "relation": "나는 가족에게",
+      "relationMom": "엄마",
+      "relationDad": "아빠",
+      "relationCustom": "직접 쓸게요",
+      "relationCustomLabel": "가족에게 불릴 이름",
+      "childTitle": "첫 아이",
+      "childHint": "지금 넣지 않아도 돼요. 나중에 우리 탭에서 넣을 수 있어요.",
+      "childStatus": "아이는",
+      "childBorn": "태어났어요",
+      "childExpecting": "곧 태어나요",
+      "childName": "이름(곧 태어나면 태명)",
+      "childDate": "생일 또는 태어날 날",
+      "childDateHint": "곧 태어나면 출생 예정일을 골라 주세요",
+      "submit": "가족 만들기",
+      "submitting": "만드는 중이에요"
+    },
+    "invite": {
+      "title": "할머니 할아버지를\n초대해요",
+      "who": "누구를 초대할까요?",
+      "grandma": "할머니",
+      "grandpa": "할아버지",
+      "grandmaMaternal": "외할머니",
+      "grandpaMaternal": "외할아버지",
+      "custom": "직접 쓸게요",
+      "customLabel": "부를 이름",
+      "hint": "초대 링크는 3일 동안 한 번 쓸 수 있어요. 한 분에 하나씩 만들어요.",
+      "create": "초대 링크 만들기",
+      "creating": "만드는 중이에요",
+      "ready": "{who}께 보낼 초대 링크가 준비됐어요",
+      "someone": "가족",
+      "codeLabel": "초대 코드",
+      "expires": "3일 동안 한 번 쓸 수 있어요",
+      "send": "초대 링크 보내기",
+      "copy": "링크 복사하기",
+      "shareTitle": "봄별 가족 앨범 초대",
+      "shareText": "봄별 가족 앨범 초대장이 왔어요. {family}에서 보냈어요. 아래 링크를 눌러 들어와 주세요.",
+      "shared": "초대 링크를 보냈어요",
+      "copied": "초대 링크를 복사했어요. 카카오톡 대화창에 붙여 넣어 보내 주세요",
+      "copyFailed": "복사하지 못했어요. 위의 초대 코드를 알려 드려도 돼요",
+      "later": "나중에 할게요",
+      "again": "다른 분도 초대하기",
+      "done": "가족 앨범으로 가기"
+    },
+    "join": {
+      "welcomeTitle": "가족이 봄별 앨범에\n초대했어요",
+      "welcomeLead": "카카오로 한 번만 들어오면 돼요. 비밀번호는 필요 없어요.",
+      "title": "{family}에\n함께해요",
+      "lead": "손주 사진과 가족 이야기를 여기서 보실 수 있어요.",
+      "relationLabel": "가족이 부르는 이름",
+      "relationHint": "초대한 가족이 적어 둔 이름이에요. 바꿔도 돼요.",
+      "join": "가족 앨범 들어가기",
+      "joining": "들어가는 중이에요",
+      "invalidTitle": "이 초대는 쓸 수 없어요",
+      "enterCode": "초대 코드 넣기",
+      "home": "처음 화면으로"
+    },
+    "code": {
+      "title": "초대 코드를\n넣어 주세요",
+      "lead": "가족에게 받은 여섯 글자예요.",
+      "label": "초대 코드",
+      "submit": "다음"
+    },
+    "textSize": {
+      "title": "글자가\n잘 보이세요?",
+      "label": "글자 크기",
+      "sample": "지우가 오늘 놀이터에서 미끄럼틀을 탔어요",
+      "normal": "보통",
+      "large": "크게",
+      "larger": "더 크게",
+      "hint": "나중에 우리 탭에서 언제든 바꿀 수 있어요.",
+      "done": "이대로 시작하기"
+    },
+    "start": {
+      "title": "처음 오셨어요",
+      "lead": "가족에게 초대를 받으셨다면 초대 코드를, 우리 가족 앨범을 새로 만든다면 가족 만들기를 골라 주세요.",
+      "haveInvite": "초대 코드가 있어요",
+      "createFamily": "우리 가족 만들기"
+    }
+  },
+  "home": {
+    "emptyTitle": "아직 올라온 사진이 없어요",
+    "emptyLead": "가족이 사진과 이야기를 올리면 여기에 모여요.",
+    "invite": "할머니 할아버지 초대하기"
   }
 }

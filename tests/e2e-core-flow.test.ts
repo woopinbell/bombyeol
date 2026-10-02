@@ -10,8 +10,8 @@ import { MemoryStorage } from "./helpers/storage";
 import { callerFor } from "./helpers/trpc";
 
 // 핵심 플로우 e2e(서버): 가족 생성 → 초대 → 사진 → 이야기 → 삭제를 tRPC 호출만으로 한 번에 따라간다.
-// 화면에 기대는 부분은 여기서 다루지 않는다 — 브라우저 조작·카카오 로그인 리다이렉트·카카오톡 공유,
-// PWA 설치·오프라인, 기기의 푸시 수신(여기서는 서버가 FCM으로 보낸 메시지까지만 본다), 실제 R2 PUT(메모리 저장소).
+// 화면에 기대는 부분은 여기서 다루지 않는다 - 브라우저 조작, 카카오 로그인 리다이렉트, 카카오톡 공유,
+// PWA 설치, 오프라인, 기기의 푸시 수신(여기서는 서버가 FCM으로 보낸 메시지까지만 본다), 실제 R2 PUT(메모리 저장소).
 // 이 파일은 DB를 통째로 비우고 지우므로 로컬 DB에서만 돈다: globalSetup의 가드에 더해 파일 단위로도 다시 막는다.
 assertLocalDatabaseUrl(process.env.DATABASE_URL ?? "");
 
@@ -22,7 +22,7 @@ afterAll(() => prisma.$disconnect());
 const DAY = 24 * 60 * 60 * 1000;
 
 describe("핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭제)", () => {
-  it("엄마가 만든 가족에 할머니가 합류해 사진·이야기를 주고받고, 계정·Space 삭제 뒤 아무것도 남지 않는다", async () => {
+  it("엄마가 만든 가족에 할머니가 합류해 사진, 이야기를 주고받고, 계정, Space 삭제 뒤 아무것도 남지 않는다", async () => {
     const storage = new MemoryStorage();
     const sender = new FakeSender();
     const push = testPush(prisma, sender);
@@ -32,7 +32,7 @@ describe("핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭
       return sender.sent.splice(0).map((s) => [s.token, s.message.data.type]);
     };
 
-    // 1. 로그인(카카오) — 엄마가 가족을 만들고 아이를 등록한다
+    // 1. 로그인(카카오) - 엄마가 가족을 만들고 아이를 등록한다
     const mom = await findOrCreateUser(prisma, {
       provider: "kakao",
       providerAccountId: "e2e-mom",
@@ -48,7 +48,7 @@ describe("핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭
     });
     expect(child).toMatchObject({ status: "born" });
 
-    // 2. 초대 — 할머니가 코드로 합류한다
+    // 2. 초대 - 할머니가 코드로 합류한다
     const invite = await momApi.invite.create({
       spaceId,
       role: "grandparent",
@@ -72,7 +72,7 @@ describe("핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭
     const grandmaMemberId = family.members[1]!.id;
     expect(await momApi.invite.list({ spaceId })).toEqual([]);
 
-    // 3. 사진 — 업로드 URL 발급 → (R2 PUT 흉내) → 확정 → 오늘 기록
+    // 3. 사진 - 업로드 URL 발급 → (R2 PUT 흉내) → 확정 → 오늘 기록
     const upload = await momApi.media.requestUpload({
       spaceId,
       kind: "image",
@@ -91,7 +91,7 @@ describe("핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭
     });
     expect(await sent()).toEqual([[grandmaToken, "moment"]]);
 
-    // 할머니가 피드에서 보고 좋아요·댓글을 남긴다 → 엄마에게 알림
+    // 할머니가 피드에서 보고 좋아요, 댓글을 남긴다 → 엄마에게 알림
     const feed = await grandmaApi.moment.list({ spaceId });
     expect(feed.items.map((m) => m.id)).toEqual([moment.id]);
     expect(feed.items[0]!.media).toEqual([
@@ -111,7 +111,7 @@ describe("핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭
     const momFeed = await momApi.moment.list({ spaceId });
     expect(momFeed.items[0]!.reactions).toEqual({ likes: 1, comments: 1, likedByMe: false });
 
-    // 4. 이야기 — 할머니가 질문 카드에 답하고, 엄마가 별 하나를 보낸다
+    // 4. 이야기 - 할머니가 질문 카드에 답하고, 엄마가 별 하나를 보낸다
     const prompts = await grandmaApi.story.prompts({ spaceId, category: "food" });
     expect(prompts.map((p) => p.key)).toContain("food_signature");
     const story = await grandmaApi.story.create({
@@ -167,14 +167,14 @@ describe("핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭
         .sort(),
     ).toEqual(["food_signature", "love_wedding"]);
 
-    // 5. 할머니 계정 삭제 — 그 사람의 행은 어디에도 없고, 이야기는 작성 시점 스냅샷으로 가족에게 남는다
+    // 5. 할머니 계정 삭제 - 그 사람의 행은 어디에도 없고, 이야기는 작성 시점 스냅샷으로 가족에게 남는다
     await grandmaApi.user.deleteAccount({ confirm: true });
     expect(await leftovers(prisma, "userId", grandma.id)).toEqual({});
     const kept = await momApi.story.get({ spaceId, storyId: story.id });
     expect(kept.narrator).toMatchObject({ memberId: null, name: "할머니", label: "할머니" });
     expect((await momApi.space.get({ spaceId })).members).toHaveLength(1);
 
-    // 6. Space 삭제 — 요청 → 유예 종료 → 정리 Cron이 R2부터 지우고 Space를 파기한다
+    // 6. Space 삭제 - 요청 → 유예 종료 → 정리 Cron이 R2부터 지우고 Space를 파기한다
     const request = await momApi.space.requestDeletion({ spaceId, confirmName: "봄이네" });
     expect(request.purgeAfter.getTime() - request.requestedAt.getTime()).toBeGreaterThan(DAY);
     await expect(

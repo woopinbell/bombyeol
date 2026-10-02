@@ -11,7 +11,7 @@ afterAll(() => prisma.$disconnect());
 const free = TIER_LIMITS.free;
 
 describe("media.requestUpload", () => {
-  it("pending 자산을 만들고 길이·타입을 서명한 URL을 pending/ 키로 발급한다", async () => {
+  it("pending 자산을 만들고 길이, 타입을 서명한 URL을 pending/ 키로 발급한다", async () => {
     const { api, storage, spaceId } = await mediaSetup(prisma);
     const res = await api.media.requestUpload({
       spaceId,
@@ -28,7 +28,7 @@ describe("media.requestUpload", () => {
     expect(usage.uploadUrlsIssued).toBe(1);
   });
 
-  it("G-01: 서명과 다른 크기·타입의 업로드는 저장소가 거부한다", async () => {
+  it("G-01: 서명과 다른 크기, 타입의 업로드는 저장소가 거부한다", async () => {
     const { api, storage, spaceId } = await mediaSetup(prisma);
     const { assetId } = await api.media.requestUpload({
       spaceId,
@@ -70,7 +70,7 @@ describe("media.requestUpload", () => {
     ).rejects.toMatchObject({ message: "FILE_TOO_LARGE" });
   });
 
-  it("G-01: 허용하지 않은 형식과 종류·형식 불일치를 거부한다", async () => {
+  it("G-01: 허용하지 않은 형식과 종류, 형식 불일치를 거부한다", async () => {
     const { api, spaceId } = await mediaSetup(prisma);
     await expect(
       // @ts-expect-error 화이트리스트 밖 형식

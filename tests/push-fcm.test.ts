@@ -43,7 +43,7 @@ const message = {
 };
 
 describe("FCM 발송(S-5 계승)", () => {
-  it("개인 키는 \\n 이스케이프·실제 줄바꿈·따옴표를 모두 받는다", () => {
+  it("개인 키는 \\n 이스케이프, 실제 줄바꿈, 따옴표를 모두 받는다", () => {
     const real = "-----BEGIN PRIVATE KEY-----\nAAAA\nBBBB\n-----END PRIVATE KEY-----\n";
     const escaped = '"-----BEGIN PRIVATE KEY-----\\nAAAA\\nBBBB\\n-----END PRIVATE KEY-----\\n"';
     expect(pemBody(real)).toBe("AAAABBBB");
@@ -143,7 +143,7 @@ describe("FCM 발송(S-5 계승)", () => {
   describe("probeFcm(배포 스모크 진단)", () => {
     const link = "https://bombyeol.test/";
 
-    it("키·교환·호출이 정상이면 가짜 토큰은 invalid_token", async () => {
+    it("키, 교환, 호출이 정상이면 가짜 토큰은 invalid_token", async () => {
       const account = await serviceAccount();
       const fetcher = (async (url: string) =>
         url.includes("oauth2")

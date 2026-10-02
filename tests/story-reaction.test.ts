@@ -28,7 +28,7 @@ async function family() {
 }
 
 describe("story 세대 교차 반응", () => {
-  it("별 하나는 토글이고 이야기 목록·상세에 요약이 나온다", async () => {
+  it("별 하나는 토글이고 이야기 목록, 상세에 요약이 나온다", async () => {
     const { api, grandma, relative, spaceId, storyId, target } = await family();
     await expect(relative.reaction.toggleStar({ spaceId, target })).resolves.toEqual({
       starred: true,

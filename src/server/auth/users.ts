@@ -3,7 +3,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 export type OAuthIdentity = {
   provider: string;
   providerAccountId: string;
-  /** 표시 이름(카카오 닉네임 등). 이메일·프로필 사진은 저장하지 않는다(PRIVACY §2) */
+  /** 표시 이름(카카오 닉네임 등). 이메일, 프로필 사진은 저장하지 않는다(PRIVACY §2) */
   name?: string | null;
 };
 

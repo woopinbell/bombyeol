@@ -45,7 +45,7 @@ export function mediaError(reason: MediaFailure) {
   return new TRPCError({ code: mediaErrorCode[reason], message: reason });
 }
 
-/** 같은 Space에 없는 대상(아이·반려동물·기록 등). 존재 여부를 드러내지 않는다 */
+/** 같은 Space에 없는 대상(아이, 반려동물, 기록 등). 존재 여부를 드러내지 않는다 */
 export function notFound(reason: "SUBJECT_NOT_FOUND" | "ITEM_NOT_FOUND") {
   return new TRPCError({ code: "NOT_FOUND", message: reason });
 }

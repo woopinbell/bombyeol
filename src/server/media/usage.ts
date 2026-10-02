@@ -19,7 +19,7 @@ export function openPendingWhere(spaceId: string, now: Date): Prisma.MediaAssetW
 
 /**
  * Space 저장 사용량과 한도(G-03). 한도 판정은 confirmed + 진행 중 업로드 합계로 한다
- * (URL만 받아 두고 한도를 넘기는 우회 차단). UsageCounter는 집계·감시용이고 판정에 쓰지 않는다.
+ * (URL만 받아 두고 한도를 넘기는 우회 차단). UsageCounter는 집계, 감시용이고 판정에 쓰지 않는다.
  */
 export async function spaceUsage(db: Db, spaceId: string, now = new Date()) {
   const [confirmed, pending] = await Promise.all([

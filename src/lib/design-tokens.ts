@@ -2,7 +2,7 @@ import tokens from "@/design/tokens.json";
 
 /**
  * 디자인 토큰 v1(DESIGN.md §12) 중 JS에서 쓰는 값. CSS 값은 src/app/tokens.css가 같은 원본에서 온다.
- * 스프링·끌기 상수는 CSS로 표현할 수 없어 여기서만 쓴다.
+ * 스프링, 끌기 상수는 CSS로 표현할 수 없어 여기서만 쓴다.
  */
 export const designTokens = tokens;
 export const palette = tokens.palette;

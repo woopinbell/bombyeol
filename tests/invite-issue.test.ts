@@ -56,7 +56,7 @@ describe("invite.create", () => {
     });
   });
 
-  it("회수·만료된 초대는 정원과 활성 수에서 빠진다", async () => {
+  it("회수, 만료된 초대는 정원과 활성 수에서 빠진다", async () => {
     const { api, spaceId } = await setup();
     const a = await api.invite.create({ spaceId, role: "parent" });
     await expect(api.invite.create({ spaceId, role: "parent" })).rejects.toMatchObject({

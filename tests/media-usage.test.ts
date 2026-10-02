@@ -9,8 +9,8 @@ const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
 
-describe("Space 사용량 (G-03·G-15)", () => {
-  it("confirmed와 진행 중 업로드를 나눠 집계하고, 버려진·삭제된 자산은 빼며, 다른 Space와 섞지 않는다", async () => {
+describe("Space 사용량 (G-03, G-15)", () => {
+  it("confirmed와 진행 중 업로드를 나눠 집계하고, 버려진, 삭제된 자산은 빼며, 다른 Space와 섞지 않는다", async () => {
     const { parent, spaceId } = await mediaSetup(prisma);
     const other = await mediaSetup(prisma);
     const row = {

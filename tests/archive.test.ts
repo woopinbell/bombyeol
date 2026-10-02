@@ -10,7 +10,7 @@ beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
 
 describe("archive(데이터 내보내기)", () => {
-  it("parent만 — 어르신·친척은 FORBIDDEN", async () => {
+  it("parent만 - 어르신, 친척은 FORBIDDEN", async () => {
     const { storage, spaceId } = await mediaSetup(prisma);
     const grandma = await addMember(prisma, spaceId, "grandparent", storage);
     await expect(grandma.archive.media({ spaceId })).rejects.toThrow(/FORBIDDEN/);
@@ -62,7 +62,7 @@ describe("archive(데이터 내보내기)", () => {
     expect(seen).not.toContain("gone");
   });
 
-  it("글 기록을 종류별로 작성자 이름과 함께 준다 — 삭제 유예 중에도", async () => {
+  it("글 기록을 종류별로 작성자 이름과 함께 준다 - 삭제 유예 중에도", async () => {
     const { api, spaceId } = await mediaSetup(prisma);
     await api.story.create({ spaceId, title: "시집오던 날", body: "그날은 눈이 왔지" });
     await api.moment.createDiary({ spaceId, subject: { type: "family" }, body: "첫 가족 일기" });

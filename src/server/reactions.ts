@@ -7,7 +7,7 @@ const momentTarget = z.object({ type: z.literal("moment"), momentId: entityId })
 const milestoneTarget = z.object({ type: z.literal("milestone"), milestoneId: entityId });
 export const storyTarget = z.object({ type: z.literal("story"), storyEntryId: entityId });
 
-/** 반응 대상: 오늘 기록(Moment·Milestone)과 이야기(StoryEntry) */
+/** 반응 대상: 오늘 기록(Moment, Milestone)과 이야기(StoryEntry) */
 export const reactionTargetInput = z.discriminatedUnion("type", [
   momentTarget,
   milestoneTarget,
@@ -60,7 +60,7 @@ export function targetIdOf(target: TargetWhere) {
 
 type Counts = { toggles: number; comments: number; mine: boolean };
 
-/** 대상들의 토글 반응(좋아요·별 하나)·댓글 수와 내가 눌렀는지(쿼리 두 번) */
+/** 대상들의 토글 반응(좋아요, 별 하나), 댓글 수와 내가 눌렀는지(쿼리 두 번) */
 async function countReactions(
   prisma: Pick<PrismaClient, "reaction">,
   userId: string,
@@ -98,7 +98,7 @@ async function countReactions(
 
 export type ReactionSummary = { likes: number; comments: number; likedByMe: boolean };
 
-/** 오늘 기록 목록용: 좋아요·댓글 수와 내가 좋아요했는지 */
+/** 오늘 기록 목록용: 좋아요, 댓글 수와 내가 좋아요했는지 */
 export async function reactionSummaries(
   prisma: Pick<PrismaClient, "reaction">,
   userId: string,
@@ -116,7 +116,7 @@ export async function reactionSummaries(
 
 export type StoryReactionSummary = { stars: number; comments: number; starredByMe: boolean };
 
-/** 이야기 목록용: 별 하나·댓글 수와 내가 별을 보냈는지 */
+/** 이야기 목록용: 별 하나, 댓글 수와 내가 별을 보냈는지 */
 export async function storyReactionSummaries(
   prisma: Pick<PrismaClient, "reaction">,
   userId: string,

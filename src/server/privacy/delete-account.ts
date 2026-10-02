@@ -5,14 +5,14 @@ import { markPurging } from "@/server/media/purge";
 import { openSpaceDeletion } from "@/server/trpc/procedures";
 
 /**
- * 계정 삭제(G-06, PRIVACY §2.5·§5). 콘텐츠는 Space(가족) 소유라 남기고, 그 사람을 알아볼 수 있는 정보를 지운다.
- * - 지움: 로그인 연결(Account)·푸시 토큰·동의 기록·모든 멤버십·내가 낸 미사용 초대·초대 입력 실패 기록(IP),
+ * 계정 삭제(G-06, PRIVACY §2.5, §5). 콘텐츠는 Space(가족) 소유라 남기고, 그 사람을 알아볼 수 있는 정보를 지운다.
+ * - 지움: 로그인 연결(Account), 푸시 토큰, 동의 기록, 모든 멤버십, 내가 낸 미사용 초대, 초대 입력 실패 기록(IP),
  *   내가 쓴 임신 기록(건강 정보)
- *   — 초음파 파일은 purging으로 넘겨 정리 Cron이 R2에서 지운다(G-05).
- * - 남김: User 행은 비식별 묘비(이름 없음, deletedAt)로 — 가족 기록의 작성자 FK가 가리킨다. 이야기는 작성 시점 스냅샷.
- * - 혼자 남은 Space(다른 활동 멤버 없음)는 유예 없이 파기 대상으로 올린다(취소·내보내기할 사람이 없음).
- * - 다른 멤버가 있는 Space의 유일한 parent면 막는다(LAST_PARENT) — 먼저 다른 parent를 세우거나 Space를 삭제.
- * 구독 해지 연쇄는 Phase 8(결제)에서 이 경로에 붙인다 — TODO(G-06).
+ * - 초음파 파일은 purging으로 넘겨 정리 Cron이 R2에서 지운다(G-05).
+ * - 남김: User 행은 비식별 묘비(이름 없음, deletedAt)로 - 가족 기록의 작성자 FK가 가리킨다. 이야기는 작성 시점 스냅샷.
+ * - 혼자 남은 Space(다른 활동 멤버 없음)는 유예 없이 파기 대상으로 올린다(취소, 내보내기할 사람이 없음).
+ * - 다른 멤버가 있는 Space의 유일한 parent면 막는다(LAST_PARENT) - 먼저 다른 parent를 세우거나 Space를 삭제.
+ * 구독 해지 연쇄는 Phase 8(결제)에서 이 경로에 붙인다 - TODO(G-06).
  */
 export async function deleteAccount(prisma: PrismaClient, userId: string, now = new Date()) {
   return prisma.$transaction(async (tx) => {

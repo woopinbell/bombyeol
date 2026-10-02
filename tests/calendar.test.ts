@@ -49,7 +49,7 @@ describe("캘린더 회차 계산", () => {
 });
 
 describe("calendar 가족 캘린더", () => {
-  it("종일·시각 있는 일정을 만들고 현지 날짜 범위로 조회한다", async () => {
+  it("종일, 시각 있는 일정을 만들고 현지 날짜 범위로 조회한다", async () => {
     const { api, spaceId } = await mediaSetup(prisma);
     const allDay = (title: string, startDate: string) =>
       api.calendar.create({
@@ -105,7 +105,7 @@ describe("calendar 가족 캘린더", () => {
     expect(list[1]).toMatchObject({ id: birthday.id, recurrence: "yearly" });
   });
 
-  it("쓰기는 parent·grandparent, 고치기·지우기는 만든 사람 또는 parent", async () => {
+  it("쓰기는 parent, grandparent, 고치기, 지우기는 만든 사람 또는 parent", async () => {
     const { api, storage, spaceId } = await mediaSetup(prisma);
     const grandma = await addMember(prisma, spaceId, "grandparent", storage);
     const uncle = await addMember(prisma, spaceId, "relative", storage);
@@ -145,7 +145,7 @@ describe("calendar 가족 캘린더", () => {
     ).rejects.toMatchObject({ message: "ITEM_NOT_FOUND" });
   });
 
-  it("끝이 시작보다 앞서거나 너무 긴 일정·범위는 받지 않는다", async () => {
+  it("끝이 시작보다 앞서거나 너무 긴 일정, 범위는 받지 않는다", async () => {
     const { api, spaceId } = await mediaSetup(prisma);
     const base = { spaceId, title: "x", kind: "other" } as const;
     await expect(

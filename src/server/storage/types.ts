@@ -1,6 +1,6 @@
 /** 미디어 객체 저장소(R2). 테스트는 메모리 구현을 쓴다. */
 export interface MediaStorage {
-  /** Content-Length·Content-Type을 서명에 포함한 업로드 URL(G-01) */
+  /** Content-Length, Content-Type을 서명에 포함한 업로드 URL(G-01) */
   presignPut(
     key: string,
     opts: { bytes: number; contentType: string; expiresSec: number },

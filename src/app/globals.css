@@ -16,9 +16,9 @@
 }
 
 /*
- * Tailwind 테마를 토큰 v1(DESIGN.md §12)로 제한한다. 기본 팔레트·라운드·글자 크기·굵기·그림자를 지워
+ * Tailwind 테마를 토큰 v1(DESIGN.md §12)로 제한한다. 기본 팔레트, 라운드, 글자 크기, 굵기, 그림자를 지워
  * 토큰 밖 값이 유틸리티로 새어 들어오지 않게 한다. 간격은 4px 고정(글자 크게에서도 화면이 넘치지 않게)이고
- * 쓰는 단계는 1·2·3·4·5·6·8·12(= 4~48px)뿐이다.
+ * 쓰는 단계는 1, 2, 3, 4, 5, 6, 8, 12(= 4~48px)뿐이다.
  */
 @theme {
   --color-*: initial;
@@ -30,7 +30,7 @@
   --inset-shadow-*: initial;
   --drop-shadow-*: initial;
   --text-shadow-*: initial;
-  /* 곡선은 tokens.css의 --ease-*(같은 이름)가 맡는다 — Tailwind 기본값과 겹치지 않게 지운다 */
+  /* 곡선은 tokens.css의 --ease-*(같은 이름)가 맡는다 - Tailwind 기본값과 겹치지 않게 지운다 */
   --ease-*: initial;
   --spacing: 4px;
 }
@@ -53,6 +53,12 @@
   --color-spring-green: var(--spring-green);
   --color-spring-yellow: var(--spring-yellow);
   --color-spring-sky: var(--spring-sky);
+  /* 외부 로그인 버튼(공식 가이드 값) */
+  --color-kakao: var(--kakao-container);
+  --color-kakao-label: var(--kakao-label);
+  --color-google: var(--google-fill);
+  --color-google-stroke: var(--google-stroke);
+  --color-google-label: var(--google-label);
   /* shadcn 컴포넌트가 쓰는 이름 → 역할 */
   --color-background: var(--bg);
   --color-foreground: var(--fg);
@@ -68,16 +74,14 @@
   --color-muted-foreground: var(--fg-muted);
   --color-accent: var(--bg);
   --color-accent-foreground: var(--fg);
-  /* 상태 색은 토큰 v1에 없다 — 위험 동작도 글자·확인 단계로 구분한다(DESIGN §12) */
+  /* 상태 색은 토큰 v1에 없다 - 위험 동작도 글자, 확인 단계로 구분한다(DESIGN §12) */
   --color-destructive: var(--fg);
   --color-border: var(--line);
   --color-input: var(--line-strong);
   --color-ring: var(--fg);
 
-  --radius-s: var(--r-s);
-  --radius-m: var(--r-m);
-  --radius-l: var(--r-l);
-  --radius-full: var(--r-full);
+  /* 라운드는 rounded-sm(10), rounded-md(14), rounded-lg(20), rounded-full로만 쓴다.
+     rounded-s/e는 Tailwind의 논리 방향(시작, 끝 모서리) 유틸리티라 토큰 이름(r-s 등)을 그대로 쓰지 않는다. */
   --radius-sm: var(--r-s);
   --radius-md: var(--r-m);
   --radius-lg: var(--r-l);
@@ -114,5 +118,26 @@
     @apply bg-bg font-sans text-body font-regular text-fg;
     word-break: keep-all;
     -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* 누름 피드백(DESIGN §11): PressFeedback이 --ps를 계산한다. 감소 모션이면 변형 대신 투명도만 */
+@layer components {
+  .press {
+    transition: transform var(--d-press) var(--ease-press);
+  }
+  .press[data-pressed],
+  [data-pressed] > .press {
+    transform: scale(var(--ps, 1));
+  }
+  :root[data-motion="reduce"] .press[data-pressed] {
+    transform: none;
+    opacity: 0.8;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .press[data-pressed] {
+      transform: none;
+      opacity: 0.8;
+    }
   }
 }

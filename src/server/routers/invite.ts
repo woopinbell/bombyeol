@@ -15,7 +15,7 @@ import { relationLabel } from "./inputs";
 const HOUR_MS = 60 * 60 * 1000;
 const memberRole = z.enum(["parent", "grandparent", "relative"]);
 
-/** 미사용·미회수·미만료 초대 조건 */
+/** 미사용, 미회수, 미만료 초대 조건 */
 export function activeInviteWhere(spaceId: string, now: Date): Prisma.InviteWhereInput {
   return { spaceId, usedAt: null, revokedAt: null, expiresAt: { gt: now } };
 }
@@ -32,7 +32,7 @@ const codeInput = z.object({ code: z.string().max(32) });
 
 /**
  * 코드로 유효한 초대를 찾는다. 차단 중이면 429, 못 찾으면 실패를 기록하고 INVITE_INVALID.
- * 없음·만료·사용됨·회수됨·삭제된 Space를 구분하지 않는다(코드 탐색에 정보를 주지 않기 위해).
+ * 없음, 만료, 사용됨, 회수됨, 삭제된 Space를 구분하지 않는다(코드 탐색에 정보를 주지 않기 위해).
  */
 async function findValidInvite(ctx: Context & { userId: string }, rawCode: string) {
   if (await isInviteAttemptBlocked(ctx.prisma, ctx.userId, ctx.ip)) {

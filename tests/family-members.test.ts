@@ -28,7 +28,7 @@ async function family() {
 }
 
 describe("family 멤버 관리", () => {
-  it("멤버 목록에 나·만든 사람·기념 상태 표시가 있다", async () => {
+  it("멤버 목록에 나, 만든 사람, 기념 상태 표시가 있다", async () => {
     const { api, spaceId, creator, grandma } = await family();
     await api.memorial.mark({ spaceId, target: { type: "member", memberId: grandma.member.id } });
     const members = await grandma.api.family.members({ spaceId });
@@ -64,7 +64,7 @@ describe("family 멤버 관리", () => {
     ).rejects.toMatchObject({ message: "SUBJECT_NOT_FOUND" });
   });
 
-  it("역할 바꾸기는 parent만, 자기 자신·만든 사람·기념 상태인 분은 대상이 아니다", async () => {
+  it("역할 바꾸기는 parent만, 자기 자신, 만든 사람, 기념 상태인 분은 대상이 아니다", async () => {
     const { api, spaceId, creator, partner, grandma, uncle } = await family();
     await expect(
       grandma.api.family.changeRole({ spaceId, memberId: uncle.member.id, role: "grandparent" }),
@@ -94,7 +94,7 @@ describe("family 멤버 관리", () => {
 
   it("G-11: 역할별 정원을 대기 중 초대까지 포함해 다시 센다", async () => {
     const { api, spaceId, partner, grandma, uncle } = await family();
-    // 무료: parent 2 — 이미 꽉 찼다
+    // 무료: parent 2 - 이미 꽉 찼다
     await expect(
       api.family.changeRole({ spaceId, memberId: grandma.member.id, role: "parent" }),
     ).rejects.toMatchObject({ message: "MEMBER_ROLE_LIMIT" });
@@ -133,7 +133,7 @@ describe("family 멤버 관리", () => {
     expect(kept.narrator).toMatchObject({ memberId: null, name: "김순자", label: "할머니" });
   });
 
-  it("스스로 나가기 — Space를 만든 사람은 나갈 수 없다", async () => {
+  it("스스로 나가기 - Space를 만든 사람은 나갈 수 없다", async () => {
     const { api, spaceId, uncle } = await family();
     await uncle.api.family.leave({ spaceId });
     expect(await prisma.member.count({ where: { id: uncle.member.id } })).toBe(0);

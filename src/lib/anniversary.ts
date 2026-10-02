@@ -1,5 +1,5 @@
-// 매년 돌아오는 날(기일·생일·입양기념일·반복 일정) 계산. 정시 알림 없이 조회 시점에 계산한다(PRD §4.4 pull 원칙).
-// 날짜는 @db.Date(UTC 자정)로 다룬다 — "오늘"은 클라이언트의 현지 날짜를 받는다.
+// 매년 돌아오는 날(기일, 생일, 입양기념일, 반복 일정) 계산. 정시 알림 없이 조회 시점에 계산한다(PRD §4.4 pull 원칙).
+// 날짜는 @db.Date(UTC 자정)로 다룬다 - "오늘"은 클라이언트의 현지 날짜를 받는다.
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -34,7 +34,7 @@ export type Anniversary = {
   daysUntil: number;
 };
 
-/** 다음 기념일(1주년부터). 기준 날짜가 오늘보다 뒤면(입력 오류·아직 오지 않은 날) 없음 */
+/** 다음 기념일(1주년부터). 기준 날짜가 오늘보다 뒤면(입력 오류, 아직 오지 않은 날) 없음 */
 export function nextAnniversary(since: Date, today: Date): Anniversary | null {
   const base = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
   if (since.getTime() > base.getTime()) return null;

@@ -1,7 +1,7 @@
-/** 알림 종류 — 문구는 messages의 push.body.<종류>(PRIVACY §3: 고정 문구만, 이름·본문 없음) */
+/** 알림 종류 - 문구는 messages의 push.body.<종류>(PRIVACY §3: 고정 문구만, 이름, 본문 없음) */
 export type NoticeKind = "moment" | "story" | "ask" | "heart" | "comment" | "news";
 
-/** 기기 하나로 보내는 메시지. 데이터에는 종류·id·링크만 싣는다(본문 없음) */
+/** 기기 하나로 보내는 메시지. 데이터에는 종류, id, 링크만 싣는다(본문 없음) */
 export type PushMessage = {
   title: string;
   body: string;

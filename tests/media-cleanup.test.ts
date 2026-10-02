@@ -10,7 +10,7 @@ afterAll(() => prisma.$disconnect());
 
 const DAY = 24 * 60 * 60 * 1000;
 
-describe("runCleanup (G-05·G-15·G-17)", () => {
+describe("runCleanup (G-05, G-15, G-17)", () => {
   it("pendingTtl이 지난 업로드만 객체를 지우고 deleted로 바꾼다", async () => {
     const { api, storage, spaceId } = await mediaSetup(prisma);
     const fresh = await api.media.requestUpload({
@@ -60,7 +60,7 @@ describe("runCleanup (G-05·G-15·G-17)", () => {
     );
   });
 
-  it("보관 기간이 지난 레이트 리밋 카운터·초대 실패 기록을 지운다(G-17)", async () => {
+  it("보관 기간이 지난 레이트 리밋 카운터, 초대 실패 기록을 지운다(G-17)", async () => {
     const { parent, storage } = await mediaSetup(prisma);
     const old = new Date(Date.now() - (CLEANUP_POLICY.counterRetentionDays + 1) * DAY);
     await prisma.rateCounter.createMany({

@@ -11,7 +11,7 @@ afterAll(() => prisma.$disconnect());
 const d = (iso: string) => new Date(`${iso}T00:00:00Z`);
 
 describe("기일 계산(조회 시점)", () => {
-  it("다가오는 기일·주기·남은 날", () => {
+  it("다가오는 기일, 주기, 남은 날", () => {
     expect(nextAnniversary(d("2020-10-05"), d("2026-10-01"))).toEqual({
       date: d("2026-10-05"),
       years: 6,
@@ -65,7 +65,7 @@ async function family() {
 }
 
 describe("memorial 기념 상태(사람)", () => {
-  it("parent가 전환하면 이름·관계 스냅샷이 남고 기일 카드가 계산된다", async () => {
+  it("parent가 전환하면 이름, 관계 스냅샷이 남고 기일 카드가 계산된다", async () => {
     const { api, spaceId, grandma, uncle } = await family();
     const memorial = await api.memorial.mark({
       spaceId,
@@ -84,7 +84,7 @@ describe("memorial 기념 상태(사람)", () => {
     expect(list[0].anniversary).toEqual({ date: d("2026-10-05"), years: 1, daysUntil: 4 });
   });
 
-  it("parent만 전환하고, 자기 자신·다른 Space·이미 기념인 대상은 안 된다", async () => {
+  it("parent만 전환하고, 자기 자신, 다른 Space, 이미 기념인 대상은 안 된다", async () => {
     const { api, spaceId, grandma, grandpa, uncle } = await family();
     const target = { type: "member", memberId: grandma.member.id } as const;
     await expect(grandpa.api.memorial.mark({ spaceId, target })).rejects.toMatchObject({
@@ -117,7 +117,7 @@ describe("memorial 기념 상태(사람)", () => {
     ).rejects.toMatchObject({ message: "DATE_IN_FUTURE" });
   });
 
-  it("기념 상태인 분: 새 이야기·대필·물어보기는 막히고, 이야기는 고치거나 지울 수 없으며 추모 반응은 된다", async () => {
+  it("기념 상태인 분: 새 이야기, 대필, 물어보기는 막히고, 이야기는 고치거나 지울 수 없으며 추모 반응은 된다", async () => {
     const { api, spaceId, grandma, grandpa, uncle } = await family();
     const story = await grandma.api.story.create({ spaceId, body: "내 고향은 바닷가" });
     const openAsk = await api.story.ask({
@@ -164,7 +164,7 @@ describe("memorial 기념 상태(사람)", () => {
     expect(await api.memorial.list({ spaceId })).toEqual([]);
   });
 
-  it("떠난 날·메모 고치기는 parent만", async () => {
+  it("떠난 날, 메모 고치기는 parent만", async () => {
     const { api, spaceId, grandma, grandpa } = await family();
     const memorial = await api.memorial.mark({
       spaceId,
@@ -185,7 +185,7 @@ describe("memorial 기념 상태(사람)", () => {
 });
 
 describe("memorial 기념 상태(반려동물)", () => {
-  it("별이 된 반려동물: 상태·떠난 날이 프로필에 반영되고, 마일스톤은 막히고 추억 사진은 올릴 수 있다", async () => {
+  it("별이 된 반려동물: 상태, 떠난 날이 프로필에 반영되고, 마일스톤은 막히고 추억 사진은 올릴 수 있다", async () => {
     const { api, storage, spaceId, grandma } = await family();
     const pet = await api.pet.create({ spaceId, name: "보리", species: "dog" });
     const story = await grandma.api.story.create({ spaceId, body: "보리와 산책", petId: pet.id });

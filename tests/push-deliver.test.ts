@@ -39,7 +39,7 @@ function request(spaceId: string, actorId: string, userIds: string[]): DeliverRe
   };
 }
 
-describe("deliverPush — 발송 시점 수신자 재확인", () => {
+describe("deliverPush - 발송 시점 수신자 재확인", () => {
   it("지금 멤버인 사람에게만, 보낸 사람 본인은 빼고 보낸다", async () => {
     const { actor, space, join } = await family();
     const grandma = await join("grandparent");
@@ -56,7 +56,7 @@ describe("deliverPush — 발송 시점 수신자 재확인", () => {
     expect(result).toMatchObject({ recipients: 1, sent: 1 });
   });
 
-  it("내보내진 멤버·기념 상태 멤버·탈퇴 계정·삭제된 Space에는 보내지 않는다", async () => {
+  it("내보내진 멤버, 기념 상태 멤버, 탈퇴 계정, 삭제된 Space에는 보내지 않는다", async () => {
     const { actor, space, join } = await family();
     const removed = await join("relative");
     const memorial = await join("grandparent");
@@ -93,7 +93,7 @@ describe("deliverPush — 발송 시점 수신자 재확인", () => {
     expect(sender.tokens()).toEqual([dad.token]);
   });
 
-  it("PRIVACY §3: 문구는 고정 문구뿐 — 이름·관계 표시명이 들어가지 않는다", async () => {
+  it("PRIVACY §3: 문구는 고정 문구뿐 - 이름, 관계 표시명이 들어가지 않는다", async () => {
     const { actor, space, join } = await family();
     const grandma = await join("grandparent", "김순자");
     const sender = new FakeSender();

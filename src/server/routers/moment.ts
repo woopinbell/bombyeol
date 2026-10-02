@@ -21,7 +21,7 @@ const mediaItems = z
   .array(z.object({ assetId: entityId, thumbnailAssetId: entityId.optional() }))
   .max(MOMENT_POLICY.maxMediaPerMoment);
 
-/** 첨부 검증(G-02): 원본은 사진·영상, 썸네일은 사진. 같은 자산을 두 번 쓸 수 없다 */
+/** 첨부 검증(G-02): 원본은 사진, 영상, 썸네일은 사진. 같은 자산을 두 번 쓸 수 없다 */
 async function checkMedia(
   prisma: Parameters<typeof requireAttachableAssets>[0],
   spaceId: string,
@@ -82,7 +82,7 @@ type CreateInput = {
   media: z.infer<typeof mediaItems>;
 };
 
-/** 사진·영상 기록과 일기가 함께 쓰는 생성 경로(대상 확인 → 첨부 검증 G-02 → 저장) */
+/** 사진, 영상 기록과 일기가 함께 쓰는 생성 경로(대상 확인 → 첨부 검증 G-02 → 저장) */
 async function createMoment(ctx: SpaceCtx, kind: MomentKind, input: CreateInput) {
   const spaceId = ctx.member.spaceId;
   const when = input.takenAt ?? new Date();
@@ -116,7 +116,7 @@ async function createMoment(ctx: SpaceCtx, kind: MomentKind, input: CreateInput)
 
 export const momentRouter = router({
   /**
-   * 사진·영상 기록. 대상(아이·반려동물·가족 전체)에 따라 기록 권한이 다르다.
+   * 사진, 영상 기록. 대상(아이, 반려동물, 가족 전체)에 따라 기록 권한이 다르다.
    * 첨부는 자기 Space의 confirmed 자산 ID만 받는다(G-01~04는 업로드 단계에서 이미 통과).
    */
   create: spaceProcedure
@@ -137,7 +137,7 @@ export const momentRouter = router({
     }),
 
   /**
-   * 부모 일기(PRD §4.2): 짧은 글이 필수, 사진·영상은 선택으로 묶는다. parent만 쓴다.
+   * 부모 일기(PRD §4.2): 짧은 글이 필수, 사진, 영상은 선택으로 묶는다. parent만 쓴다.
    * 파일이 없을 수 있으므로 글 쓰기 리밋을 건다(G-07).
    */
   createDiary: parentProcedure
@@ -160,7 +160,7 @@ export const momentRouter = router({
     }),
 
   /**
-   * 글·날짜 수정: 작성자만(다른 사람의 글을 대신 고치지 않는다). 일기는 글을 비울 수 없다.
+   * 글, 날짜 수정: 작성자만(다른 사람의 글을 대신 고치지 않는다). 일기는 글을 비울 수 없다.
    */
   update: spaceProcedure
     .input(
@@ -188,7 +188,7 @@ export const momentRouter = router({
       return withReadUrls(ctx.storage, spaceId, updated);
     }),
 
-  /** 피드: 촬영일 최신순, 대상 필터(아이·반려동물·가족 전체만). 커서는 (takenAt, id) */
+  /** 피드: 촬영일 최신순, 대상 필터(아이, 반려동물, 가족 전체만). 커서는 (takenAt, id) */
   list: spaceProcedure
     .input(
       z.object({

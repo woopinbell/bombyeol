@@ -10,7 +10,7 @@ beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
 
 describe("질문 카드 카탈로그", () => {
-  it("모든 카드·카테고리에 한국어 문구가 있고 남는 문구가 없다", () => {
+  it("모든 카드, 카테고리에 한국어 문구가 있고 남는 문구가 없다", () => {
     expect(Object.keys(ko.story.prompts).sort()).toEqual(Object.keys(STORY_PROMPTS).sort());
     expect(Object.keys(ko.story.categories).sort()).toEqual([...STORY_CATEGORIES].sort());
   });

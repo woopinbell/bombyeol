@@ -21,8 +21,8 @@ type SpaceCtx = Context & {
 };
 
 /**
- * 역할 변경·내보내기 대상: 같은 Space의 다른 멤버. 자기 자신과 Space를 만든 사람은 대상이 아니고
- * (마지막 관리자 소실·관리자끼리 서로 내보내기 방지), 기념 상태인 분은 되돌린 뒤에만.
+ * 역할 변경, 내보내기 대상: 같은 Space의 다른 멤버. 자기 자신과 Space를 만든 사람은 대상이 아니고
+ * (마지막 관리자 소실, 관리자끼리 서로 내보내기 방지), 기념 상태인 분은 되돌린 뒤에만.
  */
 async function findManagedMember(ctx: SpaceCtx, memberId: string) {
   const member = await ctx.prisma.member.findFirst({
@@ -44,8 +44,8 @@ async function findManagedMember(ctx: SpaceCtx, memberId: string) {
 }
 
 /**
- * 멤버가 Space를 떠난다(내보내기·나가기). 그 사람이 발급해 아직 쓰이지 않은 초대는 거둔다.
- * 콘텐츠는 Space 소유라 남는다 — 이야기는 화자·대필자 스냅샷으로, 받은 물어보기는 사라진다(FK 규칙).
+ * 멤버가 Space를 떠난다(내보내기, 나가기). 그 사람이 발급해 아직 쓰이지 않은 초대는 거둔다.
+ * 콘텐츠는 Space 소유라 남는다 - 이야기는 화자, 대필자 스냅샷으로, 받은 물어보기는 사라진다(FK 규칙).
  */
 async function removeMember(ctx: SpaceCtx, member: { id: string; userId: string }) {
   const spaceId = ctx.member.spaceId;
@@ -61,25 +61,25 @@ async function removeMember(ctx: SpaceCtx, member: { id: string; userId: string 
 
 type Card = {
   type: "child_birthday" | "pet_birthday" | "pet_adoption" | "memorial" | "event";
-  /** 아이·반려동물·기념 프로필·일정 id */
+  /** 아이, 반려동물, 기념 프로필, 일정 id */
   id: string;
   name: string | null;
   date: Date;
-  /** 몇 번째(나이·주년·주기). 직접 등록한 일정은 처음 해부터 센다 */
+  /** 몇 번째(나이, 주년, 주기). 직접 등록한 일정은 처음 해부터 센다 */
   years: number | null;
   daysUntil: number;
   /** 반려동물 생일을 추정일로 입력했는지 */
   estimated?: boolean;
 };
 
-/** 시각 있는 일정의 현지 날짜(UTC 자정 기준)로 바꾼다 — D-day 계산은 현지 날짜끼리 */
+/** 시각 있는 일정의 현지 날짜(UTC 자정 기준)로 바꾼다 - D-day 계산은 현지 날짜끼리 */
 function localDate(at: Date, allDay: boolean, utcOffsetMinutes: number) {
   if (allDay) return at;
   const shifted = new Date(at.getTime() + utcOffsetMinutes * 60 * 1000);
   return new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()));
 }
 
-/** 우리(PRD §4.4): 세대별 프로필 — 멤버·역할·관계 표시명 관리 */
+/** 우리(PRD §4.4): 세대별 프로필 - 멤버, 역할, 관계 표시명 관리 */
 export const familyRouter = router({
   /** 멤버 목록(모든 멤버): 관리 화면에서 바꿀 수 있는 대상인지 판단할 표시를 함께 준다 */
   members: spaceProcedure.query(async ({ ctx }) => {
@@ -112,7 +112,7 @@ export const familyRouter = router({
 
   /**
    * 우리 탭 카드(조회 시점 계산, 정시 알림 없음): 다음 가족 모임 D-day와 앞으로 days일 안의
-   * 아이 생일·반려동물 생일·입양기념일·기일·직접 등록한 생일/기념일. today·utcOffsetMinutes는 클라이언트 현지 기준.
+   * 아이 생일, 반려동물 생일, 입양기념일, 기일, 직접 등록한 생일/기념일. today, utcOffsetMinutes는 클라이언트 현지 기준.
    * 출생 예정일은 넣지 않는다(임신 관련 날짜는 카드로 펼치지 않음, COMMIT_PLAN Phase 5 메모).
    */
   upcoming: spaceProcedure
@@ -210,7 +210,7 @@ export const familyRouter = router({
       }
       for (const m of memorials) yearly("memorial", m.id, m.name, m.passedAt);
 
-      // 직접 등록한 일정의 회차 — 진행 중인 며칠짜리 모임은 오늘(0일)로 본다
+      // 직접 등록한 일정의 회차 - 진행 중인 며칠짜리 모임은 오늘(0일)로 본다
       const occurrences = events.flatMap((event) =>
         occurrencesIn(event, event.allDay ? windows.allDay : windows.timed).map((span) => {
           const date = localDate(span.startsAt, event.allDay, offset);
@@ -255,7 +255,7 @@ export const familyRouter = router({
       };
     }),
 
-  /** 관계 표시명(할머니·외할아버지 등): 본인 또는 parent. null이면 지운다 */
+  /** 관계 표시명(할머니, 외할아버지 등): 본인 또는 parent. null이면 지운다 */
   updateLabel: spaceProcedure
     .input(z.object({ memberId: entityId, relationLabel: relationLabel.nullable() }))
     .mutation(async ({ ctx, input }) => {
@@ -271,8 +271,7 @@ export const familyRouter = router({
     }),
 
   /**
-   * 역할 바꾸기(parent). 요금제의 역할별 정원(G-11)을 초대와 같은 잠금 아래에서 다시 센다 —
-   * 대기 중인 초대도 정원에 포함. 바뀐 역할은 다음 요청부터 바로 권한에 반영된다(매 요청 검사).
+   * 역할 바꾸기(parent). 요금제의 역할별 정원(G-11)을 초대와 같은 잠금 아래에서 다시 센다 - * 대기 중인 초대도 정원에 포함. 바뀐 역할은 다음 요청부터 바로 권한에 반영된다(매 요청 검사).
    */
   changeRole: parentProcedure
     .input(z.object({ memberId: entityId, role: memberRole }))

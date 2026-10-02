@@ -18,7 +18,7 @@ async function family() {
 }
 
 describe("오늘(봄) 스키마 체크 제약", () => {
-  it("Moment는 아이·반려동물 중 최대 하나만 대상으로 한다", async () => {
+  it("Moment는 아이, 반려동물 중 최대 하나만 대상으로 한다", async () => {
     const { user, space, child, pet } = await family();
     const base = {
       spaceId: space.id,
@@ -35,7 +35,7 @@ describe("오늘(봄) 스키마 체크 제약", () => {
     ).rejects.toThrow();
   });
 
-  it("Milestone은 아이·반려동물 중 정확히 하나를 대상으로 한다", async () => {
+  it("Milestone은 아이, 반려동물 중 정확히 하나를 대상으로 한다", async () => {
     const { user, space, child, pet } = await family();
     const base = {
       spaceId: space.id,

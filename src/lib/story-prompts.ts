@@ -1,15 +1,15 @@
 // 이야기(별) 질문 카드 카탈로그(PRD §4.3). 큐레이션은 코드에 두고 문구는 messages의
-// story.categories.<category>·story.prompts.<key>에서 찾는다. DB에는 키만 저장한다.
+// story.categories.<category>, story.prompts.<key>에서 찾는다. DB에는 키만 저장한다.
 // 키는 저장된 이야기가 참조하므로 바꾸거나 지우지 않는다(문구만 고친다).
 
 export const STORY_CATEGORIES = [
   "childhood", // 어린 시절
   "youth", // 젊은 시절
   "work", // 일
-  "love", // 사랑·결혼
+  "love", // 사랑, 결혼
   "parenting", // 자녀 키우기
   "food", // 음식
-  "holidays", // 명절·절기
+  "holidays", // 명절, 절기
   "places", // 살던 곳
   "grandchildren", // 손주
   "wisdom", // 전하고 싶은 말

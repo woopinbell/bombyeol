@@ -9,7 +9,7 @@ import { parentProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
 import { entityId, isNotFuture, isoDate, personName } from "./inputs";
 
-/** 이름·태명 중 하나 이상, 출생 예정일·생일 중 정확히 하나 */
+/** 이름, 태명 중 하나 이상, 출생 예정일, 생일 중 정확히 하나 */
 export const childInput = z
   .object({
     name: personName.optional(),
@@ -71,7 +71,7 @@ export const childRouter = router({
   ),
 
   /**
-   * 프로필 수정(parent). 이름·태명은 null로 지울 수 있지만 둘 다 비울 수는 없다.
+   * 프로필 수정(parent). 이름, 태명은 null로 지울 수 있지만 둘 다 비울 수는 없다.
    * 출생 전 아이의 생일은 markBorn으로만 정한다(상태 전환을 한 경로로).
    */
   update: parentProcedure
@@ -99,7 +99,7 @@ export const childRouter = router({
     }),
 
   /**
-   * 태명 시절 → 출생 전환(parent). 태명·출생 예정일과 그동안의 기록은 그대로 둔다(PRD §4.2).
+   * 태명 시절 → 출생 전환(parent). 태명, 출생 예정일과 그동안의 기록은 그대로 둔다(PRD §4.2).
    */
   markBorn: parentProcedure
     .input(z.object({ childId: entityId, birthDate: isoDate, name: personName.optional() }))
@@ -121,7 +121,7 @@ export const childRouter = router({
 
   /**
    * 아이 삭제(parent, 되돌릴 수 없음). 화면에 보이는 이름(이름 또는 태명)을 다시 입력해야 한다.
-   * 그 아이의 사진·일기·마일스톤·임신 기록을 함께 지우고, 붙은 파일은 purging으로 넘겨
+   * 그 아이의 사진, 일기, 마일스톤, 임신 기록을 함께 지우고, 붙은 파일은 purging으로 넘겨
    * 정리 Cron이 R2에서 지운다(G-05). 아이 정보 동의 철회도 이 경로로 처리한다(PRIVACY §2.4).
    */
   delete: parentProcedure

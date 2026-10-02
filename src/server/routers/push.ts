@@ -14,13 +14,12 @@ const tokenInput = z
   .regex(/^[A-Za-z0-9_:-]+$/);
 
 /**
- * 웹푸시 기기 토큰(ARCHITECTURE §7). Space와 무관하게 사용자 단위로 둔다 —
- * 어느 Space의 알림을 받을지는 발송 시점에 멤버십으로 다시 판단한다.
+ * 웹푸시 기기 토큰(ARCHITECTURE §7). Space와 무관하게 사용자 단위로 둔다 - * 어느 Space의 알림을 받을지는 발송 시점에 멤버십으로 다시 판단한다.
  */
 export const pushRouter = router({
   /**
-   * 토큰 등록·갱신(앱을 열 때마다 불러도 된다). 같은 토큰이 다른 계정에 붙어 있으면
-   * 지금 로그인한 계정으로 옮긴다 — 기기를 넘겨받은 사람이 앞 사람의 알림을 받지 않게.
+   * 토큰 등록, 갱신(앱을 열 때마다 불러도 된다). 같은 토큰이 다른 계정에 붙어 있으면
+   * 지금 로그인한 계정으로 옮긴다 - 기기를 넘겨받은 사람이 앞 사람의 알림을 받지 않게.
    * 사용자당 토큰 수 상한(G-11)을 넘으면 가장 오래 안 쓴 토큰부터 지운다. 등록 리밋(G-07).
    */
   register: protectedProcedure
@@ -54,7 +53,7 @@ export const pushRouter = router({
       return { ok: true };
     }),
 
-  /** 토큰 해제(로그아웃·알림 끄기). 내 토큰만 지운다 — 없거나 남의 토큰이어도 같은 응답 */
+  /** 토큰 해제(로그아웃, 알림 끄기). 내 토큰만 지운다 - 없거나 남의 토큰이어도 같은 응답 */
   unregister: protectedProcedure
     .input(z.object({ token: tokenInput }))
     .mutation(async ({ ctx, input }) => {

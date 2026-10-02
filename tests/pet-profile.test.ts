@@ -53,7 +53,7 @@ describe("pet 프로필 관리", () => {
     ).rejects.toMatchObject({ code: "PRECONDITION_FAILED", message: "PET_LIMIT" });
   });
 
-  it("G-02: 다른 Space·영상·이미 쓰인 자산은 커버로 쓸 수 없다", async () => {
+  it("G-02: 다른 Space, 영상, 이미 쓰인 자산은 커버로 쓸 수 없다", async () => {
     const a = await mediaSetup(prisma);
     const b = await mediaSetup(prisma);
     const foreign = await uploadConfirmed(b.api, b.storage, b.spaceId);
@@ -122,7 +122,7 @@ describe("pet 프로필 관리", () => {
     }
   });
 
-  it("미래 날짜·다른 Space의 반려동물 수정은 거부한다", async () => {
+  it("미래 날짜, 다른 Space의 반려동물 수정은 거부한다", async () => {
     const a = await mediaSetup(prisma);
     const b = await mediaSetup(prisma);
     await expect(

@@ -26,7 +26,7 @@ async function expecting() {
 }
 
 describe("임신 주차 계산", () => {
-  it("예정일 기준 280일로 주·일을 계산한다", () => {
+  it("예정일 기준 280일로 주, 일을 계산한다", () => {
     expect(gestationalAge(d("2027-03-01"), d("2026-09-20"))).toEqual({ weeks: 16, days: 6 });
     expect(gestationalAge(d("2027-03-01"), d("2027-03-01"))).toEqual({ weeks: 40, days: 0 });
     expect(gestationalAge(d("2027-03-01"), d("2027-03-05"))).toEqual({ weeks: 40, days: 4 });
@@ -36,7 +36,7 @@ describe("임신 주차 계산", () => {
 });
 
 describe("pregnancy 임신 기록", () => {
-  it("기본은 parents_only, 주차·사진 읽기 URL을 함께 돌려준다", async () => {
+  it("기본은 parents_only, 주차, 사진 읽기 URL을 함께 돌려준다", async () => {
     const { api, storage, spaceId, childId } = await expecting();
     const photo = await uploadConfirmed(api, storage, spaceId);
     const record = await api.pregnancy.create({
@@ -133,7 +133,7 @@ describe("pregnancy 임신 기록", () => {
     });
   });
 
-  it("고치기는 쓴 사람만 — 다른 parent는 parents_only로 좁히기만 할 수 있다", async () => {
+  it("고치기는 쓴 사람만 - 다른 parent는 parents_only로 좁히기만 할 수 있다", async () => {
     const { api, storage, spaceId, childId } = await expecting();
     const partner = await addMember(prisma, spaceId, "parent", storage);
     const record = await api.pregnancy.create({
@@ -197,7 +197,7 @@ describe("pregnancy 임신 기록", () => {
     expect(await prisma.pregnancyRecord.count()).toBe(0);
   });
 
-  it("동의를 철회하면 새 기록·수정이 막히고, 내 기록은 지우거나 가족 공개를 거둔다", async () => {
+  it("동의를 철회하면 새 기록, 수정이 막히고, 내 기록은 지우거나 가족 공개를 거둔다", async () => {
     const { api, storage, spaceId, childId } = await expecting();
     const partner = await addMember(prisma, spaceId, "parent", storage);
     await partner.consent.grantSpace({
@@ -253,7 +253,7 @@ describe("pregnancy 임신 기록", () => {
     });
   });
 
-  it("G-07: 글 기록 리밋을 마일스톤·일기와 함께 쓴다", async () => {
+  it("G-07: 글 기록 리밋을 마일스톤, 일기와 함께 쓴다", async () => {
     const { api, parent, spaceId, childId } = await expecting();
     await exhaustRateLimit(prisma, `record-write:${parent.id}`, RATE_LIMITS.recordWritePerUser);
     await expect(
