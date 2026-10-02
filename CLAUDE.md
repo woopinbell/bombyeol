@@ -17,11 +17,11 @@
 - [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) — 아직 결정되지 않은 것, 검증이 필요한 가정
 - [docs/PROGRESS.md](docs/PROGRESS.md) — 세션 인수인계 로그(현재 상태·다음 할 일·막힌 것)
 - [docs/REPO_BOOTSTRAP.md](docs/REPO_BOOTSTRAP.md) — git 리포·`docs` 고아 브랜치·GitHub 리포 생성 절차(2026-10-01 수행 완료, 재현 참고용)
-- `image-asset/` — 대화 중 생성한 로고·아이콘·토큰 **임시 후보**(확정 아님, DESIGN.md §1 참고)
+- `image-asset/` — 확정 로고·아이콘·OG·토큰 v1(`brand/tokens.json`, 2026-10-02). 후보·결정 기록은 `concept/`·`logo-v2/`
 
 ## 현재 상태
 
-스택 확정(2026-10-01, 스파이크 S-1~S-8 통과). Phase 0(디자인 토큰 이식 제외)은 main에 머지됨(PR woopinbell/bombyeol#2). Phase 1 서버 쪽(온보딩 UI 제외)도 main에 머지됨(PR woopinbell/bombyeol#3), 스테이징 `bombyeol-staging` 배포·실로그인 확인됨. Phase 2(미디어) 서버도 main에 머지됨(PR woopinbell/bombyeol#4, 스테이징 R2 스모크 통과). Phase 3(오늘) 서버도 main에 머지됨(PR woopinbell/bombyeol#5), 스테이징 배포·R2 스모크 통과. Phase 4(이야기) 서버도 main에 머지됨(PR woopinbell/bombyeol#6), 스테이징 배포·스모크 통과. Phase 5(우리·임신 기록) 서버도 main에 머지됨(PR woopinbell/bombyeol#7), 스테이징 배포·스모크 통과. Phase 6(알림) 서버도 main에 머지됨(PR woopinbell/bombyeol#8), 스테이징 배포·스모크 통과(FCM Secret 미등록 — 발송만 건너뜀). Phase 7(삭제·개인정보) 서버도 main에 머지됨(PR woopinbell/bombyeol#10), 스테이징 배포·스모크 통과(FCM 키 재등록 후 `fcm: invalid_token` — 발송 경로 정상). Phase DS 1차(화면 규칙 초안·목업 3안)와 Q-PAY 결정 자료, Phase 9 e2e 서버 부분 작성 — 사용자 선택 대기(PROGRESS 참고). 스파이크 코드는 `spike/s1-opennext-prisma` 참고용(머지 금지). 개발 코드 쪽 에이전트 규칙은 main의 `AGENTS.md`(Next.js가 관리하는 블록 — 코드 작성 전 `node_modules/next/dist/docs/` 확인)도 함께 읽는다. 실제 상태는 항상 `docs/PROGRESS.md`가 우선한다.
+스택 확정(2026-10-01, 스파이크 S-1~S-8 통과). Phase 0(디자인 토큰 이식 제외)은 main에 머지됨(PR woopinbell/bombyeol#2). Phase 1 서버 쪽(온보딩 UI 제외)도 main에 머지됨(PR woopinbell/bombyeol#3), 스테이징 `bombyeol-staging` 배포·실로그인 확인됨. Phase 2(미디어) 서버도 main에 머지됨(PR woopinbell/bombyeol#4, 스테이징 R2 스모크 통과). Phase 3(오늘) 서버도 main에 머지됨(PR woopinbell/bombyeol#5), 스테이징 배포·R2 스모크 통과. Phase 4(이야기) 서버도 main에 머지됨(PR woopinbell/bombyeol#6), 스테이징 배포·스모크 통과. Phase 5(우리·임신 기록) 서버도 main에 머지됨(PR woopinbell/bombyeol#7), 스테이징 배포·스모크 통과. Phase 6(알림) 서버도 main에 머지됨(PR woopinbell/bombyeol#8), 스테이징 배포·스모크 통과(FCM Secret 미등록 — 발송만 건너뜀). Phase 7(삭제·개인정보) 서버도 main에 머지됨(PR woopinbell/bombyeol#10), 스테이징 배포·스모크 통과(FCM 키 재등록 후 `fcm: invalid_token` — 발송 경로 정상). Phase DS 결정 완료(2026-10-02: B안·다크·L2·모션·로고 S2+W2·Pretendard 단일, **토큰 v1 확정** — `image-asset/brand/tokens.json`, DESIGN §12). 다음은 Phase 0 `chore(design-system)` 토큰 이식. Q-PAY 결정 자료와 Phase 9 e2e 서버 테스트(작업 브랜치, main 미머지)도 대기(PROGRESS 참고). 스파이크 코드는 `spike/s1-opennext-prisma` 참고용(머지 금지). 개발 코드 쪽 에이전트 규칙은 main의 `AGENTS.md`(Next.js가 관리하는 블록 — 코드 작성 전 `node_modules/next/dist/docs/` 확인)도 함께 읽는다. 실제 상태는 항상 `docs/PROGRESS.md`가 우선한다.
 
 ## 브랜치 구조 (사용자 결정, 2026-10-01)
 

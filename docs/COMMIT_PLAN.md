@@ -4,7 +4,7 @@
 
 **이 문서의 위상**: 뼈대이지 불변 목록이 아니다. 더 원자적으로 쪼개는 것은 언제나 허용, 통째로 건너뛰거나 뭉치는 것은 하지 않는다. 벗어나야 하면 커밋 전에 이 문서를 먼저 갱신한다(작업 트리 수정, docs 커밋은 지시 시에만 — `WORKFLOW.md` §4).
 
-**진행 순서 메모 (2026-10-01 결정)**: Kaddie(`products/kaddie`)와 병행할 때 **기술 스파이크(Phase S)는 먼저·병행 진행**하고, **디자인 작업은 Kaddie의 디자인 스프린트가 자리 잡은 뒤로 미룬다**(사용자의 디자인 결정이 두 프로젝트에서 겹치지 않게). 따라서 아래 Phase 0의 `chore(design-system): 확정 토큰 이식`은 **Phase DS 완료 전에는 착수하지 않는다**(나머지 Phase 0 항목과 Phase 1~2의 비UI 작업은 진행 가능, UI 화면 구현은 토큰 확정 후).
+**진행 순서 메모 (2026-10-01 결정)**: Kaddie(`products/kaddie`)와 병행할 때 **기술 스파이크(Phase S)는 먼저·병행 진행**하고, **디자인 작업은 Kaddie의 디자인 스프린트가 자리 잡은 뒤로 미룬다**(사용자의 디자인 결정이 두 프로젝트에서 겹치지 않게). 따라서 아래 Phase 0의 `chore(design-system): 확정 토큰 이식`은 **Phase DS 완료 전에는 착수하지 않는다**(2026-10-02 Phase DS 결정 항목 완료 — 이제 착수 가능)(나머지 Phase 0 항목과 Phase 1~2의 비UI 작업은 진행 가능, UI 화면 구현은 토큰 확정 후).
 
 체크박스는 진행 표시. 완료한 항목은 `- [x]`. 항목 끝의 `[G-xx]`는 그 커밋(또는 직후 test 커밋)이 함께 만족해야 하는 비용 게이트.
 
@@ -25,10 +25,10 @@
 
 ## Phase DS — 봄별 디자인 스프린트 (Kaddie 디자인이 자리 잡은 뒤, 코드 UI 전)
 
-- [ ] 레퍼런스 1차 자료 정독(`design-research` §7) → `DESIGN.md` 화면 규칙화 — 2026-10-01 1차 반영(`design-research/2026-10-01-primary-sources.md`, `DESIGN.md` §9 초안), 사용자 확인 대기
-- [ ] 로고 확정(Q-LOGO: 기존 SVG 재제작 여부)과 손글씨 폰트 확정(Q-FONT, 라이선스 확인) — 로고는 2026-10-02 **S2 + W2 결정·파생 에셋 생성**(`image-asset/logo-v2/build.py`·`render.mjs`). 남은 것: 손글씨(Q-FONT)
-- [ ] 오늘·이야기·우리 3탭, 어르신 온보딩의 **정적 HTML 목업 2~3안** → 스크린샷으로 사용자 확인·선택 — 2026-10-01 3안 작성(`docs/mockups/2026-10-01-ds/`), **2026-10-02 사용자 B안 선택** → L2 시스템 제안(`DESIGN.md` §10, `docs/mockups/2026-10-02-b-l2/`) 사용자 확인 대기
-- [ ] 토큰 확정(색·서체·간격·모션 곡선), 대비 검증 테스트표 — 2026-10-02 후보: 다크(§3.1)·L2 스케일(§10)·모션(§11, 프로토타입 `docs/mockups/2026-10-02-proto/`), 대비 검사 `mockups/2026-10-02-b-l2/check.py`. 사용자 확정 대기
+- [x] 레퍼런스 1차 자료 정독(`design-research` §7) → `DESIGN.md` 화면 규칙화 — 2026-10-01 1차 반영(`design-research/2026-10-01-primary-sources.md`, `DESIGN.md` §9 초안), 2026-10-02 반영
+- [x] 로고 확정(Q-LOGO: 기존 SVG 재제작 여부)과 손글씨 폰트 확정(Q-FONT, 라이선스 확인) — 로고는 2026-10-02 **S2 + W2 결정·파생 에셋 생성**(`image-asset/logo-v2/build.py`·`render.mjs`). 손글씨는 쓰지 않음(Pretendard 단일, 2026-10-02)
+- [x] 오늘·이야기·우리 3탭, 어르신 온보딩의 **정적 HTML 목업 2~3안** → 스크린샷으로 사용자 확인·선택 — 2026-10-01 3안 작성(`docs/mockups/2026-10-01-ds/`), **2026-10-02 사용자 B안 선택** → L2 시스템 제안(`DESIGN.md` §10, `docs/mockups/2026-10-02-b-l2/`) → 모션 프로토타입(`docs/mockups/2026-10-02-proto/`)
+- [x] 토큰 확정(색·서체·간격·모션 곡선), 대비 검증 테스트표 — **2026-10-02 토큰 v1 확정**(`image-asset/brand/tokens.json`·`tokens.css`, `DESIGN.md` §12, 대비 표 §12.1 = `check-contrast.py`). 코드 단위 테스트는 Phase 0 이식 커밋에서
 
 ## Phase 0 — 부트스트랩 (스파이크 통과 후)
 
@@ -37,7 +37,7 @@
 - [x] `chore(repo): Next.js(App Router) + TypeScript 프로젝트 초기화` — Next 16.3.8, `node_modules/next/dist/docs/` 확인. main에 `AGENTS.md`(Next 관리 블록)만 두고 루트 `CLAUDE.md`는 docs 링크 유지
 - [x] `chore(tooling): ESLint/Prettier 설정`
 - [x] `chore(tooling): Tailwind CSS 및 shadcn/ui(Radix) 초기화` — Tailwind 4.3, shadcn 4.21(radix-nova). shadcn 기본 팔레트·폰트·예제 버튼은 넣지 않음(토큰은 Phase DS 이후)
-- [ ] `chore(design-system): DESIGN.md 확정 토큰 이식` — **Phase DS 완료 후에만 착수**. 색·간격·모션 곡선 이름 정의, 대비 검증 단위 테스트, 손글씨 폰트는 확정 시에만
+- [ ] `chore(design-system): DESIGN.md 확정 토큰 이식` — **착수 가능(토큰 v1 확정 2026-10-02)**. 원본 `image-asset/brand/tokens.json` → 코드 토큰(CSS 변수 + TS 상수), 대비 검증 단위 테스트(DESIGN §12.1 표), Pretendard 작성자 배포 dynamic subset 자체 호스팅(RFN 주의), 로고·파비콘·아이콘·OG를 `public/`로, 다크·글자 크기·감소 모션 루트 속성(`data-theme`·`data-text`·`data-motion`, 첫 페인트 전 결정)
 - [x] `chore(infra): Cloudflare Workers(OpenNext) 배포 구성` — wrangler 최상위=로컬, `env.staging`(bombyeol-staging)·`env.production`(bombyeol). 번들 3.9 MiB(빈 앱). **실제 배포·Hyperdrive 생성은 사용자 승인 대기**, R2 바인딩은 Phase 2(버킷 생성과 함께)
 - [x] `chore(prisma): Prisma 초기화 및 서버리스 Postgres 연결` — 요청 단위 클라이언트, 로컬 Hyperdrive `localConnectionString`, docker-compose `postgres:17.11`, 로컬 DB 가드 스크립트
 - [x] `chore(testing): Vitest 설정` (로컬 Postgres 통합 테스트 가드) — Vitest 5, workerd용 Prisma 클라이언트를 Node에서 쓰도록 `.wasm?module` 로더 플러그인

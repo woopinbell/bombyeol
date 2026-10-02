@@ -18,7 +18,7 @@ concept/     원래의 로고 탐색 보드
 logo/        실제 사용 로고 SVG
 icon/        favicon / PWA / 앱 아이콘
 og/          SNS 공유 이미지
-palette/     색상 토큰
+brand/tokens.json  확정 토큰 v1(원본)
 brand/       디자인 토큰과 간단한 사용 가이드
 ```
 

@@ -23,8 +23,8 @@
 - `logo/monochrome.svg`: 단색 인쇄 또는 제약 환경
 - `icon/*`: 웹 앱/PWA 아이콘 파생본
 - `og/og-image.png`: Open Graph / SNS 공유 이미지
-- `palette/colors.css`: 색상 토큰
-- `brand/tokens.css`: 프로젝트 UI에서 사용할 브랜드 토큰
+- `brand/tokens.json`: 확정 토큰 v1 원본(2026-10-02, DESIGN.md §12)
+- `brand/tokens.css`: 같은 값의 CSS 변수판, `brand/check-contrast.py`: 대비 검사
 
 ## Typography
 

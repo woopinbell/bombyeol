@@ -4,7 +4,7 @@
 
 ## 현재 상태 (2026-10-01)
 
-- 단계(2026-10-01, Phase DS 세션): **Phase DS 1차 — 1차 자료 정독·DESIGN §9 화면 규칙 초안·정적 목업 3안 작성, 사용자 선택 대기**. 병행: Q-PAY 결정 자료, Phase 9 e2e 서버 부분(작업 브랜치, main 미머지) — 아래 "현재 상태 — Phase DS".
+- 단계(2026-10-02, Phase DS 세션): **Phase DS 결정 완료 — B안·L2·다크·모션(시트 350ms·토스트 6초)·로고 S2+W2·Pretendard 단일·토큰 v1 확정**. (2026-10-01 시작: 1차 자료 정독·화면 규칙·목업 3안) 병행: Q-PAY 결정 자료, Phase 9 e2e 서버 부분(작업 브랜치, main 미머지) — 아래 "현재 상태 — Phase DS".
 - (이전) 단계(2026-10-01, Phase 7): **Phase 7 삭제·개인정보 서버 main 머지 완료(PR woopinbell/bombyeol#10, 머지 커밋 ea6a25e), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외). 그 전에 FCM 스모크 점검 추가(PR woopinbell/bombyeol#9 머지) — 아래 "현재 상태 — Phase 7".
 - (이전) 단계(2026-10-01, Phase 6): **Phase 6 알림 서버 main 머지 완료(PR woopinbell/bombyeol#8, 머지 커밋 934c55d), 스테이징 마이그레이션·배포·스모크 통과**(UI·공유·PWA 제외) — 아래 "현재 상태 — Phase 6".
 - (이전) 단계(2026-10-01, Phase 5): **Phase 5 우리·임신 기록 서버 main 머지 완료(PR woopinbell/bombyeol#7, 머지 커밋 6c7b55b), 스테이징 마이그레이션·배포·스모크 통과**(UI 제외) — 아래 "현재 상태 — Phase 5".
@@ -34,11 +34,12 @@
 - **2026-10-02 모션 프로토타입**: [`mockups/2026-10-02-proto/`](mockups/2026-10-02-proto/) — B안 오늘·이야기를 직접 눌러 보는 HTML(시트·끌어 닫기·토스트·누름 2px·별 하나 boop·사진 안착·마일스톤 반짝임·탭 페이드, 설정판: 테마·글자·움직임 줄이기·×5 느리게·시트 500/350·토스트 4/6초). `DESIGN.md` §11 모션 토큰 후보. Playwright 28항목 통과, 시연 영상 `shots/demo.webm`, 시트 프레임 띠. 실기기·스크린리더는 미확인.
 - **2026-10-02 사용자 선택**: 시트 350ms·토스트 6초(DESIGN §11, 프로토타입 기본값 반영, 테스트 28/28 재통과). **로고 v2 후보**: `image-asset/logo-v2/`(심볼 S1·S2·S3 × 워드마크 W1·W2, 한글 워드마크는 직접 그린 경로, 생성기 `build.py`) + 검토판 `docs/mockups/2026-10-02-logo/`. 추천 S2+W2, 사용자 선택 대기.
 - **2026-10-02 로고 확정(S2 + W2) + 파생 에셋**: `image-asset/logo/`(primary·primary-dark·stacked·symbol·wordmark·monochrome, SVG+PNG), `icon/`(favicon.svg — 어두운 탭이면 별 silver, favicon 16·32·48, apple 180, PWA 192·512·1024, maskable 512 — 이전 파일은 1024px로 잘못돼 있었음), `og/og-image`(가운데 정렬). 생성기 `logo-v2/build.py` + `logo-v2/render.mjs`. 검토판 `docs/mockups/2026-10-02-logo/final/`.
+- **2026-10-02 Pretendard 단일 + 토큰 v1 확정**: Q-FONT 해결(손글씨 안 씀, OFL·Reserved Font Name 주의 — 작성자 배포 파일 그대로 자체 호스팅, 직접 서브셋 시 이름 변경). 토큰 원본 `image-asset/brand/tokens.json` + `tokens.css`, 대비 검사 `check-contrast.py`(26조합 통과, 금지 조합 4개 미달 확인), `DESIGN.md` §12(요약·대비 표). 새로 정한 값: 콘텐츠 최대 폭 480px, 글자 크기 루트 16/20/22. v1에 없는 것: 상태 색·z-index. `palette/colors.css` 삭제(원본 하나로). **Phase DS 결정 항목 전부 완료** → Phase 0 `chore(design-system)` 착수 가능.
 - 환경 메모: 기존 스위트에서 3번 중 1번 테스트 1건이 실패했다가 재실행에 통과(어떤 테스트인지 기록 못 함 — 다음에 반복 실행으로 찾을 것). Docker Hub 429로 `db:up` 첫 시도 실패, 재시도 성공. 컨테이너에 한글 폰트가 없어 목업 스크린샷은 Pretendard woff2를 받아 Playwright route로 주입(스크래치패드, 리포에 넣지 않음).
 
 ### 다음 할 일 (Phase DS 1차 이후)
 
-1. **사용자**: Q-FONT(손글씨 폰트를 쓸지 — 워드마크가 이미 손맛을 맡았으니 Pretendard 단일도 선택지) → 토큰 확정(Phase DS 마지막) → Phase 0 `chore(design-system)` 토큰 이식 + 로고·아이콘을 `public/`에 넣는 커밋. 실기기(어르신 폰)에서 프로토타입 열어 보기는 계속 권장.
+1. 다음 개발: Phase 0 `chore(design-system): DESIGN.md 확정 토큰 이식`(작업 브랜치, COMMIT_PLAN 메모대로) → 그 뒤 UI 화면 구현(Phase 1~7의 UI 항목). 사용자: 실기기(어르신 폰)에서 프로토타입 열어 보기 권장.
 2. 그 뒤 Phase DS 남은 것: 로고(Q-LOGO)·손글씨(Q-FONT) 결정, 토큰 확정(모션 토큰 후보 표에서 고르기) + 대비 검증 표. 확정 전에는 코드에 토큰을 넣지 않는다.
 3. **사용자**: Q-PAY 선택(선결: 사업자 등록 여부). 고르면 ENV_MANIFEST Phase 8 키 이름부터 채우고 Phase 8 착수.
 4. e2e 커밋(f089b91)은 main 머지 대기 — 사용자 확인 후 PR.
