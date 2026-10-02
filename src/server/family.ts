@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+import { TRPCError } from "@trpc/server";
+import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { requireSignedIn } from "@/server/session";
 import { serverCaller } from "@/server/trpc/server-caller";
@@ -12,7 +13,13 @@ export const loadFamily = cache(async (spaceId: string) => {
   const caller = await serverCaller();
   const [space, mine] = await Promise.all([
     caller.space.get({ spaceId }).catch(() => null),
-    caller.space.list(),
+    caller.space.list().catch((error) => {
+      // 세션은 남았는데 계정이 지워진 경우: 다시 로그인하게 한다
+      if (error instanceof TRPCError && error.code === "UNAUTHORIZED") {
+        redirect(`/login?next=${encodeURIComponent(`/s/${spaceId}`)}`);
+      }
+      throw error;
+    }),
   ]);
   const membership = mine.find((m) => m.space.id === spaceId);
   if (!space || !membership) notFound();
