@@ -105,7 +105,16 @@
 - [x] `chore(prisma): Reaction 스키마 정의`
 - [x] `feat(reaction): 좋아요, 댓글 구현` [G-07]
 - [x] `feat(today): 오늘 탭 화면 구성` - 2026-10-02 9커밋, main 머지(PR woopinbell/bombyeol#13): 하단 3탭 틀과 아이콘, 로컬 개발 저장소, 피드 최근 댓글(서버), 시트와 토스트, 날짜별 앨범 피드와 좋아요, 사진 보기와 댓글, 사진, 영상 올리기, 기록하기(일기, 성장 기록), 내 기록 지우기(되돌리기)
-- [ ] (남음) 기록 글 고치기, 마일스톤 고치기(처음 옮기기)와 좋아요, 댓글, 지우기 화면, 아이, 반려동물 등록과 고치기 화면(가족 만들기 이후), 저장 공간 표시
+- [x] (남았던 화면) 2026-10-02 8커밋, 작업 브랜치 `claude/magical-planck-y1ekem`(main 미머지):
+  - [x] `feat(today): 내 기록 글 고치기 구현` - 작성자만, 일기는 비울 수 없음
+  - [x] `refactor(today): 좋아요, 댓글을 기록과 성장 기록이 함께 쓰게 분리` - `reactions.tsx`(useLike 연타 묶기, useComments)
+  - [x] `feat(milestone): 성장 기록 자세히 보기(좋아요, 댓글, 지우기) 구현` - 띠를 누르면 시트, 띠에 좋아요, 댓글 수
+  - [x] (추가) `feat(milestone): 처음 표시를 한 번에 옮기는 수정 옵션 추가` - `milestone.update`의 `moveFirst`(한 트랜잭션, 그 기록을 고칠 수 있는 사람만), 응답 `movedFromId`
+  - [x] `feat(milestone): 성장 기록 고치기(값, 날짜, 메모, 처음 옮기기) 구현` - 이미 처음이 있으면 옮길지 묻는다
+  - [x] `feat(child): 아이 더하기, 고치기, 태어났어요 화면 구현` - 우리 탭 `/us/child/new`, `/us/child/[id]`
+  - [x] `feat(pet): 반려동물 더하기, 고치기 화면 구현` - `/us/pet/new`, `/us/pet/[id]`, 다른 동물은 종 이름(`space.get`에 speciesLabel 추가)
+  - [x] `feat(media): 가족 앨범 저장 공간 표시 구현` - 우리 탭, 90%부터 거의 다 찼다고 알림
+  - [ ] (남음) 반려동물 커버 사진 고르기 화면(서버 `pet.update` coverAssetId는 있음), 아이, 반려동물 지우기 화면은 Phase 7 UI(`feat(privacy)`)
 - [x] (피드백) 아이 날짜 공란, 마일스톤 '처음' 표시 분리, 속도(쿼리 33 → 9, loading, 업로드 묶음), 좋아요 연타 묶기 - PR woopinbell/bombyeol#14, #15, 저장 공간 표시
 
 ## Phase 4 - 이야기(별)
