@@ -76,6 +76,8 @@ export const MEDIA_POLICY = {
   pendingTtlSec: 60 * 60,
   /** G-04: Space당 동시에 열린(미확정) 업로드 수 */
   pendingPerSpace: 20,
+  /** 한 번에 확인하는 업로드 수(파일마다 저장소 요청 3번 - Workers 무료 하위 요청 50 안) */
+  confirmBatch: 12,
   /** 읽기용 서명 URL 유효 시간(초) */
   readUrlTtlSec: 60 * 60,
 } as const;
