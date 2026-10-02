@@ -1,3 +1,4 @@
+import { memoized } from "@/server/trpc/context";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { noPush } from "@/server/push/dispatch";
 import { createCallerFactory, router } from "@/server/trpc/init";
@@ -68,5 +69,18 @@ describe("tRPC 접근 통제", () => {
     await expect(as(grandma.id).parentOnly({ spaceId: space.id })).rejects.toMatchObject({
       code: "FORBIDDEN",
     });
+  });
+});
+
+describe("요청 안 권한 조회 메모", () => {
+  it("같은 키는 한 번만 부르고, 메모가 없으면 매번 부른다", async () => {
+    let calls = 0;
+    const load = async () => ++calls;
+    const ctx = { memo: new Map<string, Promise<unknown>>() };
+    expect(await memoized(ctx, "user:a", load)).toBe(1);
+    expect(await memoized(ctx, "user:a", load)).toBe(1);
+    expect(await memoized(ctx, "user:b", load)).toBe(2);
+    expect(await memoized({}, "user:a", load)).toBe(3);
+    expect(await memoized({}, "user:a", load)).toBe(4);
   });
 });

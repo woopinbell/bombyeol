@@ -68,7 +68,7 @@
     "RATE_LIMITED": "잠시 뒤에 다시 해 주세요",
     "SPACE_DELETING": "삭제를 기다리는 가족이라 바꿀 수 없어요",
     "NAME_REQUIRED": "이름이나 태명을 써 주세요",
-    "ONE_DATE_REQUIRED": "생일이나 태어날 날 중 하나를 골라 주세요",
+    "ONE_DATE_REQUIRED": "생일과 태어날 날 중 하나만 골라 주세요",
     "DATE_IN_FUTURE": "생일은 오늘보다 앞선 날이어야 해요",
     "INVALID_INPUT": "입력한 내용을 다시 확인해 주세요",
     "SIGN_IN_REQUIRED": "다시 로그인해 주세요",
@@ -86,6 +86,8 @@
     "ITEM_NOT_FOUND": "이미 지워진 기록이에요",
     "SUBJECT_NOT_FOUND": "가족 구성원을 찾지 못했어요",
     "FORBIDDEN": "이 기록은 남길 수 없어요",
+    "MILESTONE_FIRST_EXISTS": "이미 처음으로 남긴 기록이 있어요",
+    "MILESTONE_FIRST_INVALID": "이 기록에는 처음을 붙일 수 없어요",
     "UNKNOWN": "문제가 생겼어요. 잠시 뒤에 다시 해 주세요"
   },
   "auth": {
@@ -119,7 +121,7 @@
       "childExpecting": "곧 태어나요",
       "childName": "이름(곧 태어나면 태명)",
       "childDate": "생일 또는 태어날 날",
-      "childDateHint": "곧 태어나면 출생 예정일을 골라 주세요",
+      "childDateHint": "아직 모르면 비워 둬도 괜찮아요",
       "submit": "가족 만들기",
       "submitting": "만드는 중이에요"
     },
@@ -224,24 +226,24 @@
   },
   "milestone": {
     "child": {
+      "roll": "{first, select, true {처음 뒤집었어요} other {뒤집었어요}}",
+      "sit": "{first, select, true {처음 혼자 앉았어요} other {혼자 앉았어요}}",
+      "crawl": "{first, select, true {처음 기었어요} other {기었어요}}",
+      "tooth": "{first, select, true {첫 이가 났어요} other {이가 났어요}}",
+      "step": "{first, select, true {처음 걸었어요} other {걸었어요}}",
+      "word": "{first, select, true {처음 말했어요} other {말했어요}}",
       "height": "키 {value}cm",
       "weight": "몸무게 {value}kg",
       "head": "머리둘레 {value}cm",
-      "first_roll": "처음 뒤집었어요",
-      "first_sit": "처음 혼자 앉았어요",
-      "first_crawl": "처음 기었어요",
-      "first_tooth": "첫 이가 났어요",
-      "first_step": "처음 걸었어요",
-      "first_word": "처음 말했어요",
-      "custom": "{title}"
+      "custom": "{first, select, true {처음, {title}} other {{title}}}"
     },
     "pet": {
       "adoption": "가족이 된 날",
-      "first_walk": "첫 산책",
+      "walk": "{first, select, true {첫 산책} other {산책했어요}}",
       "weight": "몸무게 {value}kg",
       "vaccination": "예방접종",
       "vet_visit": "병원 다녀왔어요",
-      "custom": "{title}"
+      "custom": "{first, select, true {처음, {title}} other {{title}}}"
     }
   },
   "moment": {
@@ -284,12 +286,12 @@
   },
   "milestoneKind": {
     "child": {
-      "first_roll": "처음 뒤집기",
-      "first_sit": "처음 혼자 앉기",
-      "first_crawl": "처음 기기",
-      "first_tooth": "첫 이",
-      "first_step": "첫 걸음",
-      "first_word": "첫 말",
+      "roll": "뒤집기",
+      "sit": "혼자 앉기",
+      "crawl": "기기",
+      "tooth": "이",
+      "step": "걸음",
+      "word": "말",
       "height": "키",
       "weight": "몸무게",
       "head": "머리둘레",
@@ -297,7 +299,7 @@
     },
     "pet": {
       "adoption": "가족이 된 날",
-      "first_walk": "첫 산책",
+      "walk": "산책",
       "weight": "몸무게",
       "vaccination": "예방접종",
       "vet_visit": "병원",
@@ -312,7 +314,7 @@
     "diary": "일기 쓰기",
     "diaryHint": "아이에게 남기는 짧은 글이에요",
     "milestone": "성장 기록 남기기",
-    "milestoneHint": "첫 걸음, 키, 몸무게 같은 순간이에요"
+    "milestoneHint": "뒤집기, 걸음, 키, 몸무게 같은 순간이에요"
   },
   "diary": {
     "title": "일기 쓰기",
@@ -332,6 +334,8 @@
     "note": "메모",
     "noteHint": "쓰지 않아도 괜찮아요",
     "submit": "기록 남기기",
-    "done": "성장 기록을 남겼어요"
+    "done": "성장 기록을 남겼어요",
+    "first": "처음이에요",
+    "firstHint": "이 순간이 처음이면 켜 주세요. 처음 표시는 종류마다 하나예요"
   }
 }

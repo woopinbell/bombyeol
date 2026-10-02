@@ -136,9 +136,10 @@ export const spaceRouter = router({
     }),
   ),
 
-  /** Space 상세: 멤버와 아이 */
-  get: spaceProcedure.query(({ ctx }) =>
-    ctx.prisma.space.findUniqueOrThrow({
+  /** Space 상세: 멤버와 아이, 반려동물, 그리고 요청한 사람의 역할(화면이 목록 조회를 따로 하지 않게) */
+  get: spaceProcedure.query(async ({ ctx }) => ({
+    myRole: ctx.member.role,
+    ...(await ctx.prisma.space.findUniqueOrThrow({
       where: { id: ctx.member.spaceId },
       select: {
         id: true,
@@ -169,6 +170,6 @@ export const spaceRouter = router({
           select: { id: true, name: true, species: true, status: true },
         },
       },
-    }),
-  ),
+    })),
+  })),
 });

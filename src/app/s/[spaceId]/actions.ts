@@ -59,30 +59,28 @@ export async function deleteComment(spaceId: string, commentId: string) {
   }
 }
 
-/** 올리기 1단계: 서명된 업로드 URL(G-01, G-03, G-04 검사는 프로시저) */
-export async function requestUpload(
+/** 올리기 1단계: 여러 파일의 서명된 업로드 URL을 한 번에(G-01, G-03, G-04 검사는 프로시저) */
+export async function requestUploads(
   spaceId: string,
-  file: { kind: "image" | "video"; contentType: string; bytes: number },
+  items: { kind: "image" | "video"; contentType: string; bytes: number }[],
 ) {
   try {
     const caller = await serverCaller();
-    return await caller.media.requestUpload({
+    return await caller.media.requestUploads({
       spaceId,
-      kind: file.kind,
       // 허용 형식은 프로시저의 입력 검사가 거른다
-      contentType: file.contentType as "image/jpeg",
-      bytes: file.bytes,
+      items: items as { kind: "image" | "video"; contentType: "image/jpeg"; bytes: number }[],
     });
   } catch (error) {
     return { error: toErrorKey(error) } satisfies Failed;
   }
 }
 
-/** 올리기 2단계: 저장소의 실제 크기, 형식 확인(G-02) */
-export async function confirmUpload(spaceId: string, assetId: string) {
+/** 올리기 2단계: 저장소의 실제 크기, 형식 확인(G-02), 묶어서 */
+export async function confirmUploads(spaceId: string, assetIds: string[]) {
   try {
     const caller = await serverCaller();
-    return await caller.media.confirm({ spaceId, assetId });
+    return await caller.media.confirmMany({ spaceId, assetIds });
   } catch (error) {
     return { error: toErrorKey(error) } satisfies Failed;
   }
@@ -138,6 +136,7 @@ export async function createMilestone(
     kind: string;
     value: Record<string, unknown>;
     recordedAt: string;
+    first: boolean;
   },
 ) {
   try {

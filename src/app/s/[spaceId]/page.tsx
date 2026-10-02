@@ -18,24 +18,17 @@ import {
 import { cn } from "@/lib/utils";
 import { loadFamily, type Family } from "@/server/family";
 
-/** 마일스톤은 대상별로만 조회된다: 모두면 아이, 반려동물마다 불러 합친다(G-11로 수가 작다) */
+/** 마일스톤은 한 번에 불러와(milestone.listAll) 대상 이름을 붙인다 */
 async function loadMilestones({ caller, space }: Family, who: Who): Promise<FeedMilestone[]> {
-  const subjects = [
-    ...space.children.map((c) => ({
-      input: { type: "child" as const, childId: c.id },
-      name: childName(c),
-    })),
-    ...space.pets.map((p) => ({ input: { type: "pet" as const, petId: p.id }, name: p.name })),
-  ].filter(({ input }) => who.type === "all" || whoParam(who) === whoParam(input));
-  const lists = await Promise.all(
-    subjects.map(async ({ input, name }) =>
-      (await caller.milestone.list({ spaceId: space.id, subject: input })).map((m) => ({
-        ...m,
-        subjectName: name,
-      })),
-    ),
-  );
-  return lists.flat();
+  const names = new Map<string, string>([
+    ...space.children.map((c) => [c.id, childName(c)] as const),
+    ...space.pets.map((p) => [p.id, p.name] as const),
+  ]);
+  const rows = await caller.milestone.listAll({
+    spaceId: space.id,
+    subject: who.type === "all" ? undefined : who,
+  });
+  return rows.map((m) => ({ ...m, subjectName: names.get(m.childId ?? m.petId ?? "") ?? "" }));
 }
 
 /** 오늘(봄) 탭: 가족 이름 머리말, 누구의 기록 고르기, 날짜별 앨범 피드 */

@@ -11,29 +11,40 @@ const custom = z
   .object({ title: z.string().trim().min(1).max(40), note: note.optional() })
   .strict();
 
-/** 한 번만 있는 "처음" 기록인지(대상당 하나) */
-type Preset = { value: z.ZodType; once: boolean };
+/**
+ * once: 대상당 하나뿐인 기록(입양일). firstable: "처음" 표시를 켤 수 있는 기록 - 뒤집기, 이 같은 순간은 여러 번
+ * 남기고 그중 하나에만 "처음"을 붙인다(사용자 결정 2026-10-02: 첫 기록을 자동으로 "처음"이라 하면 사실과 다를 수 있다).
+ * "처음"은 대상, 종류마다 하나(직접 쓰기는 제목이 달라 제한하지 않는다). 키, 몸무게 같은 측정에는 붙이지 않는다.
+ */
+type Preset = { value: z.ZodType; once: boolean; firstable: boolean };
+
+const measure = (min: number, max: number): Preset => ({
+  value: measurement(min, max),
+  once: false,
+  firstable: false,
+});
+const moment: Preset = { value: event, once: false, firstable: true };
 
 export const CHILD_MILESTONES = {
-  height: { value: measurement(20, 200), once: false }, // cm
-  weight: { value: measurement(0.3, 150), once: false }, // kg
-  head: { value: measurement(20, 70), once: false }, // 머리둘레 cm
-  first_roll: { value: event, once: true },
-  first_sit: { value: event, once: true },
-  first_crawl: { value: event, once: true },
-  first_tooth: { value: event, once: true },
-  first_step: { value: event, once: true },
-  first_word: { value: event, once: true },
-  custom: { value: custom, once: false },
+  roll: moment,
+  sit: moment,
+  crawl: moment,
+  tooth: moment,
+  step: moment,
+  word: moment,
+  height: measure(20, 200), // cm
+  weight: measure(0.3, 150), // kg
+  head: measure(20, 70), // 머리둘레 cm
+  custom: { value: custom, once: false, firstable: true },
 } satisfies Record<string, Preset>;
 
 export const PET_MILESTONES = {
-  adoption: { value: event, once: true },
-  first_walk: { value: event, once: true },
-  weight: { value: measurement(0.01, 150), once: false }, // kg
-  vaccination: { value: event, once: false },
-  vet_visit: { value: event, once: false },
-  custom: { value: custom, once: false },
+  adoption: { value: event, once: true, firstable: false },
+  walk: moment,
+  weight: measure(0.01, 150), // kg
+  vaccination: { value: event, once: false, firstable: false },
+  vet_visit: { value: event, once: false, firstable: false },
+  custom: { value: custom, once: false, firstable: true },
 } satisfies Record<string, Preset>;
 
 export type ChildMilestoneKind = keyof typeof CHILD_MILESTONES;
@@ -44,14 +55,19 @@ export function milestonePreset(subject: "child" | "pet", kind: string): Preset 
   return Object.hasOwn(table, kind) ? table[kind] : null;
 }
 
-/** 아이 나이(개월)에 맞는 "처음" 기록 제안 창. 의학 기준이 아니라 제안용 넓은 범위 */
+/** "처음" 표시가 대상, 종류마다 하나로 제한되는 종류(직접 쓰기 제외) */
+export function firstIsUnique(kind: string) {
+  return kind !== "custom";
+}
+
+/** 아이 나이(개월)에 맞는 "처음" 순간 제안 창. 의학 기준이 아니라 제안용 넓은 범위 */
 const CHILD_AGE_WINDOWS: Partial<Record<ChildMilestoneKind, [number, number]>> = {
-  first_roll: [2, 8],
-  first_sit: [4, 10],
-  first_tooth: [4, 14],
-  first_crawl: [5, 12],
-  first_word: [8, 20],
-  first_step: [8, 20],
+  roll: [2, 8],
+  sit: [4, 10],
+  tooth: [4, 14],
+  crawl: [5, 12],
+  word: [8, 20],
+  step: [8, 20],
 };
 
 /** 생일 기준 만 개월 수 */
@@ -64,7 +80,8 @@ export function ageInMonths(birthDate: Date, today: Date) {
 }
 
 /**
- * 아이 나이 기반 제안: 나이 창에 들어온 아직 기록하지 않은 "처음" 기록을 먼저, 그다음 키, 몸무게.
+ * 아이 나이 기반 제안: 나이 창에 들어왔고 아직 "처음"이 붙지 않은 순간을 먼저, 그다음 키, 몸무게.
+ * recorded = "처음"이 붙은 종류.
  * 출생 전이면 제안하지 않는다.
  */
 export function suggestChildMilestones(

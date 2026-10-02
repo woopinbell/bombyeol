@@ -11,19 +11,18 @@ import { serverCaller } from "@/server/trpc/server-caller";
 export const loadFamily = cache(async (spaceId: string) => {
   const userId = await requireSignedIn(`/s/${spaceId}`);
   const caller = await serverCaller();
-  const [space, mine] = await Promise.all([
-    caller.space.get({ spaceId }).catch(() => null),
-    caller.space.list().catch((error) => {
-      // 세션은 남았는데 계정이 지워진 경우: 다시 로그인하게 한다
-      if (error instanceof TRPCError && error.code === "UNAUTHORIZED") {
-        redirect(`/login?next=${encodeURIComponent(`/s/${spaceId}`)}`);
-      }
-      throw error;
-    }),
-  ]);
-  const membership = mine.find((m) => m.space.id === spaceId);
-  if (!space || !membership) notFound();
-  return { caller, space, role: membership.role, userId };
+  const space = await caller.space.get({ spaceId }).catch((error) => {
+    // 세션은 남았는데 계정이 지워진 경우: 다시 로그인하게 한다
+    if (error instanceof TRPCError && error.code === "UNAUTHORIZED") {
+      redirect(`/login?next=${encodeURIComponent(`/s/${spaceId}`)}`);
+    }
+    // 멤버가 아니거나 없는 Space, 잘못된 주소는 있는지도 드러내지 않는다
+    if (error instanceof TRPCError && ["NOT_FOUND", "BAD_REQUEST"].includes(error.code)) {
+      notFound();
+    }
+    throw error;
+  });
+  return { caller, space, role: space.myRole, userId };
 });
 
 export type Family = Awaited<ReturnType<typeof loadFamily>>;

@@ -39,7 +39,7 @@ describe("오늘(봄) 스키마 체크 제약", () => {
     const { user, space, child, pet } = await family();
     const base = {
       spaceId: space.id,
-      kind: "first_step",
+      kind: "step",
       value: {},
       recordedAt: new Date("2026-10-01"),
       createdById: user.id,

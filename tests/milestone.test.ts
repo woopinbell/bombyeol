@@ -36,32 +36,64 @@ describe("milestone 기록", () => {
     const step = await api.milestone.create({
       spaceId,
       subject: child,
-      kind: "first_step",
+      kind: "step",
       value: { note: "거실에서 세 걸음" },
       recordedAt: "2026-09-20",
     });
-    expect(step).toMatchObject({ kind: "first_step", value: { note: "거실에서 세 걸음" } });
+    expect(step).toMatchObject({ kind: "step", value: { note: "거실에서 세 걸음" } });
     const list = await api.milestone.list({ spaceId, subject: child });
-    expect(list.map((m) => m.kind)).toEqual(["first_step", "height"]);
+    expect(list.map((m) => m.kind)).toEqual(["step", "height"]);
   });
 
-  it("'처음' 기록은 대상당 하나(동시 요청 포함), 반복 기록은 여러 번", async () => {
+  it("같은 순간은 여러 번 남기고, '처음' 표시는 대상, 종류마다 하나(동시 요청 포함)", async () => {
     const { api, spaceId, child, pet } = await family();
+    const word = { spaceId, subject: child, kind: "word", value: {}, recordedAt: "2026-09-01" };
+    await api.milestone.create(word);
+    await api.milestone.create(word);
     const results = await Promise.allSettled(
-      [1, 2, 3].map(() =>
-        api.milestone.create({
-          spaceId,
-          subject: child,
-          kind: "first_word",
-          value: {},
-          recordedAt: "2026-09-01",
-        }),
-      ),
+      [1, 2, 3].map(() => api.milestone.create({ ...word, first: true })),
     );
     expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
     expect(results.find((r) => r.status === "rejected")).toMatchObject({
-      reason: { code: "CONFLICT", message: "MILESTONE_EXISTS" },
+      reason: { code: "CONFLICT", message: "MILESTONE_FIRST_EXISTS" },
     });
+    const words = await api.milestone.list({ spaceId, subject: child });
+    expect(words.map((m) => m.isFirst).sort()).toEqual([false, false, true]);
+
+    // 다른 종류의 처음은 따로, 측정과 한 번뿐인 기록에는 처음을 붙이지 않는다
+    await api.milestone.create({ ...word, kind: "step", first: true });
+    await expect(
+      api.milestone.create({ ...word, kind: "height", value: { value: 70 }, first: true }),
+    ).rejects.toMatchObject({ message: "MILESTONE_FIRST_INVALID" });
+    // 직접 쓰기는 제목이 달라 처음을 여러 번 붙일 수 있다
+    for (const title of ["첫 바다", "첫 눈"]) {
+      await api.milestone.create({ ...word, kind: "custom", value: { title }, first: true });
+    }
+    // 입양일은 대상당 하나
+    const adoption = {
+      spaceId,
+      subject: pet,
+      kind: "adoption",
+      value: {},
+      recordedAt: "2026-01-01",
+    };
+    await api.milestone.create(adoption);
+    await expect(api.milestone.create(adoption)).rejects.toMatchObject({
+      message: "MILESTONE_EXISTS",
+    });
+    await expect(api.milestone.create({ ...adoption, first: true })).rejects.toMatchObject({
+      message: "MILESTONE_EXISTS",
+    });
+
+    // 처음 표시는 고치기로 옮길 수 있다(먼저 끄고 다른 기록에 켠다)
+    const [firstWord, plainWord] = [words.find((m) => m.isFirst)!, words.find((m) => !m.isFirst)!];
+    await expect(
+      api.milestone.update({ spaceId, milestoneId: plainWord.id, first: true }),
+    ).rejects.toMatchObject({ message: "MILESTONE_FIRST_EXISTS" });
+    await api.milestone.update({ spaceId, milestoneId: firstWord.id, first: false });
+    await expect(
+      api.milestone.update({ spaceId, milestoneId: plainWord.id, first: true }),
+    ).resolves.toMatchObject({ isFirst: true });
     for (const day of ["2026-08-01", "2026-09-01"]) {
       await api.milestone.create({
         spaceId,
@@ -71,7 +103,30 @@ describe("milestone 기록", () => {
         recordedAt: day,
       });
     }
-    expect(await api.milestone.list({ spaceId, subject: pet })).toHaveLength(2);
+    expect(await api.milestone.list({ spaceId, subject: pet })).toHaveLength(3); // 입양일 + 몸무게 2
+  });
+
+  it("가족 전체 마일스톤을 한 번에(대상 거르기 가능), 기록일 최신순", async () => {
+    const { api, spaceId, child, pet } = await family();
+    await api.milestone.create({
+      spaceId,
+      subject: child,
+      kind: "step",
+      value: {},
+      recordedAt: "2026-09-02",
+    });
+    await api.milestone.create({
+      spaceId,
+      subject: pet,
+      kind: "walk",
+      value: {},
+      recordedAt: "2026-09-03",
+    });
+    const all = await api.milestone.listAll({ spaceId });
+    expect(all.map((m) => m.kind)).toEqual(["walk", "step"]);
+    expect(all[0].reactions).toEqual({ likes: 0, comments: 0, likedByMe: false });
+    const onlyChild = await api.milestone.listAll({ spaceId, subject: child });
+    expect(onlyChild.map((m) => m.kind)).toEqual(["step"]);
   });
 
   it("대상에 맞지 않는 kind, 범위 밖 값, 모르는 필드를 거부한다", async () => {
@@ -98,7 +153,7 @@ describe("milestone 기록", () => {
       api.milestone.create({
         ...base,
         subject: child,
-        kind: "first_step",
+        kind: "step",
         value: {},
         recordedAt: "2099-01-01",
       }),
@@ -109,9 +164,9 @@ describe("milestone 기록", () => {
     const { api, spaceId, storage, child, pet } = await family();
     const grandparent = await addMember(prisma, spaceId, "grandparent", storage);
     const relative = await addMember(prisma, spaceId, "relative", storage);
-    const base = { spaceId, kind: "first_walk", value: {}, recordedAt: "2026-09-01" };
+    const base = { spaceId, kind: "walk", value: {}, recordedAt: "2026-09-01" };
     await expect(
-      grandparent.milestone.create({ ...base, subject: child, kind: "first_step" }),
+      grandparent.milestone.create({ ...base, subject: child, kind: "step" }),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
     await expect(relative.milestone.create({ ...base, subject: pet })).rejects.toMatchObject({
       code: "FORBIDDEN",
@@ -148,7 +203,7 @@ describe("milestone 기록", () => {
       b.api.milestone.create({
         spaceId: b.spaceId,
         subject: a.child,
-        kind: "first_step",
+        kind: "step",
         value: {},
         recordedAt: "2026-09-01",
       }),
@@ -156,7 +211,7 @@ describe("milestone 기록", () => {
     const m = await a.api.milestone.create({
       spaceId: a.spaceId,
       subject: a.child,
-      kind: "first_step",
+      kind: "step",
       value: {},
       recordedAt: "2026-09-01",
     });
@@ -178,23 +233,20 @@ describe("milestone 기록", () => {
       child: { name: "둘째", birthDate: sixMonthsAgo.toISOString().slice(0, 10) },
     });
     const before = await api.milestone.suggestions({ spaceId, childId });
-    expect(before).toEqual([
-      "first_roll",
-      "first_sit",
-      "first_tooth",
-      "first_crawl",
-      "height",
-      "weight",
-    ]);
-    await api.milestone.create({
+    expect(before).toEqual(["roll", "sit", "tooth", "crawl", "height", "weight"]);
+    const roll = {
       spaceId,
-      subject: { type: "child", childId },
-      kind: "first_roll",
+      subject: { type: "child" as const, childId },
+      kind: "roll",
       value: {},
       recordedAt: new Date().toISOString().slice(0, 10),
-    });
+    };
+    // 처음 표시 없는 기록은 제안을 지우지 않는다
+    await api.milestone.create(roll);
+    expect(await api.milestone.suggestions({ spaceId, childId })).toEqual(before);
+    await api.milestone.create({ ...roll, first: true });
     const after = await api.milestone.suggestions({ spaceId, childId });
-    expect(after).toEqual(["first_sit", "first_tooth", "first_crawl", "height", "weight"]);
+    expect(after).toEqual(["sit", "tooth", "crawl", "height", "weight"]);
   });
 
   it("G-07: 글 기록 작성은 사용자당 리밋에 걸린다", async () => {

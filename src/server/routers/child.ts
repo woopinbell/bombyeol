@@ -9,17 +9,30 @@ import { parentProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
 import { entityId, isNotFuture, isoDate, personName } from "./inputs";
 
-/** 이름, 태명 중 하나 이상, 출생 예정일, 생일 중 정확히 하나 */
+/**
+ * 이름, 태명 중 하나 이상. 날짜는 비워도 된다(나중에 채움, 사용자 결정 2026-10-02) - 다만 출생 예정일과 생일을
+ * 함께 줄 수는 없다. 날짜가 없으면 status(곧 태어나요 / 태어났어요)로 상태를 정하고, 그것도 없으면 태어난 아이로 본다.
+ */
 export const childInput = z
   .object({
     name: personName.optional(),
     nickname: personName.optional(),
     dueDate: isoDate.optional(),
     birthDate: isoDate.optional(),
+    status: z.enum(["expecting", "born"]).optional(),
   })
   .refine((c) => c.name || c.nickname, { message: "NAME_REQUIRED" })
-  .refine((c) => Boolean(c.dueDate) !== Boolean(c.birthDate), { message: "ONE_DATE_REQUIRED" })
+  .refine((c) => !(c.dueDate && c.birthDate), { message: "ONE_DATE_REQUIRED" })
+  .refine((c) => !c.status || (c.status === "born" ? !c.dueDate : !c.birthDate), {
+    message: "INVALID_INPUT",
+  })
   .refine((c) => !c.birthDate || isNotFuture(c.birthDate), { message: "DATE_IN_FUTURE" });
+
+function childStatus(child: z.infer<typeof childInput>) {
+  if (child.birthDate) return "born" as const;
+  if (child.dueDate) return "expecting" as const;
+  return child.status ?? "born";
+}
 
 export function createChild(
   tx: Prisma.TransactionClient,
@@ -35,7 +48,7 @@ export function createChild(
       nickname,
       dueDate,
       birthDate,
-      status: birthDate ? "born" : "expecting",
+      status: childStatus(child),
       createdById,
     },
     select: { id: true, status: true },

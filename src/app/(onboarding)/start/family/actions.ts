@@ -25,10 +25,12 @@ export async function createFamily(
   );
   const relationLabel = values.relation === "custom" ? values.relationCustom : values.relation;
   const wantsChild = Boolean(values.childName || values.childDate);
+  const expecting = values.childStatus === "expecting";
   const child = wantsChild
     ? {
-        // 이름, 태명 칸 하나: 곧 태어나면 태명, 태어났으면 이름
-        ...(values.childStatus === "expecting"
+        // 이름, 태명 칸 하나: 곧 태어나면 태명, 태어났으면 이름. 날짜는 비워도 된다
+        status: expecting ? ("expecting" as const) : ("born" as const),
+        ...(expecting
           ? { nickname: values.childName || undefined, dueDate: values.childDate || undefined }
           : { name: values.childName || undefined, birthDate: values.childDate || undefined }),
       }

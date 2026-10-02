@@ -24,6 +24,7 @@ export function requestContext({
     userId,
     ip,
     storage: storageFromEnv(),
+    memo: new Map(),
     // 알림은 응답 뒤에 같은 요청의 DB 연결로 보낸다(ARCHITECTURE §7)
     push: createPushDispatcher({ prisma, sender: fcmSenderFromEnv(env), origin }, (work) =>
       ctx.waitUntil(work),
