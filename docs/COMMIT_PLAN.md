@@ -115,7 +115,7 @@
   - [x] `feat(pet): 반려동물 더하기, 고치기 화면 구현` - `/us/pet/new`, `/us/pet/[id]`, 다른 동물은 종 이름(`space.get`에 speciesLabel 추가)
   - [x] `feat(media): 가족 앨범 저장 공간 표시 구현` - 우리 탭, 90%부터 거의 다 찼다고 알림
   - [x] (2026-10-02, PR woopinbell/bombyeol#17 머지) `refactor(media): 올리기 단계를 공용 모듈로 분리`, `feat(pet): 반려동물 커버 사진 고르기, 바꾸기, 지우기 화면 구현`
-  - [ ] (남음) 아이, 반려동물 지우기 화면은 Phase 7 UI(`feat(privacy)`)
+  - [x] 아이, 반려동물 지우기 화면은 Phase 7 UI(`feat(privacy)`, PR woopinbell/bombyeol#21)
 - [x] (피드백) 아이 날짜 공란, 마일스톤 '처음' 표시 분리, 속도(쿼리 33 → 9, loading, 업로드 묶음), 좋아요 연타 묶기 - PR woopinbell/bombyeol#14, #15, 저장 공간 표시
 
 ## Phase 4 - 이야기(별)
@@ -176,7 +176,7 @@
   - [x] `feat(pregnancy)` 임신 기록(주차, 별도 동의, 초음파 사진 필수, 검진, 태동, 메모, 보는 사람 바꾸기, 지우기, 동의 거두기)
   - [x] `feat(settings)` 설정(글자 크기, 밝기, 움직임 - 이 기기만, 부모는 초대 관리와 거두기)
   - [x] (2026-10-03) `feat(pregnancy)` 임신 기록 고치기(날짜, 메모, 보는 사람, 초음파 사진 바꾸기 - 쓴 사람이 동의한 동안만)
-  - [ ] (남음) 아이, 반려동물 지우기(Phase 7). (알림 설정은 Phase 6 UI에서 끝남)
+  - [x] 아이, 반려동물 지우기(Phase 7, PR woopinbell/bombyeol#21). (알림 설정은 Phase 6 UI에서 끝남)
 
 ## Phase 6 - 알림
 
@@ -218,7 +218,7 @@
 - [x] (순서 앞당김) `feat(privacy): Space 삭제(유예 기간, 내보내기 후 파기) 구현` [G-06] - 계정 삭제가 혼자 남은 Space 삭제를 쓰므로 먼저. 유예 중 쓰기 차단은 `spaceProcedure`(tRPC meta `allowWhileDeleting`: 취소, 나가기, 임신 동의 철회)
 - [x] `feat(privacy): 계정 삭제 구현(R2, DB, 푸시 토큰 연쇄)` [G-06] - `protectedProcedure`가 매 요청 `deletedAt` 확인
 - [x] (추가) `fix(privacy): 계정 삭제 시 초대 입력 실패 기록도 삭제` - 잔존 데이터 테스트를 설계하다 발견(IP 포함)
-- [ ] `feat(privacy): 웹 계정, 데이터 삭제 페이지 구현` [G-06] - **UI 단계**(API는 위 커밋들)
+- [x] `feat(privacy): 웹 계정, 데이터 삭제 페이지 구현` [G-06] - 2026-10-03 PR woopinbell/bombyeol#21에서 5커밋으로: 아이, 반려동물 지우기 화면 / 가족 앨범 내려받기(브라우저 ZIP, R2 CORS GET) / 가족 지우기와 유예(모든 탭 안내) / 웹 계정 삭제 `/account/delete` / 떠난 가족 표시
 - [x] `feat(privacy): 데이터 내보내기(원본 목록, 이야기 텍스트) 구현` - ZIP은 클라이언트, `archive.media, records`
 - [x] `test(privacy): 삭제 후 잔존 데이터 0 검증` [G-06] - `spaceId`, `userId` 열이 있는 모든 표를 DB에서 직접 읽어 검사(새 모델도 자동 포함). 구독 해지 호출 검증은 Phase 8에서 추가
 
