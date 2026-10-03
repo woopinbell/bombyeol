@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { PUSH_POLICY, RATE_LIMITS } from "@/lib/plan";
 import { limitError } from "@/server/errors";
@@ -5,6 +6,7 @@ import { lockKey } from "@/server/locks";
 import { hitRateLimit } from "@/server/rate-limit";
 import { protectedProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
+import { entityId } from "./inputs";
 
 /** FCM 등록 토큰: base64url 계열 문자와 콜론만 */
 const tokenInput = z
@@ -12,6 +14,9 @@ const tokenInput = z
   .min(16)
   .max(PUSH_POLICY.tokenMaxChars)
   .regex(/^[A-Za-z0-9_:-]+$/);
+
+/** 알림 링크 종류(`/open/{종류}/{id}`, src/server/push/events.ts) */
+export const OPEN_LINK_TYPES = ["moment", "milestone", "story", "ask", "pregnancy"] as const;
 
 /**
  * 웹푸시 기기 토큰(ARCHITECTURE §7). Space와 무관하게 사용자 단위로 둔다 - * 어느 Space의 알림을 받을지는 발송 시점에 멤버십으로 다시 판단한다.
@@ -61,5 +66,51 @@ export const pushRouter = router({
         where: { token: input.token, userId: ctx.userId },
       });
       return { ok: true };
+    }),
+
+  /**
+   * 알림을 눌렀을 때 열 화면. 대상이 지금도 있고 내가 그 Space의 멤버인지 다시 확인한다 -
+   * 임신 기록은 지금의 공개 범위로(parent가 아니면 가족 공개만). 아니면 있는지도 드러내지 않고 NOT_FOUND.
+   * 기록 하나를 바로 펼치지 않고 그 기록이 있는 화면으로 보낸다.
+   */
+  openLink: protectedProcedure
+    .input(z.object({ type: z.enum(OPEN_LINK_TYPES), id: entityId }))
+    .query(async ({ ctx, input }) => {
+      const where = {
+        id: input.id,
+        space: { deletedAt: null, members: { some: { userId: ctx.userId } } },
+      };
+      const select = { spaceId: true } as const;
+      const db = ctx.prisma;
+      const found =
+        input.type === "moment"
+          ? await db.moment.findFirst({ where, select })
+          : input.type === "milestone"
+            ? await db.milestone.findFirst({ where, select })
+            : input.type === "story"
+              ? await db.storyEntry.findFirst({ where, select })
+              : input.type === "ask"
+                ? await db.storyAsk.findFirst({ where, select })
+                : null;
+      if (found) {
+        const tab = input.type === "story" || input.type === "ask" ? "/story" : "";
+        return { path: `/s/${found.spaceId}${tab}` };
+      }
+      if (input.type === "pregnancy") {
+        const record = await db.pregnancyRecord.findFirst({
+          where,
+          select: { spaceId: true, childId: true, visibility: true },
+        });
+        const member =
+          record &&
+          (await db.member.findUnique({
+            where: { spaceId_userId: { spaceId: record.spaceId, userId: ctx.userId } },
+            select: { role: true },
+          }));
+        if (record && member && (record.visibility === "family" || member.role === "parent")) {
+          return { path: `/s/${record.spaceId}/us/pregnancy/${record.childId}` };
+        }
+      }
+      throw new TRPCError({ code: "NOT_FOUND" });
     }),
 });
