@@ -4,6 +4,7 @@
 
 ## 현재 상태 (2026-10-01)
 
+- **최신(2026-10-03)**: UI는 Phase 3~6까지 main에 머지, 스테이징 배포(PR woopinbell/bombyeol#19, main 84f18a0, 스테이징 818e9168). 다음은 카카오 키 재배포(키가 있으면)와 Phase 7 UI - 아래 "다음 할 일 (2026-10-03 세션 마감 기준)".
 - 단계(2026-10-02, Phase DS 세션): **Phase DS 결정 완료 - B안, L2, 다크, 모션(시트 350ms, 토스트 6초), 로고 S2+W2, Pretendard 단일, 토큰 v1 확정**. (2026-10-01 시작: 1차 자료 정독, 화면 규칙, 목업 3안) 병행: Q-PAY 결정 자료, Phase 9 e2e 서버 부분(작업 브랜치, main 미머지) - 아래 "현재 상태 - Phase DS".
 - (이전) 단계(2026-10-01, Phase 7): **Phase 7 삭제, 개인정보 서버 main 머지 완료(PR woopinbell/bombyeol#10, 머지 커밋 ea6a25e), 스테이징 마이그레이션, 배포, 스모크 통과**(UI 제외). 그 전에 FCM 스모크 점검 추가(PR woopinbell/bombyeol#9 머지) - 아래 "현재 상태 - Phase 7".
 - (이전) 단계(2026-10-01, Phase 6): **Phase 6 알림 서버 main 머지 완료(PR woopinbell/bombyeol#8, 머지 커밋 934c55d), 스테이징 마이그레이션, 배포, 스모크 통과**(UI, 공유, PWA 제외) - 아래 "현재 상태 - Phase 6".
@@ -69,13 +70,20 @@
 - 작업 메모: `npm test`는 로컬 DB를 비운다(시드한 화면 확인 데이터도 사라짐). 파이프로 grep하면 실패가 가려지니 종료 코드를 따로 본다.
 - 환경 메모: 기존 스위트에서 3번 중 1번 테스트 1건이 실패했다가 재실행에 통과(어떤 테스트인지 기록 못 함 - 다음에 반복 실행으로 찾을 것). Docker Hub 429로 `db:up` 첫 시도 실패, 재시도 성공. 컨테이너에 한글 폰트가 없어 목업 스크린샷은 Pretendard woff2를 받아 Playwright route로 주입(스크래치패드, 리포에 넣지 않음).
 
-### 다음 할 일 (2026-10-02 세션 마감 기준 - 새 세션은 여기부터)
+### 다음 할 일 (2026-10-03 세션 마감 기준 - 새 세션은 여기부터)
+
+**재개 지점(2026-10-03 마감)**: main 84f18a0(PR woopinbell/bombyeol#19), 스테이징 818e9168. 작업 브랜치 `claude/inspiring-wright-nvi6vc`는 머지됨(새 세션은 자기 브랜치를 main에서 시작). 열린 PR 없음, 진행 중 코드 없음.
+1. **카카오 키가 등록됐으면 먼저**: 클라우드 환경에 `NEXT_PUBLIC_KAKAO_JS_KEY`가 있는지 길이만 확인 → `npm run cf:deploy:staging`(빌드 시점 값이라 다시 빌드해야 들어감) → 스모크 → 번들에 SDK 경로가 있는지 확인 → 사용자에게 카카오톡 공유 실기기 확인 요청(초대, 질문 알리기, 기록 보내기). 키가 없으면 건너뛴다(공유는 기기 공유, 복사로 동작).
+2. **Phase 7 UI**: 계정 삭제, 가족(Space) 삭제와 유예, 데이터 내보내기, 아이, 반려동물 지우기 화면(`feat(privacy)` - 서버는 PR woopinbell/bombyeol#10에 있음). 착수 전 COMMIT_PLAN Phase 7, PRIVACY_AND_LEGAL, ENV_MANIFEST 확인.
+3. 사용자 실기기 확인 결과가 오면 반영: 안드로이드 크롬 알림 켜기와 수신, 눌러 열기, 아이폰 홈 화면 추가 뒤 알림(FCM 페이로드를 우리 `sw.js`가 받는 모양은 실기기에서 처음 확인).
+4. 화면 확인 도구: [`dev-notes/local-ui-check/`](dev-notes/local-ui-check/) (시드, 세션 쿠키, Playwright 도우미 - main에 넣지 않음).
 
 **2026-10-03 세션: PR woopinbell/bombyeol#19 CI 통과(약 5분) → 머지 커밋으로 main 머지(84f18a0)**. 작은 남은 일(임신 기록 고치기, 이야기 모음 합계)과 Phase 6 UI(알림 링크, PWA 매니페스트, 서비스 워커, 알림 설정, 카카오톡 공유) - 위 "2026-10-03" 항목. 스키마 변경 없음. **스테이징 배포**(버전 818e9168, Startup 18ms, gzip 4.92 MiB): 스모크 db, R2, cleanup 통과, fcm invalid_token(발송 경로 정상). `/manifest.webmanifest` 200(application/manifest+json), `/sw.js` 200, 아이콘 200, `/open/story/x`, `/s/x/us/settings` 비로그인 307(로그인 뒤 돌아옴), 로그인 화면에 manifest 링크와 iOS 앱 메타. 클라이언트 번들에 Firebase 공개 설정 들어감(값 확인 없이 존재만), 카카오 키는 아직 없어 공유는 기기 공유, 복사로 동작. 열린 PR 없음. **사용자 할 일 추가: 클라우드 환경에 `NEXT_PUBLIC_KAKAO_JS_KEY`(빌드 시점 값) 등록, 카카오 콘솔 Web 도메인 확인, 스테이징에서 알림 켜기(안드로이드 크롬, 아이폰은 홈 화면 추가 뒤)와 카카오톡 공유 실기기 확인.**
 
 (이전) main 2144a32(PR woopinbell/bombyeol#18), 스테이징 버전 b8d98dbe. PR #18 검증: format, lint, typecheck, Vitest 385건, OpenNext dry-run gzip 4.82 MiB, 로컬 브라우저 검사(구성원, 기념, 달력, 임신 기록 권한, 설정, 초대 거두기).
 
 **사용자가 할 일(먼저 확인)**
+0. **(2026-10-03 추가) `NEXT_PUBLIC_KAKAO_JS_KEY`** 클라우드 환경 등록(카카오 콘솔 > 앱 키 > JavaScript 키, 등급 A 공개 키), 카카오 콘솔 플랫폼 > Web 사이트 도메인에 스테이징 주소 확인. 등록 뒤 **새 세션**에서 재배포. 그리고 스테이징 실기기: 우리 > 설정 > 알림 켜기(안드로이드 크롬, 아이폰은 홈 화면 추가 뒤), 다른 계정으로 기록을 올려 알림 수신과 눌러 열기, 임신 기록 고치기, 이야기 모음 합계.
 1. **Workers Paid 전환**(결정됨, Q-PLAN) - 대시보드 Workers & Pages > Plans. 2026-10-02 13시 기준 아직 무료(1102 계속 관측). 전환 뒤 Cloudflare GraphQL 분석(`workersInvocationsAdaptive`, 스크립트 `bombyeol-staging`)으로 status, cpuTime 확인.
 2. 스테이징 재확인: 아이 날짜 공란 가족 만들기, 탭과 고르기 즉시 반응, 사진 여러 장 올리기 속도와 바로 보이는지, 성장 기록 "처음이에요", 좋아요 연타. 특히 Prisma `relationJoins`(미리 보기 기능)는 로그인 화면에서만 쓰여 아직 스테이징 실사용 확인 전 - 문제면 schema previewFeatures 한 줄 제거.
 3. 실기기: iOS 사진 고르기(HEIC → JPEG 변환), 영상 썸네일, 어르신 폰.
