@@ -114,7 +114,7 @@
   - [x] `feat(child): 아이 더하기, 고치기, 태어났어요 화면 구현` - 우리 탭 `/us/child/new`, `/us/child/[id]`
   - [x] `feat(pet): 반려동물 더하기, 고치기 화면 구현` - `/us/pet/new`, `/us/pet/[id]`, 다른 동물은 종 이름(`space.get`에 speciesLabel 추가)
   - [x] `feat(media): 가족 앨범 저장 공간 표시 구현` - 우리 탭, 90%부터 거의 다 찼다고 알림
-  - [x] (2026-10-02, 작업 브랜치 `claude/magical-planck-y1ekem`, main 미머지) `refactor(media): 올리기 단계를 공용 모듈로 분리`, `feat(pet): 반려동물 커버 사진 고르기, 바꾸기, 지우기 화면 구현`
+  - [x] (2026-10-02, PR woopinbell/bombyeol#17 머지) `refactor(media): 올리기 단계를 공용 모듈로 분리`, `feat(pet): 반려동물 커버 사진 고르기, 바꾸기, 지우기 화면 구현`
   - [ ] (남음) 아이, 반려동물 지우기 화면은 Phase 7 UI(`feat(privacy)`)
 - [x] (피드백) 아이 날짜 공란, 마일스톤 '처음' 표시 분리, 속도(쿼리 33 → 9, loading, 업로드 묶음), 좋아요 연타 묶기 - PR woopinbell/bombyeol#14, #15, 저장 공간 표시
 
@@ -136,7 +136,7 @@
 - [x] `feat(story): 부모의 질문 보내기(물어보기) 구현`
 - [x] `feat(story): 세대 교차 반응(별 하나, 댓글) 구현`
 - [x] `feat(memorial): 기념 상태 전환(사람, 반려동물)과 영구 보존 정책 구현` - 구독 만료와 무관 보존, `PRIVACY_AND_LEGAL.md` §5. 기념인 분: 새 이야기, 대필, 물어보기 불가, 기존 이야기 수정, 삭제 불가(되돌린 뒤 가능), 열린 물어보기는 거둠, 반응 허용. 반려동물: 마일스톤 불가, 추억 사진 허용, `Pet.status/passedAt` 동기화. 기일은 조회 시점 계산(`today`는 클라이언트 현지 날짜)
-- [x] `feat(story): 이야기 탭 화면 구성` - 2026-10-02 작업 브랜치 `claude/magical-planck-y1ekem`(main 미머지) 5커밋:
+- [x] `feat(story): 이야기 탭 화면 구성` - 2026-10-02 5커밋, main 머지(PR woopinbell/bombyeol#17), 스테이징 배포:
   - [x] (추가) `feat(reaction): 별 하나를 원하는 상태로 맞추는 setStar 추가` - 좋아요처럼 연타를 모아 마지막 상태만(Workers CPU)
   - [x] (추가) `feat(space): 가족 상세의 멤버에 기념 상태 포함`
   - [x] (추가) `refactor(today): 연타 묶기 토글을 좋아요, 별 하나가 함께 쓰게 일반화하고 댓글 대상에 이야기 추가`
