@@ -9,6 +9,7 @@ import {
   deletePregnancyRecord,
   grantPregnancyConsent,
   setPregnancyVisibility,
+  updatePregnancyRecord,
   withdrawPregnancyConsent,
 } from "@/app/s/[spaceId]/us/pregnancy/actions";
 import { UploadError, uploadParts } from "@/components/media/upload";
@@ -121,6 +122,7 @@ export function AddRecord({
 /**
  * 기록 시트: 종류 → 날짜(검진은 앞날도) → 메모(메모 기록은 필수) → 초음파 사진(초음파는 필수) → 누가 볼까요(기본 엄마 아빠만).
  * 사진은 브라우저에서 JPEG로 다시 만들어 올린다(위치 정보 제거). 실패하면 올린 파일을 치운다.
+ * `record`를 주면 고치기: 종류는 그대로 두고 나머지를 그 기록 값으로 채운다. 사진을 새로 고르지 않으면 이전 사진을 둔다.
  */
 function RecordSheet({
   open,
@@ -128,18 +130,20 @@ function RecordSheet({
   spaceId,
   childId,
   todayKey,
+  record,
 }: {
   open: boolean;
   onClose: () => void;
   spaceId: string;
   childId: string;
   todayKey: string;
+  record?: PregnancyRecord;
 }) {
   const t = useTranslations("pregnancy");
   const errors = useTranslations("errors");
   const router = useRouter();
   const { toast } = useToast();
-  const [kind, setKind] = useState<Kind>("ultrasound");
+  const [kind, setKind] = useState<Kind>(record?.kind ?? "ultrasound");
   const [photo, setPhoto] = useState<{ file: File; url: string } | null>(null);
   const [error, setError] = useState<ErrorKey | null>(null);
   const [sending, setSending] = useState(false);
@@ -152,7 +156,7 @@ function RecordSheet({
       setError("BODY_REQUIRED");
       return;
     }
-    if (kind === "ultrasound" && !photo) {
+    if (kind === "ultrasound" && !photo && !record?.photo) {
       setError("MEDIA_REQUIRED");
       return;
     }
@@ -172,16 +176,17 @@ function RecordSheet({
           () => {},
         );
       }
-      const result = await createPregnancyRecord(spaceId, {
-        childId,
-        kind,
+      const fields = {
         date: String(form.get("date") || todayKey),
         note,
         photoAssetId,
         visibility: (String(form.get("visibility")) || "parents_only") as Visibility,
-      });
+      };
+      const result = record
+        ? await updatePregnancyRecord(spaceId, record.id, fields)
+        : await createPregnancyRecord(spaceId, { childId, kind, ...fields });
       if ("error" in result) throw new UploadError(result.error);
-      toast({ message: t("saved") });
+      toast({ message: record ? t("edited") : t("saved") });
       onClose();
       router.refresh();
     } catch (e) {
@@ -198,7 +203,7 @@ function RecordSheet({
     <Sheet
       open={open}
       onClose={onClose}
-      title={t("add")}
+      title={record ? t("editTitle") : t("add")}
       footer={
         <Button
           type="submit"
@@ -209,7 +214,7 @@ function RecordSheet({
           disabled={sending}
           aria-busy={sending}
         >
-          {sending ? t("sending") : t("save")}
+          {sending ? t("sending") : record ? t("editSave") : t("save")}
         </Button>
       }
     >
@@ -228,17 +233,21 @@ function RecordSheet({
         }}
         className="flex flex-col gap-6 pb-2"
       >
-        <ChoiceChips
-          name="kind"
-          legend={t("kindLabel")}
-          defaultValue={kind}
-          options={KINDS.map((k) => ({ value: k, label: t(`kind.${k}`) }))}
-        />
+        {record ? (
+          <p className="font-bold">{t(`kind.${record.kind}`)}</p>
+        ) : (
+          <ChoiceChips
+            name="kind"
+            legend={t("kindLabel")}
+            defaultValue={kind}
+            options={KINDS.map((k) => ({ value: k, label: t(`kind.${k}`) }))}
+          />
+        )}
         <Field
           name="date"
           type="date"
           label={t("date")}
-          defaultValue={todayKey}
+          defaultValue={record ? dateOnlyKey(record.date) : todayKey}
           // 검진은 앞으로의 날짜도 받는다(서버가 예정일 뒤 60일까지 확인)
           max={kind === "checkup" ? undefined : todayKey}
           hint={kind === "checkup" ? t("checkupHint") : undefined}
@@ -246,11 +255,11 @@ function RecordSheet({
         {kind === "ultrasound" ? (
           <div className="flex flex-col gap-3">
             <span className="font-bold">{t("photo")}</span>
-            {photo ? (
-              // 미리보기(객체 URL)
+            {photo || record?.photo ? (
+              // 미리보기(객체 URL) 또는 고치기 전 사진(서명 URL)
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={photo.url}
+                src={photo?.url ?? record?.photo?.url}
                 alt={t("photoAlt")}
                 className="max-h-48 self-start rounded-md object-contain"
               />
@@ -268,7 +277,7 @@ function RecordSheet({
             />
             <Button className="self-start" onClick={() => input.current?.click()}>
               <Icon name="plus" size="small" />
-              {photo ? t("photoChange") : t("photoPick")}
+              {photo || record?.photo ? t("photoChange") : t("photoPick")}
             </Button>
             {error === "MEDIA_REQUIRED" ? (
               <p aria-live="polite" className="font-bold">
@@ -283,12 +292,13 @@ function RecordSheet({
           hint={kind === "note" ? undefined : t("optionalHint")}
           rows={3}
           maxLength={PREGNANCY_POLICY.noteMaxChars}
+          defaultValue={record?.note ?? ""}
           error={error === "BODY_REQUIRED" ? t("noteRequired") : undefined}
         />
         <ChoiceChips
           name="visibility"
           legend={t("visibilityLabel")}
-          defaultValue="parents_only"
+          defaultValue={record?.visibility ?? "parents_only"}
           options={(["parents_only", "family"] as const).map((v) => ({
             value: v,
             label: t(`visibility.${v}`),
@@ -307,17 +317,24 @@ function RecordSheet({
 /**
  * 기록 목록(서버가 이미 보이는 것만 준다 - parent가 아니면 가족 공개만). 날짜, 종류, 그 날의 주차, 메모, 사진,
  * 누가 보는지(글자로). parent: 쓴 사람은 공개 범위를 바꾸고, 다른 parent는 엄마 아빠만으로 좁히기만, 지우기는 확인 뒤.
+ * 고치기는 쓴 사람이 동의한 동안만(`canWrite`, 서버도 검사).
  */
 export function RecordList({
   spaceId,
+  childId,
+  todayKey,
   records,
   isParent,
+  canWrite,
   myUserId,
   authors,
 }: {
   spaceId: string;
+  childId: string;
+  todayKey: string;
   records: PregnancyRecord[];
   isParent: boolean;
+  canWrite: boolean;
   myUserId: string;
   authors: Record<string, string>;
 }) {
@@ -325,110 +342,134 @@ export function RecordList({
   const format = useFormatter();
   const { pending, act } = useAct();
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [editing, setEditing] = useState<{ record: PregnancyRecord; open: boolean; seq: number }>();
   if (!records.length) {
     return <p className="py-4 text-fg-muted">{isParent ? t("empty") : t("emptyFamily")}</p>;
   }
   return (
-    <ol className="flex flex-col">
-      {records.map((r) => {
-        const mine = r.createdBy.id === myUserId;
-        const next: Visibility = r.visibility === "family" ? "parents_only" : "family";
-        // 다른 parent는 좁히기(엄마 아빠만)만 할 수 있다
-        const canToggle = isParent && (mine || next === "parents_only");
-        return (
-          <li
-            key={r.id}
-            className="flex flex-col gap-2 border-b-(length:--bw-hair) border-line py-4"
-          >
-            <div className="flex flex-wrap items-baseline gap-2">
-              <span className="font-bold tabular-nums">
-                {format.dateTime(new Date(`${dateOnlyKey(r.date)}T12:00:00Z`), {
-                  timeZone: "UTC",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-              <span className="text-caption font-bold">{t(`kind.${r.kind}`)}</span>
-              {r.gestationalAge ? (
-                <span className="text-caption text-fg-muted tabular-nums">
-                  {t("week", r.gestationalAge)}
+    <>
+      <ol className="flex flex-col">
+        {records.map((r) => {
+          const mine = r.createdBy.id === myUserId;
+          const next: Visibility = r.visibility === "family" ? "parents_only" : "family";
+          // 다른 parent는 좁히기(엄마 아빠만)만 할 수 있다
+          const canToggle = isParent && (mine || next === "parents_only");
+          return (
+            <li
+              key={r.id}
+              className="flex flex-col gap-2 border-b-(length:--bw-hair) border-line py-4"
+            >
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="font-bold tabular-nums">
+                  {format.dateTime(new Date(`${dateOnlyKey(r.date)}T12:00:00Z`), {
+                    timeZone: "UTC",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </span>
+                <span className="text-caption font-bold">{t(`kind.${r.kind}`)}</span>
+                {r.gestationalAge ? (
+                  <span className="text-caption text-fg-muted tabular-nums">
+                    {t("week", r.gestationalAge)}
+                  </span>
+                ) : null}
+                {isParent ? (
+                  <span className="ml-auto rounded-sm border-(length:--bw) border-line-strong px-1 text-caption">
+                    {t(`visibility.${r.visibility}`)}
+                  </span>
+                ) : null}
+              </div>
+              {r.photo ? (
+                // 서명 URL(짧은 TTL)이라 이미지 최적화 경로를 거치지 않는다
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={r.photo.url}
+                  alt={t("photoAlt")}
+                  loading="lazy"
+                  className="max-h-64 self-start rounded-md object-contain"
+                />
               ) : null}
+              {r.note ? <p className="whitespace-pre-line">{r.note}</p> : null}
+              <p className="text-caption text-fg-muted">
+                {t("by", { who: authors[r.createdBy.id] ?? r.createdBy.name ?? "" })}
+              </p>
               {isParent ? (
-                <span className="ml-auto rounded-sm border-(length:--bw) border-line-strong px-1 text-caption">
-                  {t(`visibility.${r.visibility}`)}
-                </span>
-              ) : null}
-            </div>
-            {r.photo ? (
-              // 서명 URL(짧은 TTL)이라 이미지 최적화 경로를 거치지 않는다
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={r.photo.url}
-                alt={t("photoAlt")}
-                loading="lazy"
-                className="max-h-64 self-start rounded-md object-contain"
-              />
-            ) : null}
-            {r.note ? <p className="whitespace-pre-line">{r.note}</p> : null}
-            <p className="text-caption text-fg-muted">
-              {t("by", { who: authors[r.createdBy.id] ?? r.createdBy.name ?? "" })}
-            </p>
-            {isParent ? (
-              confirming === r.id ? (
-                <div
-                  role="alert"
-                  className="flex flex-col gap-3 rounded-md border-(length:--bw-sel) border-fg p-4"
-                >
-                  <p className="font-bold">{t("removeConfirm")}</p>
-                  <div className="flex gap-2">
-                    <Button onClick={() => setConfirming(null)} disabled={pending}>
-                      {t("confirmNo")}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      className="flex-1"
-                      disabled={pending}
-                      aria-busy={pending}
-                      onClick={() =>
-                        act(
-                          () => deletePregnancyRecord(spaceId, r.id),
-                          t("removed"),
-                          () => setConfirming(null),
-                        )
-                      }
-                    >
-                      {t("confirmYes")}
+                confirming === r.id ? (
+                  <div
+                    role="alert"
+                    className="flex flex-col gap-3 rounded-md border-(length:--bw-sel) border-fg p-4"
+                  >
+                    <p className="font-bold">{t("removeConfirm")}</p>
+                    <div className="flex gap-2">
+                      <Button onClick={() => setConfirming(null)} disabled={pending}>
+                        {t("confirmNo")}
+                      </Button>
+                      <Button
+                        variant="primary"
+                        className="flex-1"
+                        disabled={pending}
+                        aria-busy={pending}
+                        onClick={() =>
+                          act(
+                            () => deletePregnancyRecord(spaceId, r.id),
+                            t("removed"),
+                            () => setConfirming(null),
+                          )
+                        }
+                      >
+                        {t("confirmYes")}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="-ml-2 flex flex-wrap gap-2">
+                    {mine && canWrite ? (
+                      <Button
+                        variant="text"
+                        onClick={() =>
+                          setEditing((e) => ({ record: r, open: true, seq: (e?.seq ?? 0) + 1 }))
+                        }
+                      >
+                        {t("edit")}
+                      </Button>
+                    ) : null}
+                    {canToggle ? (
+                      <Button
+                        variant="text"
+                        disabled={pending}
+                        onClick={() =>
+                          act(
+                            () => setPregnancyVisibility(spaceId, r.id, next),
+                            t("visibilityChanged"),
+                          )
+                        }
+                      >
+                        {next === "family" ? t("showFamily") : t("showParents")}
+                      </Button>
+                    ) : null}
+                    <Button variant="text" onClick={() => setConfirming(r.id)}>
+                      {t("remove")}
                     </Button>
                   </div>
-                </div>
-              ) : (
-                <div className="-ml-2 flex flex-wrap gap-2">
-                  {canToggle ? (
-                    <Button
-                      variant="text"
-                      disabled={pending}
-                      onClick={() =>
-                        act(
-                          () => setPregnancyVisibility(spaceId, r.id, next),
-                          t("visibilityChanged"),
-                        )
-                      }
-                    >
-                      {next === "family" ? t("showFamily") : t("showParents")}
-                    </Button>
-                  ) : null}
-                  <Button variant="text" onClick={() => setConfirming(r.id)}>
-                    {t("remove")}
-                  </Button>
-                </div>
-              )
-            ) : null}
-          </li>
-        );
-      })}
-    </ol>
+                )
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+      {editing ? (
+        <RecordSheet
+          key={editing.seq}
+          open={editing.open}
+          onClose={() => setEditing((e) => e && { ...e, open: false })}
+          spaceId={spaceId}
+          childId={childId}
+          todayKey={todayKey}
+          record={editing.record}
+        />
+      ) : null}
+    </>
   );
 }
 
