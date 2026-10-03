@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
+import { ShareButtons } from "@/components/share/share-buttons";
 import { Button, buttonClass } from "@/components/ui/button";
 import { ChoiceChips } from "@/components/ui/choice-chips";
 import { Field } from "@/components/ui/field";
 import { createInvite, type InviteFormState } from "./actions";
 
-/** 초대 만들기 → 코드와 링크 보여주기 → 보내기(기기 공유) 또는 복사. 카카오톡 공유 SDK는 feat(share) 때. */
+/** 초대 만들기 → 코드와 링크 보여주기 → 카카오톡으로 보내기(없으면 기기 공유) 또는 복사 */
 /** 한 분 초대가 끝나면 "다른 분도 초대하기"로 처음부터(새 폼 상태) */
 export function InviteFlow(props: { spaceId: string; familyName: string }) {
   const [round, setRound] = useState(0);
@@ -34,27 +35,11 @@ function InviteForm({
   if (state.invite) {
     const { code, link, relationLabel } = state.invite;
     const who = relationLabel ?? t("someone");
-    const message = t("shareText", { family: familyName });
-    const share = async () => {
-      if (navigator.share) {
-        try {
-          await navigator.share({ title: t("shareTitle"), text: message, url: link });
-          setNotice(t("shared"));
-          return;
-        } catch {
-          // 공유 창을 닫은 경우: 아무것도 하지 않는다
-          return;
-        }
-      }
-      await copy();
-    };
-    const copy = async () => {
-      try {
-        await navigator.clipboard.writeText(`${message}\n${link}`);
-        setNotice(t("copied"));
-      } catch {
-        setNotice(t("copyFailed"));
-      }
+    const target = {
+      title: t("shareTitle"),
+      text: t("shareText", { family: familyName }),
+      button: t("shareButton"),
+      path: link,
     };
     return (
       <div className="flex flex-1 flex-col gap-6">
@@ -74,12 +59,18 @@ function InviteForm({
           {notice}
         </p>
         <div className="mt-auto flex flex-col gap-3">
-          <Button variant="primary" size="elder" block onClick={share}>
-            {t("send")}
-          </Button>
-          <Button size="elder" block onClick={copy}>
-            {t("copy")}
-          </Button>
+          <ShareButtons
+            target={target}
+            variant="stack"
+            onNotice={setNotice}
+            labels={{
+              send: t("send"),
+              copy: t("copy"),
+              shared: t("shared"),
+              copied: t("copied"),
+              copyFailed: t("copyFailed"),
+            }}
+          />
           <Button variant="text" block onClick={onAgain}>
             {t("again")}
           </Button>

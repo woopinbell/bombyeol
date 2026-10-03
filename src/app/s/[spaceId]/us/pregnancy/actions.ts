@@ -55,6 +55,33 @@ export async function createPregnancyRecord(
   );
 }
 
+/**
+ * 고치기(쓴 사람, 임신 동의 필요 - 서버가 검사): 날짜, 메모, 공개 범위, 초음파 사진.
+ * 종류는 바꾸지 않는다. 메모를 비우면 지운다(메모 기록은 서버가 거절). 새 사진을 주면 이전 사진은 서버가 지운다(G-05).
+ */
+export async function updatePregnancyRecord(
+  spaceId: string,
+  recordId: string,
+  input: {
+    date: string;
+    note: string;
+    photoAssetId?: string;
+    visibility: "parents_only" | "family";
+  },
+) {
+  const caller = await serverCaller();
+  return run(() =>
+    caller.pregnancy.update({
+      spaceId,
+      recordId,
+      date: input.date,
+      note: input.note.trim() || null,
+      photoAssetId: input.photoAssetId,
+      visibility: input.visibility,
+    }),
+  );
+}
+
 /** 공개 범위 바꾸기: 쓴 사람은 둘 다, 다른 parent는 엄마 아빠만으로 좁히기만(서버가 검사) */
 export async function setPregnancyVisibility(
   spaceId: string,

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
+import { PwaSync } from "@/components/pwa/pwa-sync";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { ToastProvider, ToastRegion } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ export function FamilyShell({ spaceId, children }: { spaceId: string; children: 
     TABS.find((tab) => tab.path && pathname.startsWith(base + tab.path))?.key ?? "today";
   return (
     <ToastProvider>
+      <PwaSync />
       <div
         data-surface={current === "story" ? "night" : undefined}
         className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-(--d-fast) ease-linear"

@@ -407,6 +407,26 @@ export const storyRouter = router({
     }),
 
   /**
+   * 이야기 모음 합계(모든 멤버): 이야기 수와 받은 별 수. 목록과 같은 화자 거르기를 쓴다.
+   * 목록은 페이지 단위라 화면이 셀 수 없어 서버가 센다(count 두 번, 한 가족 규모).
+   */
+  summary: spaceProcedure
+    .input(z.object({ narratorMemberId: entityId.optional() }))
+    .query(async ({ ctx, input }) => {
+      const where: Prisma.StoryEntryWhereInput = {
+        spaceId: ctx.member.spaceId,
+        narratorMemberId: input.narratorMemberId,
+      };
+      const [stories, stars] = await Promise.all([
+        ctx.prisma.storyEntry.count({ where }),
+        ctx.prisma.reaction.count({
+          where: { spaceId: ctx.member.spaceId, kind: "star", story: where },
+        }),
+      ]);
+      return { stories, stars };
+    }),
+
+  /**
    * 물어보기(PRD §4.3): parent가 어르신(grandparent)께 질문 카드나 직접 쓴 질문을 보낸다.
    * 같은 카드를 이미 보내 답을 기다리는 중이면 그 물어보기를 돌려준다. 새 물어보기는 어르신께 알림,
    * 카카오톡 공유는 클라이언트가 링크로 보낸다(서버 비용 0). 리밋, 열린 물어보기 상한(G-07).

@@ -3,6 +3,7 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { updateMomentBody } from "@/app/s/[spaceId]/actions";
+import { ShareButtons } from "@/components/share/share-buttons";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Sheet } from "@/components/ui/sheet";
@@ -49,6 +50,7 @@ export function MomentSheet({
   onEdited?: (body: string | null) => void;
 }) {
   const t = useTranslations("moment");
+  const tshare = useTranslations("share");
   const errors = useTranslations("errors");
   const format = useFormatter();
   const { toast } = useToast();
@@ -197,8 +199,22 @@ export function MomentSheet({
         })}
       </p>
 
-      {!editing && (onEdited || onDelete) ? (
+      {!editing && (onEdited || onDelete || canModerate) ? (
         <div className="-ml-2 flex flex-wrap gap-2">
+          {canModerate ? (
+            // 소식 전달(parent): 이름, 내용 없이 그 기록으로 가는 링크만(PRIVACY §3)
+            <ShareButtons
+              variant="inline"
+              inlineLabel={tshare("momentLabel")}
+              onNotice={(message) => toast({ message })}
+              target={{
+                title: tshare("momentTitle"),
+                text: tshare("momentText"),
+                button: tshare("openButton"),
+                path: `/open/moment/${moment.id}`,
+              }}
+            />
+          ) : null}
           {onEdited ? (
             <Button variant="text" onClick={startEdit}>
               <Icon name="pen" size="small" />

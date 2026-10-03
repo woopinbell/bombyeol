@@ -58,8 +58,11 @@ export default async function PregnancyPage({
         ) : null}
         <RecordList
           spaceId={spaceId}
+          childId={childId}
+          todayKey={todayKey}
           records={page.items}
           isParent={isParent}
+          canWrite={isParent && consented}
           myUserId={userId}
           authors={Object.fromEntries(authorNames(space))}
         />
