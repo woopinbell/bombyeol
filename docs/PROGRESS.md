@@ -66,7 +66,7 @@
 
 ### 다음 할 일 (2026-10-02 세션 마감 기준 - 새 세션은 여기부터)
 
-main f3c166c(PR woopinbell/bombyeol#17까지 머지), 스테이징 버전 d9343b8c. 작업 브랜치 `claude/magical-planck-y1ekem`은 **Phase 5 우리 탭 UI 7커밋(cd147aa..64d3192) 푸시, PR 전**(2026-10-03). 검증: format, lint, typecheck, Vitest 385건, OpenNext 빌드 + dry-run(gzip 4.82 MiB), 로컬 브라우저 검사(구성원, 기념, 달력, 임신 기록, 설정 전부 통과). 다음: 사용자 확인 후 PR, 머지, 스테이징 배포.
+main 2144a32(PR woopinbell/bombyeol#18 Phase 5 우리 탭 UI까지 머지, 2026-10-03), 스테이징 버전 b8d98dbe(스모크 db, R2, cleanup 통과, fcm invalid_token은 이전과 같음 - 발송 경로 정상). 작업 브랜치 `claude/magical-planck-y1ekem`은 main과 같다. 열린 PR 없음. PR #18 검증: format, lint, typecheck, Vitest 385건, OpenNext dry-run gzip 4.82 MiB, 로컬 브라우저 검사(구성원, 기념, 달력, 임신 기록 권한, 설정, 초대 거두기).
 
 **사용자가 할 일(먼저 확인)**
 1. **Workers Paid 전환**(결정됨, Q-PLAN) - 대시보드 Workers & Pages > Plans. 2026-10-02 13시 기준 아직 무료(1102 계속 관측). 전환 뒤 Cloudflare GraphQL 분석(`workersInvocationsAdaptive`, 스크립트 `bombyeol-staging`)으로 status, cpuTime 확인.
@@ -77,7 +77,7 @@ main f3c166c(PR woopinbell/bombyeol#17까지 머지), 스테이징 버전 d9343b
 **개발 순서(제안)**
 1. ~~Phase 3 남은 화면~~(2026-10-02 PR woopinbell/bombyeol#16 머지, 스테이징 배포), 반려동물 커버(작업 브랜치). 사용자 확인: 스테이징에서 글 고치기, 성장 기록 시트(좋아요, 댓글, 고치기, 처음 옮기기, 지우기), 우리 탭(아이, 반려동물 더하기, 고치기, 태어났어요, 저장 공간).
 2. ~~Phase 4 이야기 탭 UI~~(PR woopinbell/bombyeol#17 머지, 스테이징 배포). 사용자 확인: 스테이징에서 할머니 계정으로 오늘의 질문 답하기, 엄마 계정으로 물어보기, 받아 적기, 별 하나, 댓글, 반려동물 커버 사진.
-3. Phase 5 우리 탭 UI - 작업 브랜치 푸시 완료, PR 대기(COMMIT_PLAN Phase 5 참고). 남음: 임신 기록 내용 고치기 화면.
+3. ~~Phase 5 우리 탭 UI~~(PR woopinbell/bombyeol#18 머지, 스테이징 배포). 사용자 확인: 스테이징 우리 탭(다음 가족 일, 구성원 고치기, 별이 되신 분, 가족 달력, 임신 기록 동의와 보는 사람, 설정 글자 크기, 밝기, 초대 거두기). 작은 남은 일: 임신 기록 내용, 날짜 고치기 화면(서버 `pregnancy.update` 있음), 이야기 모음 합계.
 4. Phase 6 UI: 카카오톡 공유(`feat(share)`), PWA(`feat(pwa)`, 서비스 워커, 푸시 토큰 등록 화면).
 5. Phase 7 UI: 계정, 데이터 삭제 페이지(`feat(privacy)`).
 6. Phase 8 결제(Q-PAY 결정 뒤), 이야기 PDF.
