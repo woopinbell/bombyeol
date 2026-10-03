@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { BackLink } from "@/components/family/back-link";
 import { TabPage } from "@/components/family/tab-page";
+import { MemorialPanel, Section } from "@/components/us/member-manage";
 import { PetCover } from "@/components/us/pet-cover";
 import { PetForm, type PetValues } from "@/components/us/pet-form";
 import { Title } from "@/components/ui/screen";
@@ -14,8 +15,14 @@ export default async function EditPetPage({ params }: PageProps<"/s/[spaceId]/us
   const { spaceId, petId } = await params;
   const { role, caller } = await loadFamily(spaceId);
   if (role !== "parent") notFound();
-  const found = (await caller.pet.list({ spaceId })).find((p) => p.id === petId);
+  const [pets, memorials] = await Promise.all([
+    caller.pet.list({ spaceId }),
+    caller.memorial.list({ spaceId }),
+  ]);
+  const found = pets.find((p) => p.id === petId);
   if (!found) notFound();
+  const memorial = memorials.find((m) => m.petId === found.id) ?? null;
+  const todayKey = dayKey(new Date(), timeZone);
   const pet: PetValues = {
     id: found.id,
     name: found.name,
@@ -29,10 +36,24 @@ export default async function EditPetPage({ params }: PageProps<"/s/[spaceId]/us
   const t = await getTranslations();
   return (
     <TabPage header={<BackLink href={`/s/${spaceId}/us`}>{t("usTab.back")}</BackLink>}>
-      <div className="flex flex-col gap-6 pt-2">
+      <div className="flex flex-col gap-8 pt-2 pb-12">
         <Title size="title">{t("petForm.editTitle", { name: found.name })}</Title>
         <PetCover spaceId={spaceId} petId={found.id} name={found.name} coverUrl={found.coverUrl} />
-        <PetForm spaceId={spaceId} pet={pet} todayKey={dayKey(new Date(), timeZone)} />
+        <PetForm spaceId={spaceId} pet={pet} todayKey={todayKey} />
+        <Section title={t("member.memorialTitle")} lead={t("petForm.memorialLead")}>
+          <MemorialPanel
+            spaceId={spaceId}
+            target={{ type: "pet", petId: found.id }}
+            memorial={
+              memorial && {
+                id: memorial.id,
+                passedAt: memorial.passedAt ? dateOnlyKey(memorial.passedAt) : null,
+                note: memorial.note,
+              }
+            }
+            todayKey={todayKey}
+          />
+        </Section>
       </div>
     </TabPage>
   );

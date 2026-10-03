@@ -484,7 +484,8 @@
     "coverRemove": "사진 지우기",
     "coverUploading": "사진을 올리는 중",
     "coverDone": "커버 사진을 바꿨어요",
-    "coverRemoved": "커버 사진을 지웠어요"
+    "coverRemoved": "커버 사진을 지웠어요",
+    "memorialLead": "별이 된 친구의 사진과 기록은 영원히 남아요. 새 성장 기록은 더하지 않고, 추억 사진은 계속 올릴 수 있어요."
   },
   "storySheet": {
     "title": "이야기",
