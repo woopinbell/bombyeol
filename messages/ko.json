@@ -227,6 +227,7 @@
     "askCanceled": "질문을 거뒀어요",
     "undo": "되돌리기",
     "collection": "이야기 모음",
+    "summary": "이야기 {stories}, 받은 별 {stars}",
     "write": "직접 쓰기",
     "emptyTitle": "아직 이야기가 없어요",
     "emptyLead": "할머니 할아버지의 이야기가 여기에 모여요.",

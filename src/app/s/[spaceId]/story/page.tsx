@@ -35,8 +35,9 @@ export default async function StoryPage({ params, searchParams }: PageProps<"/s/
           elders.find((n) => !n.memorial) ??
           me);
 
-  const [page, asks, prompts] = await Promise.all([
+  const [page, summary, asks, prompts] = await Promise.all([
     caller.story.list({ spaceId, narratorMemberId: narratorId ?? undefined }),
+    caller.story.summary({ spaceId, narratorMemberId: narratorId ?? undefined }),
     caller.story.asks({ spaceId }),
     cardNarrator
       ? caller.story.prompts({ spaceId, narratorMemberId: cardNarrator.memberId })
@@ -71,6 +72,7 @@ export default async function StoryPage({ params, searchParams }: PageProps<"/s/
       initialItems={page.items}
       initialCursor={page.nextCursor}
       initialAsks={asks}
+      initialSummary={summary}
       narrators={narrators}
       me={me}
       authors={Object.fromEntries(authorNames(space))}

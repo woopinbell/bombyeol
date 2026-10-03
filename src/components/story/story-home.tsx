@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { cancelAsk, loadMoreStories } from "@/app/s/[spaceId]/story/actions";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -259,9 +259,16 @@ export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
 
       <section aria-labelledby="collection-heading" className="mt-8 flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 id="collection-heading" className="font-bold">
-            {t("collection")}
-          </h2>
+          <div className="flex flex-col">
+            <h2 id="collection-heading" className="font-bold">
+              {t("collection")}
+            </h2>
+            {state.summary.stories ? (
+              <p className="text-caption text-fg-muted tabular-nums">
+                {t("summary", state.summary)}
+              </p>
+            ) : null}
+          </div>
           {canWrite ? (
             <Button
               onClick={() =>
@@ -316,12 +323,19 @@ export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
  */
 function StoryTile({ story }: { story: StoryItem }) {
   const t = useTranslations("storyTab");
-  const { spaceId, fresh } = useStory();
+  const { spaceId, fresh, bumpStars } = useStory();
   const question = useStoryQuestion(story);
   const { star: live, toggle } = useStar(spaceId, story.id, {
     on: story.reactions.starredByMe,
     count: story.reactions.stars,
   });
+  // 별 수가 바뀐 만큼 모음 합계에 더한다(누른 즉시, 실패해 되돌아오면 다시 뺀다)
+  const counted = useRef(live.count);
+  useEffect(() => {
+    const change = live.count - counted.current;
+    counted.current = live.count;
+    if (change) bumpStars(change);
+  }, [live.count, bumpStars]);
   const [comments, setComments] = useState(story.reactions.comments);
   const [sheet, setSheet] = useState<{ open: boolean; seq: number; editing: boolean }>({
     open: false,

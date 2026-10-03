@@ -75,7 +75,7 @@ export function StorySheet({
       return;
     }
     onClose();
-    dropStory(story.id);
+    dropStory(story.id, star.count);
     toast({ message: ts("removed") });
   };
 
