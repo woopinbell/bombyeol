@@ -135,3 +135,89 @@ export async function setPetCover(
     return { error: toErrorKey(error) };
   }
 }
+
+/** 멤버 화면의 바로 하는 일(결과만 돌려준다, 화면은 router.refresh로 다시 받는다) */
+type Done = { ok: true } | { error: ErrorKey };
+
+async function run(task: () => Promise<unknown>): Promise<Done> {
+  try {
+    await task();
+    return { ok: true };
+  } catch (error) {
+    return { error: toErrorKey(error) };
+  }
+}
+
+/** 부르는 이름(관계 표시명): 본인 또는 parent. 비우면 지운다 */
+export async function setMemberLabel(spaceId: string, memberId: string, label: string) {
+  const caller = await serverCaller();
+  return run(() =>
+    caller.family.updateLabel({ spaceId, memberId, relationLabel: label.trim() || null }),
+  );
+}
+
+/** 역할 바꾸기(parent). 역할별 정원(G-11)은 프로시저가 다시 센다 */
+export async function setMemberRole(
+  spaceId: string,
+  memberId: string,
+  role: "parent" | "grandparent" | "relative",
+) {
+  const caller = await serverCaller();
+  return run(() => caller.family.changeRole({ spaceId, memberId, role }));
+}
+
+/** 내보내기(parent) */
+export async function removeMember(spaceId: string, memberId: string) {
+  const caller = await serverCaller();
+  return run(() => caller.family.remove({ spaceId, memberId }));
+}
+
+/** 스스로 나가기. 나가면 이 가족 화면을 볼 수 없으므로 처음 화면으로 */
+export async function leaveFamily(spaceId: string): Promise<Done> {
+  const caller = await serverCaller();
+  const result = await run(() => caller.family.leave({ spaceId }));
+  if ("error" in result) return result;
+  redirect("/");
+}
+
+type MemorialTarget = { type: "member"; memberId: string } | { type: "pet"; petId: string };
+
+/** 별이 되신 분으로(parent, 유가족 동의 하에). 떠난 날, 기억 메모는 비워도 된다 */
+export async function markMemorial(
+  spaceId: string,
+  target: MemorialTarget,
+  input: { passedAt: string; note: string },
+) {
+  const caller = await serverCaller();
+  return run(() =>
+    caller.memorial.mark({
+      spaceId,
+      target,
+      passedAt: input.passedAt || undefined,
+      note: input.note.trim() || undefined,
+    }),
+  );
+}
+
+/** 떠난 날, 기억 메모 고치기(parent). 비우면 지운다 */
+export async function updateMemorial(
+  spaceId: string,
+  memorialId: string,
+  input: { passedAt: string; note: string },
+) {
+  const caller = await serverCaller();
+  return run(() =>
+    caller.memorial.update({
+      spaceId,
+      memorialId,
+      passedAt: input.passedAt || null,
+      note: input.note.trim() || null,
+    }),
+  );
+}
+
+/** 기념 되돌리기(잘못 바꾼 경우, parent). 이야기, 기록은 그대로 */
+export async function unmarkMemorial(spaceId: string, memorialId: string) {
+  const caller = await serverCaller();
+  return run(() => caller.memorial.unmark({ spaceId, memorialId }));
+}
