@@ -17,6 +17,7 @@ import { loadFamily } from "@/server/family";
 /**
  * 설정: 화면(모두, 이 기기) → 알림(이 기기) → 초대 관리(부모: 아직 쓰지 않은 초대, 거두기, 새로 만들기)
  * → 가족 앨범 내려받기(부모) → 가족 지우기(부모: 요청, 유예 중이면 지워질 날과 취소)
+ * → 내 계정(모두: 계정 지우기 화면으로)
  */
 export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/us/settings">) {
   const { spaceId } = await params;
@@ -81,6 +82,14 @@ export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/u
             />
           </Section>
         ) : null}
+        <Section
+          title={t("privacy.account.settingsTitle")}
+          lead={t("privacy.account.settingsLead")}
+        >
+          <Link href="/account/delete" className={`${buttonClass()} self-start`}>
+            {t("privacy.account.settingsLink")}
+          </Link>
+        </Section>
       </div>
     </TabPage>
   );
