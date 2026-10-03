@@ -3,9 +3,11 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { TabPage, TabTitle } from "@/components/family/tab-page";
 import { buttonClass } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Lead } from "@/components/ui/screen";
 import { StorageMeter } from "@/components/us/storage-meter";
-import { childName } from "@/lib/today-feed";
+import { UpcomingSection } from "@/components/us/upcoming";
+import { timeZone } from "@/i18n/config";
+import { childName, dayKey } from "@/lib/today-feed";
+import { zoneOffsetMinutes } from "@/lib/zone";
 import { cn } from "@/lib/utils";
 import { loadFamily } from "@/server/family";
 
@@ -17,9 +19,16 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
   const { spaceId } = await params;
   const { space, role, caller } = await loadFamily(spaceId);
   // 반려동물 커버(짧은 TTL 읽기 URL)는 목록 조회에만 있다
-  const [usage, pets] = await Promise.all([
+  const now = new Date();
+  const [usage, pets, upcoming] = await Promise.all([
     caller.media.usage({ spaceId }),
     space.pets.some((p) => p.coverAssetId) ? caller.pet.list({ spaceId }) : [],
+    // 오늘, 시간대 차이는 가족 시간대 기준(한국어만 출시 - i18n/config)
+    caller.family.upcoming({
+      spaceId,
+      today: dayKey(now, timeZone),
+      utcOffsetMinutes: zoneOffsetMinutes(timeZone, now),
+    }),
   ]);
   const covers = new Map(pets.map((p) => [p.id, p.coverUrl]));
   const t = await getTranslations("usTab");
@@ -61,7 +70,7 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
   return (
     <TabPage header={<TabTitle>{space.name}</TabTitle>}>
       <div className="flex flex-1 flex-col gap-10 pt-4 pb-12">
-        <Lead>{t("empty")}</Lead>
+        <UpcomingSection upcoming={upcoming} />
 
         <section aria-labelledby="family-heading" className="flex flex-col gap-3">
           <h2 id="family-heading" className="text-title font-heavy">

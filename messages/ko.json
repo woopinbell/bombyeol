@@ -233,7 +233,6 @@
     "memorialMark": "별이 되신 분"
   },
   "usTab": {
-    "empty": "가족 달력과 구성원 화면은 곧 열려요.",
     "invite": "할머니 할아버지 초대하기",
     "familyTitle": "아이와 반려동물",
     "noFamily": "아직 등록한 아이와 반려동물이 없어요.",
@@ -253,7 +252,17 @@
     "memorial": "별이 됐어요",
     "storageTitle": "가족 앨범 저장 공간",
     "storageUsed": "{limit} 중 {used} 썼어요",
-    "storageNearFull": "거의 다 찼어요. 다 차면 새 사진과 영상을 올릴 수 없어요."
+    "storageNearFull": "거의 다 찼어요. 다 차면 새 사진과 영상을 올릴 수 없어요.",
+    "upcomingTitle": "다음 가족 일",
+    "gathering": "다음 가족 모임",
+    "inDays": "{days, plural, =0 {오늘} =1 {내일} other {#일 뒤}}",
+    "childBirthday": "{name} {years, plural, =1 {첫 돌} other {#번째 생일}}",
+    "petBirthday": "{name} {years}번째 생일",
+    "petBirthdayEstimated": "{name} 생일(짐작한 날)",
+    "petAdoption": "{name} 가족이 된 지 {years}년",
+    "memorialDay": "{name} {years}주기",
+    "eventYears": "{name}, {years}번째",
+    "noUpcoming": "앞으로 30일 안에는 가족 일이 없어요."
   },
   "ui": {
     "close": "닫기",
