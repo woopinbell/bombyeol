@@ -117,3 +117,21 @@ export async function savePet(
   }
   redirect(`/s/${spaceId}/us`);
 }
+
+/**
+ * 반려동물 커버 사진 바꾸기, 지우기(parent). 사진은 먼저 올리고 확인된 자산 ID를 넘긴다(G-01~04는 올리기 단계).
+ * 이전 커버 파일은 프로시저가 저장소에서 지운다(G-05).
+ */
+export async function setPetCover(
+  spaceId: string,
+  petId: string,
+  coverAssetId: string | null,
+): Promise<{ ok: true } | { error: ErrorKey }> {
+  try {
+    const caller = await serverCaller();
+    await caller.pet.update({ spaceId, petId, coverAssetId });
+    return { ok: true };
+  } catch (error) {
+    return { error: toErrorKey(error) };
+  }
+}

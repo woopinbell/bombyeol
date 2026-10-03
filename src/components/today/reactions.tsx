@@ -11,44 +11,54 @@ import {
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
+import type { ErrorKey } from "@/lib/action-errors";
 import type { FeedComment } from "@/lib/today-feed";
 import { cn } from "@/lib/utils";
 
-/** 좋아요, 댓글을 남기는 오늘 기록: 사진, 일기(Moment)와 성장 기록(Milestone) */
+/** 좋아요를 남기는 오늘 기록: 사진, 일기(Moment)와 성장 기록(Milestone) */
 export type TodayTarget =
   { type: "moment"; momentId: string } | { type: "milestone"; milestoneId: string };
 
-const targetKey = (target: TodayTarget) =>
-  target.type === "moment" ? `moment:${target.momentId}` : `milestone:${target.milestoneId}`;
+/** 댓글을 남기는 대상: 오늘 기록과 이야기 */
+export type CommentTarget = TodayTarget | { type: "story"; storyEntryId: string };
 
-/** 좋아요를 연달아 누를 때 마지막 상태를 보내기 전 기다리는 시간 */
-const LIKE_SETTLE_MS = 500;
+const targetKey = (target: CommentTarget) =>
+  target.type === "moment"
+    ? `moment:${target.momentId}`
+    : target.type === "milestone"
+      ? `milestone:${target.milestoneId}`
+      : `story:${target.storyEntryId}`;
+
+/** 좋아요, 별 하나를 연달아 누를 때 마지막 상태를 보내기 전 기다리는 시간 */
+const TOGGLE_SETTLE_MS = 500;
 
 export type LikeState = { on: boolean; count: number };
 
+type ToggleResult = LikeState | { error: ErrorKey };
+
 /**
- * 좋아요: 누르면 화면은 바로 바뀌고, 손을 멈춘 뒤 마지막 상태만 보낸다(누를 때마다 요청하면
- * Workers CPU 한도에 걸린다 - 2026-10-02 스테이징에서 관측). 화면을 떠나기 전에 남은 것을 보낸다.
+ * 켜고 끄는 반응(좋아요, 별 하나): 누르면 화면은 바로 바뀌고, 손을 멈춘 뒤 마지막 상태만 보낸다(누를 때마다
+ * 요청하면 Workers CPU 한도에 걸린다 - 2026-10-02 스테이징에서 관측). 화면을 떠나기 전에 남은 것을 보낸다.
+ * key가 같으면 같은 대상이다. send는 원하는 상태로 맞추는 멱등 요청(setLike, setStar).
  */
-export function useLike(
-  spaceId: string,
-  target: TodayTarget,
+export function useSettledToggle(
+  key: string,
   initial: LikeState,
-  onSettled?: (like: LikeState) => void,
+  send: (on: boolean) => Promise<ToggleResult>,
+  onSettled?: (state: LikeState) => void,
 ) {
   const errors = useTranslations("errors");
   const { toast } = useToast();
-  const [like, setLike] = useState(initial);
+  const [state, setState] = useState(initial);
   // 서버가 확인한 상태, 사용자가 원하는 상태
   const confirmed = useRef(initial);
   const desired = useRef(initial.on);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sending = useRef(false);
-  const settled = useRef(onSettled);
+  const latest = useRef({ send, onSettled });
   useEffect(() => {
-    settled.current = onSettled;
+    latest.current = { send, onSettled };
   });
-  const key = targetKey(target);
 
   const flush = useCallback(async () => {
     timer.current = null;
@@ -57,23 +67,23 @@ export function useLike(
     try {
       // 보내는 사이에 또 바꿨으면 한 번 더 맞춘다
       while (desired.current !== confirmed.current.on) {
-        const result = await setLikeAction(spaceId, target, desired.current);
+        const result = await latest.current.send(desired.current);
         if ("error" in result) {
           desired.current = confirmed.current.on;
-          setLike(confirmed.current);
+          setState(confirmed.current);
           toast({ message: errors(result.error) });
           return;
         }
-        confirmed.current = { on: result.liked, count: result.likes };
+        confirmed.current = result;
       }
-      setLike(confirmed.current);
-      settled.current?.(confirmed.current);
+      setState(confirmed.current);
+      latest.current.onSettled?.(confirmed.current);
     } finally {
       sending.current = false;
     }
     // key가 같으면 같은 대상이다
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spaceId, key, toast, errors]);
+  }, [key, toast, errors]);
 
   useEffect(
     () => () => {
@@ -85,17 +95,37 @@ export function useLike(
     [flush],
   );
 
-  // 누름 피드백 + 상태 변화만(자주 쓰는 동작이라 축하 모션 없음, DESIGN §11)
   const toggle = () => {
     desired.current = !desired.current;
     const base = confirmed.current;
     const delta = (desired.current ? 1 : 0) - (base.on ? 1 : 0);
-    setLike({ on: desired.current, count: base.count + delta });
+    const next = { on: desired.current, count: base.count + delta };
+    setState(next);
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => void flush(), LIKE_SETTLE_MS);
+    timer.current = setTimeout(() => void flush(), TOGGLE_SETTLE_MS);
+    return next;
   };
 
-  return { like, toggle };
+  return { state, toggle };
+}
+
+/** 좋아요: 누름 피드백 + 상태 변화만(자주 쓰는 동작이라 축하 모션 없음, DESIGN §11) */
+export function useLike(
+  spaceId: string,
+  target: TodayTarget,
+  initial: LikeState,
+  onSettled?: (like: LikeState) => void,
+) {
+  const { state, toggle } = useSettledToggle(
+    targetKey(target),
+    initial,
+    async (on) => {
+      const result = await setLikeAction(spaceId, target, on);
+      return "error" in result ? result : { on: result.liked, count: result.likes };
+    },
+    onSettled,
+  );
+  return { like: state, toggle };
 }
 
 export function LikeButton({ like, onClick }: { like: LikeState; onClick: () => void }) {
@@ -122,7 +152,7 @@ export function useComments({
   onChange,
 }: {
   spaceId: string;
-  target: TodayTarget;
+  target: CommentTarget;
   open: boolean;
   focus: boolean;
   onChange?: (change: CommentsChange) => void;

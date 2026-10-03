@@ -54,6 +54,27 @@ describe("story 세대 교차 반응", () => {
     expect(comments.items.map((c) => c.body)).toEqual(["할머니 최고!", "고맙다 우리 강아지"]);
   });
 
+  it("setStar는 원하는 상태로 맞추고 여러 번 보내도 같다, 이야기에만", async () => {
+    const { relative, spaceId, target } = await family();
+    for (const [starred, stars] of [
+      [true, 1],
+      [true, 1],
+      [false, 0],
+      [false, 0],
+    ] as const) {
+      await expect(relative.reaction.setStar({ spaceId, target, starred })).resolves.toEqual({
+        starred,
+        stars,
+      });
+    }
+    await Promise.all(
+      Array.from({ length: 5 }, () =>
+        relative.reaction.setStar({ spaceId, target, starred: true }),
+      ),
+    );
+    expect(await prisma.reaction.count({ where: { kind: "star" } })).toBe(1);
+  });
+
   it("좋아요는 오늘 기록에, 별 하나는 이야기에만", async () => {
     const { api, spaceId, target } = await family();
     const diary = await api.moment.createDiary({

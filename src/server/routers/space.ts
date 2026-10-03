@@ -152,6 +152,7 @@ export const spaceRouter = router({
             role: true,
             relationLabel: true,
             user: { select: { name: true } },
+            memorial: { select: { id: true } },
           },
         },
         children: {
@@ -167,7 +168,14 @@ export const spaceRouter = router({
         },
         pets: {
           orderBy: { createdAt: "asc" },
-          select: { id: true, name: true, species: true, speciesLabel: true, status: true },
+          select: {
+            id: true,
+            name: true,
+            species: true,
+            speciesLabel: true,
+            status: true,
+            coverAssetId: true,
+          },
         },
       },
     })),
