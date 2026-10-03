@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { cancelAsk, loadMoreStories } from "@/app/s/[spaceId]/story/actions";
+import { ShareButtons } from "@/components/share/share-buttons";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
@@ -34,6 +35,7 @@ type Open =
 export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
   const t = useTranslations("storyTab");
   const tp = useTranslations("story");
+  const tshare = useTranslations("share");
   const errors = useTranslations("errors");
   const { toast } = useToast();
   const state = useStory();
@@ -248,6 +250,20 @@ export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
                       <Button variant="text" onClick={() => withdraw(ask)}>
                         {t("cancelAsk")}
                       </Button>
+                    ) : null}
+                    {sender && !mine ? (
+                      // 어르신은 푸시보다 카카오톡을 본다: 받은 질문으로 바로 가는 링크(ARCHITECTURE §7)
+                      <ShareButtons
+                        variant="inline"
+                        inlineLabel={tshare("askLabel")}
+                        onNotice={(message) => toast({ message })}
+                        target={{
+                          title: tshare("askTitle"),
+                          text: tshare("askText"),
+                          button: tshare("askButton"),
+                          path: `/open/ask/${ask.id}`,
+                        }}
+                      />
                     ) : null}
                   </div>
                 </li>
