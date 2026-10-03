@@ -10,7 +10,12 @@ import tokens from "@/design/tokens.json";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("app");
-  return { title: t("name"), description: t("description") };
+  return {
+    title: t("name"),
+    description: t("description"),
+    // 홈 화면에 추가한 iOS 앱: 주소창 없이 열리고 이름은 앱 이름(웹푸시의 전제)
+    appleWebApp: { capable: true, title: t("name"), statusBarStyle: "default" },
+  };
 }
 
 // 브라우저 상단 색: 기기 테마를 따른다(앱 안 테마 설정과 다를 수 있음)
