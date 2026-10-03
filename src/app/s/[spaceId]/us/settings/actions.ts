@@ -39,3 +39,25 @@ export async function unregisterPushToken(token: string): Promise<Done> {
     return { error: toErrorKey(error) };
   }
 }
+
+/** 가족 지우기 요청(parent, 가족 이름을 다시 받아 프로시저가 확인). 유예 기간 뒤 파기, 그동안 취소할 수 있다 */
+export async function requestSpaceDeletion(spaceId: string, confirmName: string): Promise<Done> {
+  try {
+    const caller = await serverCaller();
+    await caller.space.requestDeletion({ spaceId, confirmName });
+    return { ok: true };
+  } catch (error) {
+    return { error: toErrorKey(error) };
+  }
+}
+
+/** 가족 지우기 취소(parent, 유예 중에만). 이미 취소됐거나 끝났으면 할 일이 없으니 된 것으로 본다 */
+export async function cancelSpaceDeletion(spaceId: string): Promise<Done> {
+  try {
+    const caller = await serverCaller();
+    await caller.space.cancelDeletion({ spaceId });
+    return { ok: true };
+  } catch (error) {
+    return { error: toErrorKey(error) };
+  }
+}
