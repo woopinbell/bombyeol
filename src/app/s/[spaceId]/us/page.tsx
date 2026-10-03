@@ -87,7 +87,12 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
   return (
     <TabPage header={<TabTitle>{space.name}</TabTitle>}>
       <div className="flex flex-1 flex-col gap-10 pt-4 pb-12">
-        <UpcomingSection upcoming={upcoming} />
+        <div className="flex flex-col gap-4">
+          <UpcomingSection upcoming={upcoming} />
+          <Link href={`${base}/calendar`} className={buttonClass({ block: true })}>
+            {t("calendarLink")}
+          </Link>
+        </div>
 
         <section aria-labelledby="members-heading" className="flex flex-col gap-4">
           <h2 id="members-heading" className="text-title font-heavy">

@@ -99,7 +99,9 @@
     "ASK_OPEN_LIMIT": "답을 기다리는 질문이 많아요. 먼저 보낸 질문을 기다려 주세요",
     "MEMORIAL_SELF": "자기 자신은 별이 된 가족으로 바꿀 수 없어요",
     "ALREADY_MEMORIAL": "이미 별이 된 가족이에요",
-    "MEMBER_PROTECTED": "가족을 만든 분과 나 자신은 바꾸거나 내보낼 수 없어요"
+    "MEMBER_PROTECTED": "가족을 만든 분과 나 자신은 바꾸거나 내보낼 수 없어요",
+    "EVENT_RANGE_INVALID": "끝나는 때는 시작보다 뒤여야 하고, 한 달을 넘을 수 없어요",
+    "EVENT_LIMIT": "가족 일정을 더 만들 수 없어요"
   },
   "auth": {
     "logoAlt": "봄별",
@@ -273,7 +275,8 @@
       "relative": "함께하는 가족"
     },
     "me": "나",
-    "memorialMember": "별이 되신 분"
+    "memorialMember": "별이 되신 분",
+    "calendarLink": "가족 달력"
   },
   "ui": {
     "close": "닫기",
@@ -571,5 +574,47 @@
     "leaveConfirm": "정말 나갈까요?",
     "confirmYes": "네, 그렇게 할게요",
     "confirmNo": "그만두기"
+  },
+  "calendar": {
+    "title": "가족 달력",
+    "monthTitle": "{month}",
+    "prev": "지난달",
+    "next": "다음 달",
+    "empty": "이 달에는 적어 둔 가족 일이 없어요.",
+    "add": "일정 더하기",
+    "allDay": "하루 종일",
+    "yearly": "해마다",
+    "kind": {
+      "gathering": "가족 모임",
+      "birthday": "생일",
+      "anniversary": "기념일",
+      "other": "그 밖의 일"
+    },
+    "sheetNew": "일정 더하기",
+    "sheetEdit": "일정 고치기",
+    "sheetView": "가족 일정",
+    "titleLabel": "무슨 일인가요",
+    "kindLabel": "어떤 일인가요",
+    "allDayLabel": "하루 종일이에요",
+    "startDate": "날짜",
+    "endDate": "끝나는 날",
+    "endDateHint": "며칠 이어지면 적어 주세요",
+    "startTime": "시작 시각",
+    "endTime": "끝나는 시각",
+    "optionalHint": "쓰지 않아도 괜찮아요",
+    "yearlyLabel": "해마다 돌아와요",
+    "yearlyHint": "생일, 기념일처럼 같은 날 돌아오면 켜 주세요",
+    "note": "메모",
+    "save": "일정 저장",
+    "saved": "일정을 저장했어요",
+    "edit": "고치기",
+    "remove": "이 일정 지우기",
+    "removeConfirm": "이 일정을 지울까요?",
+    "removed": "일정을 지웠어요",
+    "confirmYes": "지우기",
+    "confirmNo": "그만두기",
+    "by": "적은 사람 {who}",
+    "until": "{date}까지",
+    "today": "오늘"
   }
 }
