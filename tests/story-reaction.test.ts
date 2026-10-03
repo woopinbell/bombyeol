@@ -130,4 +130,36 @@ describe("story 세대 교차 반응", () => {
     await api.story.delete({ spaceId, storyId });
     expect(await prisma.reaction.count()).toBe(0);
   });
+
+  it("이야기 모음 합계: 이야기 수와 받은 별 수, 화자로 거르고 다른 가족은 세지 않는다", async () => {
+    const { api, grandma, relative, spaceId, target } = await family();
+    await relative.reaction.toggleStar({ spaceId, target });
+    await api.reaction.toggleStar({ spaceId, target });
+    // 부모 자신의 이야기(별 하나)
+    const mine = await api.story.create({ spaceId, body: "엄마의 어린 시절" });
+    await grandma.reaction.toggleStar({
+      spaceId,
+      target: { type: "story", storyEntryId: mine.id },
+    });
+    // 댓글은 별이 아니다
+    await relative.reaction.addComment({ spaceId, target, body: "좋아요" });
+    // 다른 가족의 이야기와 별은 세지 않는다
+    const other = await mediaSetup(prisma);
+    const theirs = await other.api.story.create({ spaceId: other.spaceId, body: "다른 집" });
+    await other.api.reaction.toggleStar({
+      spaceId: other.spaceId,
+      target: { type: "story", storyEntryId: theirs.id },
+    });
+
+    await expect(relative.story.summary({ spaceId })).resolves.toEqual({ stories: 2, stars: 3 });
+    const grandmaMember = await prisma.member.findFirstOrThrow({
+      where: { spaceId, role: "grandparent" },
+    });
+    await expect(
+      api.story.summary({ spaceId, narratorMemberId: grandmaMember.id }),
+    ).resolves.toEqual({ stories: 1, stars: 2 });
+    await expect(other.api.story.summary({ spaceId })).rejects.toMatchObject({
+      code: "NOT_FOUND",
+    });
+  });
 });
