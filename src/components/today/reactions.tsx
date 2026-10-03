@@ -314,8 +314,9 @@ export function CommentList({
 }) {
   const t = useTranslations("moment");
   const errors = useTranslations("errors");
+  const left = useTranslations("privacy")("leftFamily");
   const format = useFormatter();
-  const who = (id: string, name: string | null) => authors[id] ?? name ?? "";
+  const who = (id: string, name: string | null) => authors[id] ?? name ?? left;
   return (
     <>
       <h3 className="mt-6 mb-2 font-bold">{t("comments", { count: c.visible.length })}</h3>

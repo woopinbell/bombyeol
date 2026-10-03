@@ -77,6 +77,7 @@ export function MilestoneDetail({
   canEdit: boolean;
 }) {
   const t = useTranslations("milestoneDetail");
+  const left = useTranslations("privacy")("leftFamily");
   const format = useFormatter();
   const target = { type: "milestone", milestoneId: milestone.id } as const;
   const { like, toggle } = useLike(spaceId, target, initialLike, onLikeChange);
@@ -88,7 +89,7 @@ export function MilestoneDetail({
     onChange: onCommentsChange,
   });
   const note = (milestone.value as { note?: string } | null)?.note;
-  const who = authors[milestone.createdBy.id] ?? milestone.createdBy.name ?? "";
+  const who = authors[milestone.createdBy.id] ?? milestone.createdBy.name ?? left;
   const [editing, setEditing] = useState(false);
   const formId = useId();
 

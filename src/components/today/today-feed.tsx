@@ -231,6 +231,7 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
   const isFresh = today.fresh.has(moment.id);
   const ta = useTranslations("moment");
   const errors = useTranslations("errors");
+  const left = useTranslations("privacy")("leftFamily");
   const { toast } = useToast();
   const canDelete = moment.createdBy.id === props.myUserId || props.canModerate;
   // 지우기: 바로 숨기고 6초 동안 되돌릴 수 있다. 토스트가 닫히면 실제로 지운다(DESIGN §9.1-7)
@@ -256,7 +257,7 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
       },
     });
   };
-  const who = authors[moment.createdBy.id] ?? moment.createdBy.name ?? "";
+  const who = authors[moment.createdBy.id] ?? moment.createdBy.name ?? left;
   const time = format.dateTime(moment.takenAt, { hour: "numeric", minute: "2-digit" });
   const [comments, setComments] = useState<CommentsChange>({
     count: moment.reactions.comments,

@@ -65,6 +65,7 @@ export function CalendarView({
   todayKey: string;
 }) {
   const t = useTranslations("calendar");
+  const left = useTranslations("privacy")("leftFamily");
   const format = useFormatter();
   const [sheet, setSheet] = useState<{
     mode: "view" | "edit" | "new";
@@ -152,7 +153,7 @@ export function CalendarView({
             event={sheet.event}
             spaceId={spaceId}
             canEdit={sheet.event.createdBy.id === myUserId || isParent}
-            who={authors[sheet.event.createdBy.id] ?? sheet.event.createdBy.name ?? ""}
+            who={authors[sheet.event.createdBy.id] ?? sheet.event.createdBy.name ?? left}
             onEdit={() => show("edit", sheet.event)}
             dayTitle={dayTitle}
           />

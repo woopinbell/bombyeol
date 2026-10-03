@@ -37,6 +37,7 @@ export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
   const tp = useTranslations("story");
   const tshare = useTranslations("share");
   const errors = useTranslations("errors");
+  const left = useTranslations("privacy")("leftFamily");
   const { toast } = useToast();
   const state = useStory();
   const { me, narrators, todayKey } = state;
@@ -128,7 +129,7 @@ export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
             <Icon name="spark" size="small" />
             {card.kind === "ask"
               ? t("askedBy", {
-                  who: state.authors[card.ask.askedBy.id] ?? card.ask.askedBy.name ?? "",
+                  who: state.authors[card.ask.askedBy.id] ?? card.ask.askedBy.name ?? left,
                 })
               : card.mode === "elder"
                 ? `${t("todayQuestion")}, ${label(card.narratorId)}`

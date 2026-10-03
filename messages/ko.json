@@ -820,6 +820,7 @@
       "settingsTitle": "내 계정",
       "settingsLead": "계정을 지우면 함께하던 모든 가족에서 빠지고 되돌릴 수 없어요.",
       "settingsLink": "계정 지우기"
-    }
+    },
+    "leftFamily": "떠난 가족"
   }
 }

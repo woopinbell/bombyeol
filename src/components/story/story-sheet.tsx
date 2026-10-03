@@ -50,6 +50,7 @@ export function StorySheet({
   const t = useTranslations("storyTab");
   const ts = useTranslations("storySheet");
   const errors = useTranslations("errors");
+  const left = useTranslations("privacy")("leftFamily");
   const { toast } = useToast();
   const { spaceId, me, authors, dropStory } = useStory();
   const comments = useComments({
@@ -104,10 +105,12 @@ export function StorySheet({
       {story.title ? <h3 className="text-title font-heavy">{story.title}</h3> : null}
       <p className="mt-2 text-title-s whitespace-pre-line">{story.body}</p>
       <p className="mt-3 text-caption text-fg-muted">
-        {t("byline", { name: story.narrator.label ?? story.narrator.name ?? "" })}
+        {t("byline", { name: story.narrator.label ?? story.narrator.name ?? left })}
         {story.storyYear ? <>, {t("year", { year: story.storyYear })}</> : null}
         {story.scribe ? (
-          <>, {t("scribedBy", { name: authors[story.createdBy.id] ?? story.scribe.name ?? "" })}</>
+          <>
+            , {t("scribedBy", { name: authors[story.createdBy.id] ?? story.scribe.name ?? left })}
+          </>
         ) : null}
       </p>
       <div className="mt-4 flex gap-2">
