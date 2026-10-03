@@ -101,7 +101,10 @@
     "ALREADY_MEMORIAL": "이미 별이 된 가족이에요",
     "MEMBER_PROTECTED": "가족을 만든 분과 나 자신은 바꾸거나 내보낼 수 없어요",
     "EVENT_RANGE_INVALID": "끝나는 때는 시작보다 뒤여야 하고, 한 달을 넘을 수 없어요",
-    "EVENT_LIMIT": "가족 일정을 더 만들 수 없어요"
+    "EVENT_LIMIT": "가족 일정을 더 만들 수 없어요",
+    "CONSENT_REQUIRED": "임신 기록 안내에 먼저 동의해 주세요",
+    "CONSENT_VERSION_STALE": "안내 내용이 바뀌었어요. 다시 확인하고 동의해 주세요",
+    "PHOTO_NOT_ALLOWED": "초음파 기록에만 사진을 붙일 수 있어요"
   },
   "auth": {
     "logoAlt": "봄별",
@@ -276,7 +279,8 @@
     },
     "me": "나",
     "memorialMember": "별이 되신 분",
-    "calendarLink": "가족 달력"
+    "calendarLink": "가족 달력",
+    "pregnancyLink": "{name} 임신 기록"
   },
   "ui": {
     "close": "닫기",
@@ -616,5 +620,59 @@
     "by": "적은 사람 {who}",
     "until": "{date}까지",
     "today": "오늘"
+  },
+  "pregnancy": {
+    "title": "{name} 임신 기록",
+    "week": "{weeks}주 {days}일",
+    "today": "오늘 {weeks}주 {days}일",
+    "daysUntilDue": "{days, plural, =0 {오늘이 태어날 날이에요} other {태어날 날까지 #일}}",
+    "overdue": "태어날 날이 {days}일 지났어요",
+    "noDue": "태어날 날을 적으면 주차를 알려 드려요",
+    "consentTitle": "임신 기록을 시작하기 전에",
+    "consentBody": "검진, 초음파, 태동 같은 임신 기록은 건강 정보예요. 처음에는 엄마 아빠만 볼 수 있고, 가족에게 보여줄지는 기록마다 고를 수 있어요. 알림에는 \"새 소식이 있어요\"처럼 내용 없는 문구만 써요. 동의는 언제든 거둘 수 있고, 그때 내가 쓴 기록을 지울 수 있어요.",
+    "consentAgree": "동의하고 시작하기",
+    "consentDone": "임신 기록을 시작했어요",
+    "add": "임신 기록 남기기",
+    "kind": {
+      "ultrasound": "초음파",
+      "checkup": "검진",
+      "kick": "태동",
+      "note": "메모"
+    },
+    "kindLabel": "어떤 기록인가요",
+    "date": "날짜",
+    "checkupHint": "다가오는 검진 날짜도 적을 수 있어요",
+    "note": "메모",
+    "noteRequired": "메모를 적어 주세요",
+    "optionalHint": "쓰지 않아도 괜찮아요",
+    "photo": "초음파 사진",
+    "photoAlt": "초음파 사진",
+    "photoPick": "사진 고르기",
+    "photoChange": "사진 바꾸기",
+    "visibilityLabel": "누가 볼까요",
+    "visibility": {
+      "parents_only": "엄마 아빠만",
+      "family": "가족 모두"
+    },
+    "save": "기록 남기기",
+    "saved": "임신 기록을 남겼어요",
+    "sending": "올리는 중",
+    "empty": "아직 임신 기록이 없어요.",
+    "emptyFamily": "가족과 나눈 임신 기록이 아직 없어요.",
+    "showFamily": "가족 모두에게 보이기",
+    "showParents": "엄마 아빠만 보기",
+    "visibilityChanged": "보는 사람을 바꿨어요",
+    "remove": "지우기",
+    "removeConfirm": "이 기록을 지울까요? 사진도 함께 지워져요.",
+    "removed": "임신 기록을 지웠어요",
+    "confirmYes": "지우기",
+    "confirmNo": "그만두기",
+    "withdrawTitle": "임신 기록 동의 거두기",
+    "withdrawLead": "거두면 새 임신 기록을 남기거나 고칠 수 없어요. 내가 쓴 기록을 어떻게 할지 골라 주세요.",
+    "withdrawKeep": "기록은 남기고 엄마 아빠만 보기",
+    "withdrawDelete": "내가 쓴 기록과 사진 지우기",
+    "withdraw": "동의 거두기",
+    "withdrawn": "동의를 거뒀어요",
+    "by": "{who}"
   }
 }

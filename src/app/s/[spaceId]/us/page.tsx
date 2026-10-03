@@ -124,6 +124,17 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
           ) : (
             <p className="text-fg-muted">{t("noFamily")}</p>
           )}
+          {space.children
+            .filter((c) => c.status === "expecting")
+            .map((c) => (
+              <Link
+                key={c.id}
+                href={`${base}/pregnancy/${c.id}`}
+                className={buttonClass({ block: true })}
+              >
+                {t("pregnancyLink", { name: childName(c) })}
+              </Link>
+            ))}
           {isParent ? (
             <div className="mt-2 flex flex-wrap gap-2">
               <Link href={`${base}/child/new`} className={buttonClass()}>
