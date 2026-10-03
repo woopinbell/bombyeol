@@ -7,10 +7,11 @@ import { Icon } from "@/components/ui/icon";
 import { Title } from "@/components/ui/screen";
 import { DisplaySettings } from "@/components/us/display-settings";
 import { InviteList } from "@/components/us/invite-list";
+import { NotificationSettings } from "@/components/us/notification-settings";
 import { Section } from "@/components/us/member-manage";
 import { loadFamily } from "@/server/family";
 
-/** 설정: 화면(모두, 이 기기) → 초대 관리(부모: 아직 쓰지 않은 초대, 거두기, 새로 만들기) */
+/** 설정: 화면(모두, 이 기기) → 알림(이 기기) → 초대 관리(부모: 아직 쓰지 않은 초대, 거두기, 새로 만들기) */
 export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/us/settings">) {
   const { spaceId } = await params;
   const { role, caller } = await loadFamily(spaceId);
@@ -23,6 +24,9 @@ export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/u
         <Title size="title">{t("settings.title")}</Title>
         <Section title={t("settings.displayTitle")}>
           <DisplaySettings />
+        </Section>
+        <Section title={t("settings.pushTitle")}>
+          <NotificationSettings />
         </Section>
         {isParent ? (
           <Section title={t("settings.invitesTitle")} lead={t("settings.invitesLead")}>

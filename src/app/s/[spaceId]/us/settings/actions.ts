@@ -17,3 +17,25 @@ export async function revokeInvite(spaceId: string, inviteId: string): Promise<D
     return { error: toErrorKey(error) };
   }
 }
+
+/** 이 기기의 푸시 토큰 등록, 갱신(계정 단위 - 어느 가족의 알림인지는 발송 때 멤버십으로 정한다) */
+export async function registerPushToken(token: string): Promise<Done> {
+  try {
+    const caller = await serverCaller();
+    await caller.push.register({ token });
+    return { ok: true };
+  } catch (error) {
+    return { error: toErrorKey(error) };
+  }
+}
+
+/** 이 기기 알림 끄기: 내 토큰만 지운다(없어도 된 것으로 본다) */
+export async function unregisterPushToken(token: string): Promise<Done> {
+  try {
+    const caller = await serverCaller();
+    await caller.push.unregister({ token });
+    return { ok: true };
+  } catch (error) {
+    return { error: toErrorKey(error) };
+  }
+}
