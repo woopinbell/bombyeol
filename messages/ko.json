@@ -104,7 +104,9 @@
     "EVENT_LIMIT": "가족 일정을 더 만들 수 없어요",
     "CONSENT_REQUIRED": "임신 기록 안내에 먼저 동의해 주세요",
     "CONSENT_VERSION_STALE": "안내 내용이 바뀌었어요. 다시 확인하고 동의해 주세요",
-    "PHOTO_NOT_ALLOWED": "초음파 기록에만 사진을 붙일 수 있어요"
+    "PHOTO_NOT_ALLOWED": "초음파 기록에만 사진을 붙일 수 있어요",
+    "CONFIRM_MISMATCH": "이름이 똑같지 않아요. 다시 확인해 주세요",
+    "LAST_PARENT": "다른 가족이 함께하고 있어서 지금은 계정을 지울 수 없어요. 먼저 다른 분을 엄마 아빠 역할로 바꾸거나 가족을 지워 주세요"
   },
   "auth": {
     "logoAlt": "봄별",
@@ -750,5 +752,14 @@
     "momentTitle": "새 소식이 있어요",
     "momentText": "봄별에 가족의 새 기록이 올라왔어요.",
     "momentLabel": "어르신께 보내기"
+  },
+  "privacy": {
+    "deleteTitle": "지우기",
+    "childDeleteLead": "{name}의 사진, 일기, 성장 기록, 임신 기록이 모두 지워지고 되돌릴 수 없어요. 남기고 싶은 사진은 먼저 우리 > 설정 > 가족 앨범 내려받기로 받아 두세요.",
+    "petDeleteLead": "{name}의 사진, 일기, 성장 기록이 모두 지워지고 되돌릴 수 없어요. 함께한 이야기는 남아요. 별이 된 친구라면 지우기보다 위의 별이 되신 분으로 바꾸기를 권해요.",
+    "confirmNameLabel": "지우려면 이름을 똑같이 써 주세요",
+    "confirmNameHint": "써야 할 이름: {name}",
+    "subjectDelete": "{name} 지우기",
+    "subjectDeleted": "지웠어요"
   }
 }
