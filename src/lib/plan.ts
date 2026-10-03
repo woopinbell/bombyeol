@@ -188,6 +188,8 @@ export const DELETION_POLICY = {
   archiveMediaPageSize: 100,
   /** 내보내기: 글 기록 한 페이지 */
   archiveRecordPageSize: 200,
+  /** 내보내기: 브라우저가 만드는 ZIP 한 묶음의 크기(바이트). 휴대폰 메모리와 ZIP64 없는 한계(4GB) 안 */
+  archiveZipPartBytes: 500 * 1024 * 1024,
 } as const;
 
 /**

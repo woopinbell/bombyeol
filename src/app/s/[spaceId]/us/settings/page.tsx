@@ -11,7 +11,10 @@ import { NotificationSettings } from "@/components/us/notification-settings";
 import { Section } from "@/components/us/member-manage";
 import { loadFamily } from "@/server/family";
 
-/** 설정: 화면(모두, 이 기기) → 알림(이 기기) → 초대 관리(부모: 아직 쓰지 않은 초대, 거두기, 새로 만들기) */
+/**
+ * 설정: 화면(모두, 이 기기) → 알림(이 기기) → 초대 관리(부모: 아직 쓰지 않은 초대, 거두기, 새로 만들기)
+ * → 가족 앨범 내려받기(부모)
+ */
 export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/us/settings">) {
   const { spaceId } = await params;
   const { role, caller } = await loadFamily(spaceId);
@@ -37,6 +40,13 @@ export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/u
             <Link href={`/start/invite/${spaceId}`} className={`${buttonClass()} self-start`}>
               <Icon name="plus" size="small" />
               {t("settings.newInvite")}
+            </Link>
+          </Section>
+        ) : null}
+        {isParent ? (
+          <Section title={t("privacy.export.title")} lead={t("privacy.export.settingsLead")}>
+            <Link href={`/s/${spaceId}/us/export`} className={`${buttonClass()} self-start`}>
+              {t("privacy.export.settingsLink")}
             </Link>
           </Section>
         ) : null}
