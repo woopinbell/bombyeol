@@ -280,7 +280,8 @@
     "me": "나",
     "memorialMember": "별이 되신 분",
     "calendarLink": "가족 달력",
-    "pregnancyLink": "{name} 임신 기록"
+    "pregnancyLink": "{name} 임신 기록",
+    "settingsLink": "설정"
   },
   "ui": {
     "close": "닫기",
@@ -674,5 +675,35 @@
     "withdraw": "동의 거두기",
     "withdrawn": "동의를 거뒀어요",
     "by": "{who}"
+  },
+  "settings": {
+    "title": "설정",
+    "displayTitle": "화면",
+    "text": {
+      "label": "글자 크기",
+      "normal": "보통",
+      "large": "크게",
+      "larger": "더 크게"
+    },
+    "theme": {
+      "label": "밝기",
+      "system": "기기 따라",
+      "light": "밝게",
+      "dark": "어둡게"
+    },
+    "motion": {
+      "label": "움직임",
+      "system": "기기 따라",
+      "reduce": "줄이기"
+    },
+    "deviceOnly": "화면 설정은 지금 쓰는 이 기기에만 적용돼요.",
+    "invitesTitle": "초대 관리",
+    "invitesLead": "아직 쓰지 않은 초대예요. 거두면 그 코드로는 들어올 수 없어요.",
+    "noInvites": "기다리는 초대가 없어요.",
+    "expiresAt": "{date}까지",
+    "revoke": "초대 거두기",
+    "revokeConfirm": "이 초대를 거둘까요? 받은 분이 이 코드로 들어올 수 없게 돼요.",
+    "revoked": "초대를 거뒀어요",
+    "newInvite": "새로 초대하기"
   }
 }

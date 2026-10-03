@@ -15,7 +15,7 @@ const GENERATIONS = ["grandparent", "parent", "relative"] as const;
 
 /**
  * 우리 탭(DESIGN §9.4): 맨 위 다음 가족 일 → 가족(세대별, 부르는 이름, 별이 되신 분 표식) → 아이와 반려동물
- * → 가족 앨범 저장 공간 → 초대(부모).
+ * → 가족 앨범 저장 공간 → 설정(화면, 초대 관리).
  */
 export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
   const { spaceId } = await params;
@@ -153,6 +153,10 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
           usedBytes={usage.confirmedBytes + usage.pendingBytes}
           limitBytes={usage.limitBytes}
         />
+
+        <Link href={`${base}/settings`} className={buttonClass({ block: true })}>
+          {t("settingsLink")}
+        </Link>
       </div>
     </TabPage>
   );
