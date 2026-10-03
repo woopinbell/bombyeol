@@ -50,6 +50,8 @@ export const ERROR_KEYS = [
   "ITEM_NOT_FOUND",
   "SUBJECT_NOT_FOUND",
   "FORBIDDEN",
+  "CONFIRM_MISMATCH",
+  "LAST_PARENT",
   "SIGN_IN_REQUIRED",
   "UNKNOWN",
 ] as const;

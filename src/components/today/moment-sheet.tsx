@@ -52,6 +52,7 @@ export function MomentSheet({
   const t = useTranslations("moment");
   const tshare = useTranslations("share");
   const errors = useTranslations("errors");
+  const left = useTranslations("privacy")("leftFamily");
   const format = useFormatter();
   const { toast } = useToast();
   const [index, setIndex] = useState(startIndex);
@@ -62,7 +63,7 @@ export function MomentSheet({
     focus: focusComment,
     onChange: onCommentsChange,
   });
-  const who = (id: string, name: string | null) => authors[id] ?? name ?? "";
+  const who = (id: string, name: string | null) => authors[id] ?? name ?? left;
 
   // 글 고치기: 시트 안에서 글 자리가 입력칸으로 바뀌고, 아래 행동은 [고친 글 저장]이 된다
   const [editing, setEditing] = useState(false);

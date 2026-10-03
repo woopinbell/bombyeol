@@ -221,3 +221,15 @@ export async function unmarkMemorial(spaceId: string, memorialId: string) {
   const caller = await serverCaller();
   return run(() => caller.memorial.unmark({ spaceId, memorialId }));
 }
+
+/** 아이 지우기(parent, 되돌릴 수 없음). 보이는 이름(이름 또는 태명)을 다시 받아 프로시저가 확인한다 */
+export async function deleteChild(spaceId: string, childId: string, confirmName: string) {
+  const caller = await serverCaller();
+  return run(() => caller.child.delete({ spaceId, childId, confirmName }));
+}
+
+/** 반려동물 지우기(parent, 되돌릴 수 없음). 반려동물 이야기는 남는다 */
+export async function deletePet(spaceId: string, petId: string, confirmName: string) {
+  const caller = await serverCaller();
+  return run(() => caller.pet.delete({ spaceId, petId, confirmName }));
+}

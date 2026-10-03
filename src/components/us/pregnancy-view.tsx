@@ -339,6 +339,7 @@ export function RecordList({
   authors: Record<string, string>;
 }) {
   const t = useTranslations("pregnancy");
+  const left = useTranslations("privacy")("leftFamily");
   const format = useFormatter();
   const { pending, act } = useAct();
   const [confirming, setConfirming] = useState<string | null>(null);
@@ -392,7 +393,7 @@ export function RecordList({
               ) : null}
               {r.note ? <p className="whitespace-pre-line">{r.note}</p> : null}
               <p className="text-caption text-fg-muted">
-                {t("by", { who: authors[r.createdBy.id] ?? r.createdBy.name ?? "" })}
+                {t("by", { who: authors[r.createdBy.id] ?? r.createdBy.name ?? left })}
               </p>
               {isParent ? (
                 confirming === r.id ? (
