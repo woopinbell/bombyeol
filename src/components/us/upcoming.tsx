@@ -40,7 +40,7 @@ export async function UpcomingSection({ upcoming }: { upcoming: Upcoming }) {
         {t("upcomingTitle")}
       </h2>
       {nextGathering ? (
-        <div className="flex flex-col gap-1 rounded-lg bg-surface p-5">
+        <div data-surface="night" className="flex flex-col gap-1 rounded-lg bg-bg p-5 text-fg">
           <p className="text-caption font-bold text-fg-muted">{t("gathering")}</p>
           <p className="text-display font-heavy tabular-nums">
             {t("inDays", { days: nextGathering.daysUntil })}
