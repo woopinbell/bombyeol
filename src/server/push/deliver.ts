@@ -24,6 +24,7 @@ export type DeliverResult = { recipients: number; sent: number; failed: number; 
  * 알림 발송의 마지막 관문(ARCHITECTURE §7, PRIVACY §3).
  * - 수신자는 발송 시점에 다시 확인한다: 지금도 그 Space의 멤버(삭제된 Space 제외)이고,
  *   기념 상태가 아니며, 탈퇴한 계정이 아니고, 보낸 사람 본인이 아니어야 한다.
+ *   그 가족에서 이 종류의 알림을 끈 사람(Member.pushMuted)도 뺀다.
  * - 문구는 종류별 고정 문구만 쓴다(이름, 본문, 임신 관련 단어 없음).
  * - 수신자당 시간당 상한, 수신자당 기기 수, 이벤트당 발송 수 상한(하위 요청 한도).
  * - FCM이 무효라고 답한 토큰은 지운다. 로그에는 개수만 남긴다(PRIVACY §2.7).
@@ -45,6 +46,7 @@ export async function deliverPush(
       space: { deletedAt: null },
       user: { deletedAt: null },
       memorial: { is: null },
+      NOT: { pushMuted: { has: req.notice } },
       ...(req.roles && { role: { in: req.roles } }),
     },
     select: { userId: true, user: { select: { locale: true } } },
