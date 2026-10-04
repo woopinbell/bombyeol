@@ -4,7 +4,8 @@
 
 ## 현재 상태 (2026-10-01)
 
-- **최신(2026-10-03, 2차)**: Phase 7 UI(아이, 반려동물 지우기, 가족 앨범 내려받기, 가족 지우기와 유예, 웹 계정 삭제, 떠난 가족 표시)까지 main에 머지, 스테이징 배포(PR woopinbell/bombyeol#21, main 6407dcf, 스테이징 65ca9dc4). 다음은 아래 "다음 할 일 (2026-10-03 2차 세션 마감 기준)".
+- **최신(2026-10-04)**: 가족별 알림 종류 끄기, 로그아웃, R2 설정 스크립트 재실행 가능까지 main에 머지, 스테이징 배포(PR woopinbell/bombyeol#22, main 803db7d, 스테이징 6cdb5a27, 마이그레이션 `push_muted` 적용). 다음은 아래 "다음 할 일 (2026-10-04 세션 마감 기준)".
+- (이전, 2026-10-03 2차): Phase 7 UI(아이, 반려동물 지우기, 가족 앨범 내려받기, 가족 지우기와 유예, 웹 계정 삭제, 떠난 가족 표시)까지 main에 머지, 스테이징 배포(PR woopinbell/bombyeol#21, main 6407dcf, 스테이징 65ca9dc4). 다음은 아래 "다음 할 일 (2026-10-03 2차 세션 마감 기준)".
 - (이전, 2026-10-03 1차) UI는 Phase 3~6까지 main에 머지, 스테이징 배포(PR woopinbell/bombyeol#19, main 84f18a0, 스테이징 818e9168).
 - 단계(2026-10-02, Phase DS 세션): **Phase DS 결정 완료 - B안, L2, 다크, 모션(시트 350ms, 토스트 6초), 로고 S2+W2, Pretendard 단일, 토큰 v1 확정**. (2026-10-01 시작: 1차 자료 정독, 화면 규칙, 목업 3안) 병행: Q-PAY 결정 자료, Phase 9 e2e 서버 부분(작업 브랜치, main 미머지) - 아래 "현재 상태 - Phase DS".
 - (이전) 단계(2026-10-01, Phase 7): **Phase 7 삭제, 개인정보 서버 main 머지 완료(PR woopinbell/bombyeol#10, 머지 커밋 ea6a25e), 스테이징 마이그레이션, 배포, 스모크 통과**(UI 제외). 그 전에 FCM 스모크 점검 추가(PR woopinbell/bombyeol#9 머지) - 아래 "현재 상태 - Phase 7".
@@ -71,7 +72,27 @@
 - 작업 메모: `npm test`는 로컬 DB를 비운다(시드한 화면 확인 데이터도 사라짐). 파이프로 grep하면 실패가 가려지니 종료 코드를 따로 본다.
 - 환경 메모: 기존 스위트에서 3번 중 1번 테스트 1건이 실패했다가 재실행에 통과(어떤 테스트인지 기록 못 함 - 다음에 반복 실행으로 찾을 것). Docker Hub 429로 `db:up` 첫 시도 실패, 재시도 성공. 컨테이너에 한글 폰트가 없어 목업 스크린샷은 Pretendard woff2를 받아 Playwright route로 주입(스크래치패드, 리포에 넣지 않음).
 
-### 다음 할 일 (2026-10-03 2차 세션 마감 기준 - 새 세션은 여기부터)
+### 다음 할 일 (2026-10-04 세션 마감 기준 - 새 세션은 여기부터)
+
+**재개 지점(2026-10-04 마감)**: main 803db7d(PR woopinbell/bombyeol#22), 스테이징 6cdb5a27. 작업 브랜치 `claude/awesome-wright-ggfdf8`는 머지되고 main에 맞춤. 열린 PR 없음, 진행 중 코드 없음.
+
+**이번 세션(2026-10-04, 같은 세션 이어서 - 컨테이너 재시작 뒤 dockerd, db:up 다시)**
+- 카카오 키 여전히 없음(길이 0) - 재배포 건너뜀.
+- PR woopinbell/bombyeol#22 5커밋(CI 4분 통과, 머지 커밋): c9c156d `chore(prisma)` `Member.pushMuted PushNotice[]`(마이그레이션 `push_muted`, 열 추가만) → d52b70f `feat(push)` `push.mutes`, `push.setMute`(삭제 유예 중에도, G-07 하루 100), 발송 때 그 가족에서 그 종류를 끈 멤버 제외 → da3aebb 설정 "이 가족에서 받을 알림" 6종(계정 단위, 누르면 저장) → aab58cc `fix(scripts)` r2-bucket-setup 수명주기 있으면 건너뜀(스테이징에 다시 실행 확인) → 74ce94b `feat(auth)` 설정 > 내 계정 로그아웃(이 기기 알림 토큰 먼저 해제).
+- 검증: format, lint, typecheck, Vitest **398건**(알림 끄기 7건, 필터를 빼면 실패 확인), OpenNext 빌드, dry-run gzip 4.96 MiB, 로컬 Playwright(끄고 새로고침 유지, 다시 켜기, 로그아웃 뒤 DB 토큰 0, 저장 토큰 지움, 가족 화면 로그인으로). 로그아웃 확인에서 콘솔 404 하나: 가짜 토큰이라 서비스 워커가 없어 Firebase deleteToken이 기본 sw를 찾은 것(실기기는 등록돼 있음).
+- 스테이징: `Migrate staging DB` 성공 뒤 배포(버전 6cdb5a27, Startup 24ms). health 200, 내부 스모크 db, R2, cleanup ok, fcm invalid_token, `push.mutes` 비로그인 401.
+- 환경 메모: `npm run db:migrate` 뒤 Prisma 클라이언트가 자동 생성되지 않았다(Prisma 7) - `npx prisma generate`를 따로 부른다.
+
+**사용자 할 일(추가)**: 스테이징 설정에서 알림 종류 끄기, 로그아웃(알림 켠 기기에서 로그아웃 뒤 알림이 오지 않는지).
+
+**개발 순서(다음)**
+1. 카카오 키가 등록되면 재배포, 스모크, 번들 확인.
+2. 작은 일: 알림으로 연 화면에서 그 기록을 바로 펼치기(지금은 탭으로만 보냄).
+3. Phase 8 결제(Q-PAY 결정 뒤), 이야기 PDF.
+4. Phase 9: a11y 테스트, 프로덕션 환경(사용자 승인), 운영 체크리스트, 약관, 처리방침.
+5. 상시: 디자인 폴리시(Phase D, 완료 선언 금지).
+
+### (이전) 다음 할 일 (2026-10-03 2차 세션 마감 기준)
 
 **재개 지점(2026-10-03 2차 마감)**: main 6407dcf(PR woopinbell/bombyeol#21), 스테이징 65ca9dc4. 작업 브랜치 `claude/awesome-wright-ggfdf8`는 머지되고 main에 맞춤(새 세션은 자기 브랜치를 main에서 시작). 열린 PR 없음, 진행 중 코드 없음.
 
