@@ -7,6 +7,7 @@ import { deleteEvent, saveEvent, type EventInput } from "@/app/s/[spaceId]/us/ca
 import { Button } from "@/components/ui/button";
 import { ChoiceChips } from "@/components/ui/choice-chips";
 import { Field } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Icon } from "@/components/ui/icon";
 import { Sheet } from "@/components/ui/sheet";
 import { TextArea } from "@/components/ui/text-area";
@@ -441,26 +442,13 @@ function Switch({
   onChange?: (on: boolean) => void;
 }) {
   return (
-    <label className="relative flex items-start gap-3" data-press="">
-      <input
-        type="checkbox"
-        name={name}
-        value="1"
-        checked={checked}
-        defaultChecked={defaultChecked}
-        onChange={onChange ? (e) => onChange(e.target.checked) : undefined}
-        className="peer absolute inset-0 z-10 size-full opacity-0"
-      />
-      <span
-        aria-hidden="true"
-        className="press mt-1 flex size-(--icon) flex-none items-center justify-center rounded-sm border-(length:--bw) border-line-strong text-transparent peer-checked:border-(length:--bw-sel) peer-checked:border-fg peer-checked:text-fg peer-focus-visible:outline peer-focus-visible:outline-(length:--bw-sel) peer-focus-visible:outline-offset-2 peer-focus-visible:outline-fg"
-      >
-        <Icon name="check" size="small" />
-      </span>
-      <span className="flex flex-col">
-        <span className="font-bold">{label}</span>
-        {hint ? <span className="text-caption text-fg-muted">{hint}</span> : null}
-      </span>
-    </label>
+    <Checkbox
+      name={name}
+      label={label}
+      hint={hint}
+      checked={checked}
+      defaultChecked={defaultChecked}
+      onChange={onChange}
+    />
   );
 }

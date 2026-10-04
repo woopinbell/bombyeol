@@ -49,7 +49,10 @@ export function FamilyShell({
           >
             <p className="font-bold">{privacy("banner", { date: deletion.purgeOn })}</p>
             {deletion.canManage ? (
-              <Link href={`${base}/us/settings`} className="self-start font-bold underline">
+              <Link
+                href={`${base}/us/settings`}
+                className="inline-flex min-h-(--touch) items-center self-start font-bold underline"
+              >
                 {privacy("bannerLink")}
               </Link>
             ) : null}
