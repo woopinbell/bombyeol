@@ -2,6 +2,7 @@
 
 import { TRPCError } from "@trpc/server";
 import { toErrorKey, type ErrorKey } from "@/lib/action-errors";
+import type { NoticeKind } from "@/server/push/types";
 import { serverCaller } from "@/server/trpc/server-caller";
 
 type Done = { ok: true } | { error: ErrorKey };
@@ -57,6 +58,20 @@ export async function cancelSpaceDeletion(spaceId: string): Promise<Done> {
     const caller = await serverCaller();
     await caller.space.cancelDeletion({ spaceId });
     return { ok: true };
+  } catch (error) {
+    return { error: toErrorKey(error) };
+  }
+}
+
+/** 이 가족에서 한 종류의 알림 켜기, 끄기(나만, 계정 단위). 결과로 지금 꺼 둔 목록을 돌려준다 */
+export async function setPushMute(
+  spaceId: string,
+  notice: NoticeKind,
+  muted: boolean,
+): Promise<{ muted: NoticeKind[] } | { error: ErrorKey }> {
+  try {
+    const caller = await serverCaller();
+    return await caller.push.setMute({ spaceId, notice, muted });
   } catch (error) {
     return { error: toErrorKey(error) };
   }

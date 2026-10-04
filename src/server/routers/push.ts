@@ -4,7 +4,8 @@ import { PUSH_POLICY, RATE_LIMITS } from "@/lib/plan";
 import { limitError } from "@/server/errors";
 import { lockKey } from "@/server/locks";
 import { hitRateLimit } from "@/server/rate-limit";
-import { protectedProcedure } from "@/server/trpc/procedures";
+import { NOTICE_KINDS } from "@/server/push/types";
+import { protectedProcedure, spaceProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
 import { entityId } from "./inputs";
 
@@ -66,6 +67,43 @@ export const pushRouter = router({
         where: { token: input.token, userId: ctx.userId },
       });
       return { ok: true };
+    }),
+
+  /** 이 가족에서 꺼 둔 알림 종류(나만). 비어 있으면 모두 받는다 */
+  mutes: spaceProcedure.query(async ({ ctx }) => {
+    const member = await ctx.prisma.member.findUniqueOrThrow({
+      where: { id: ctx.member.id },
+      select: { pushMuted: true },
+    });
+    return { muted: member.pushMuted };
+  }),
+
+  /**
+   * 이 가족에서 한 종류의 알림 켜기, 끄기(나만, 기기와 무관 - 계정 단위). 삭제 유예 중에도 된다.
+   * 발송은 그 순간의 목록으로 거른다(src/server/push/deliver.ts). 리밋(G-07).
+   */
+  setMute: spaceProcedure
+    .meta({ allowWhileDeleting: true })
+    .input(z.object({ notice: z.enum(NOTICE_KINDS), muted: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const ok = await hitRateLimit(
+        ctx.prisma,
+        `push-mute:${ctx.userId}`,
+        RATE_LIMITS.pushMutePerUser,
+      );
+      if (!ok) throw limitError("RATE_LIMITED");
+      return ctx.prisma.$transaction(async (tx) => {
+        await lockKey(tx, `push-mute:${ctx.member.id}`);
+        const { pushMuted } = await tx.member.findUniqueOrThrow({
+          where: { id: ctx.member.id },
+          select: { pushMuted: true },
+        });
+        const next = NOTICE_KINDS.filter((kind) =>
+          kind === input.notice ? input.muted : pushMuted.includes(kind),
+        );
+        await tx.member.update({ where: { id: ctx.member.id }, data: { pushMuted: next } });
+        return { muted: next };
+      });
     }),
 
   /**

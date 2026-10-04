@@ -734,7 +734,17 @@
     "revoke": "초대 거두기",
     "revokeConfirm": "이 초대를 거둘까요? 받은 분이 이 코드로 들어올 수 없게 돼요.",
     "revoked": "초대를 거뒀어요",
-    "newInvite": "새로 초대하기"
+    "newInvite": "새로 초대하기",
+    "pushKinds": {
+      "title": "이 가족에서 받을 알림",
+      "moment": "새 사진과 일기",
+      "story": "새 이야기",
+      "ask": "나에게 온 질문",
+      "heart": "내 기록에 온 마음과 별",
+      "comment": "내 기록에 달린 댓글",
+      "news": "임신 기록 소식",
+      "hint": "고른 알림은 내 모든 기기에 함께 적용돼요. 가족마다 따로 고를 수 있어요."
+    }
   },
   "share": {
     "kakao": "카카오톡으로 보내기",
@@ -819,7 +829,9 @@
       "toLogin": "처음 화면으로",
       "settingsTitle": "내 계정",
       "settingsLead": "계정을 지우면 함께하던 모든 가족에서 빠지고 되돌릴 수 없어요.",
-      "settingsLink": "계정 지우기"
+      "settingsLink": "계정 지우기",
+      "signOut": "로그아웃",
+      "signOutHint": "로그아웃하면 이 기기로 받던 알림도 꺼져요."
     },
     "leftFamily": "떠난 가족"
   }

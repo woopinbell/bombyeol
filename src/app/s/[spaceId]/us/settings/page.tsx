@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { SignOut } from "@/components/auth/sign-out";
 import { BackLink } from "@/components/family/back-link";
 import { TabPage } from "@/components/family/tab-page";
 import { buttonClass } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Title } from "@/components/ui/screen";
 import { DisplaySettings } from "@/components/us/display-settings";
 import { InviteList } from "@/components/us/invite-list";
 import { NotificationSettings } from "@/components/us/notification-settings";
+import { PushMutes } from "@/components/us/push-mutes";
 import { SpaceDeletion } from "@/components/us/space-deletion";
 import { timeZone } from "@/i18n/config";
 import { DELETION_POLICY } from "@/lib/plan";
@@ -17,15 +19,17 @@ import { loadFamily } from "@/server/family";
 /**
  * 설정: 화면(모두, 이 기기) → 알림(이 기기) → 초대 관리(부모: 아직 쓰지 않은 초대, 거두기, 새로 만들기)
  * → 가족 앨범 내려받기(부모) → 가족 지우기(부모: 요청, 유예 중이면 지워질 날과 취소)
- * → 내 계정(모두: 계정 지우기 화면으로)
+ * → 내 계정(모두: 로그아웃, 계정 지우기 화면으로)
  */
 export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/us/settings">) {
   const { spaceId } = await params;
   const { role, caller, space } = await loadFamily(spaceId);
   const isParent = role === "parent";
-  const [invites, deletion] = isParent
-    ? await Promise.all([caller.invite.list({ spaceId }), caller.space.deletionStatus({ spaceId })])
-    : [[], null];
+  const [invites, deletion, { muted }] = await Promise.all([
+    isParent ? caller.invite.list({ spaceId }) : [],
+    isParent ? caller.space.deletionStatus({ spaceId }) : null,
+    caller.push.mutes({ spaceId }),
+  ]);
   const t = await getTranslations();
   const format = await getFormatter();
   return (
@@ -37,6 +41,7 @@ export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/u
         </Section>
         <Section title={t("settings.pushTitle")}>
           <NotificationSettings />
+          <PushMutes spaceId={spaceId} muted={muted} />
         </Section>
         {isParent && !deletion ? (
           <Section title={t("settings.invitesTitle")} lead={t("settings.invitesLead")}>
@@ -82,10 +87,10 @@ export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/u
             />
           </Section>
         ) : null}
-        <Section
-          title={t("privacy.account.settingsTitle")}
-          lead={t("privacy.account.settingsLead")}
-        >
+        <Section title={t("privacy.account.settingsTitle")}>
+          <SignOut />
+          <p className="text-caption text-fg-muted">{t("privacy.account.signOutHint")}</p>
+          <p className="mt-4 text-fg-muted">{t("privacy.account.settingsLead")}</p>
           <Link href="/account/delete" className={`${buttonClass()} self-start`}>
             {t("privacy.account.settingsLink")}
           </Link>

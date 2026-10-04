@@ -33,6 +33,8 @@ export const RATE_LIMITS = {
   archivePagePerUser: { limit: 500, windowSec: 24 * 60 * 60 },
   /** G-07: 푸시 토큰 등록(사용자당) - 앱을 열 때마다 갱신하므로 여유 있게 */
   pushRegisterPerUser: { limit: 30, windowSec: 24 * 60 * 60 },
+  /** G-07: 가족별 알림 종류 켜기, 끄기(사용자당) */
+  pushMutePerUser: { limit: 100, windowSec: 24 * 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 /** G-11: 계정 단위 상한(요금제와 무관) */
