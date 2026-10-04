@@ -7,7 +7,12 @@ bucket="${1:?bucket}"
 origins="${2:?origins}"
 
 # 미확정 업로드(pending/ 접두사)는 1일 뒤 만료. 수명주기 규칙은 키 접두사로만 걸린다.
-npx wrangler r2 bucket lifecycle add "$bucket" pending-cleanup pending/ --expire-days 1 --force
+# 이미 있으면 건너뛴다(같은 이름으로 다시 더하면 API가 거부해 아래 CORS까지 가지 못한다).
+if npx wrangler r2 bucket lifecycle list "$bucket" 2>/dev/null | grep -q "pending-cleanup"; then
+  echo "lifecycle pending-cleanup: 이미 있음"
+else
+  npx wrangler r2 bucket lifecycle add "$bucket" pending-cleanup pending/ --expire-days 1 --force
+fi
 
 # 브라우저 직접 업로드(presign PUT)와 내려받기(presign GET을 fetch로 받아 브라우저에서 ZIP - Phase 7).
 # <img>로 보는 것은 CORS가 필요 없지만 fetch는 GET 허용이 있어야 읽힌다.
