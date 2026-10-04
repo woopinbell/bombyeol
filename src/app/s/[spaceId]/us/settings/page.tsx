@@ -8,6 +8,7 @@ import { Title } from "@/components/ui/screen";
 import { DisplaySettings } from "@/components/us/display-settings";
 import { InviteList } from "@/components/us/invite-list";
 import { NotificationSettings } from "@/components/us/notification-settings";
+import { PushMutes } from "@/components/us/push-mutes";
 import { SpaceDeletion } from "@/components/us/space-deletion";
 import { timeZone } from "@/i18n/config";
 import { DELETION_POLICY } from "@/lib/plan";
@@ -23,9 +24,11 @@ export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/u
   const { spaceId } = await params;
   const { role, caller, space } = await loadFamily(spaceId);
   const isParent = role === "parent";
-  const [invites, deletion] = isParent
-    ? await Promise.all([caller.invite.list({ spaceId }), caller.space.deletionStatus({ spaceId })])
-    : [[], null];
+  const [invites, deletion, { muted }] = await Promise.all([
+    isParent ? caller.invite.list({ spaceId }) : [],
+    isParent ? caller.space.deletionStatus({ spaceId }) : null,
+    caller.push.mutes({ spaceId }),
+  ]);
   const t = await getTranslations();
   const format = await getFormatter();
   return (
@@ -37,6 +40,7 @@ export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/u
         </Section>
         <Section title={t("settings.pushTitle")}>
           <NotificationSettings />
+          <PushMutes spaceId={spaceId} muted={muted} />
         </Section>
         {isParent && !deletion ? (
           <Section title={t("settings.invitesTitle")} lead={t("settings.invitesLead")}>
