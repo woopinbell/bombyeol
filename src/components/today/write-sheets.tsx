@@ -6,7 +6,7 @@ import { createDiary, createMilestone } from "@/app/s/[spaceId]/actions";
 import { Button } from "@/components/ui/button";
 import { ChoiceChips } from "@/components/ui/choice-chips";
 import { Field } from "@/components/ui/field";
-import { Icon } from "@/components/ui/icon";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet } from "@/components/ui/sheet";
 import { TextArea } from "@/components/ui/text-area";
 import { useToast } from "@/components/ui/toast";
@@ -314,25 +314,5 @@ export function FirstSwitch({
   hint: string;
   defaultChecked?: boolean;
 }) {
-  return (
-    <label className="relative flex items-start gap-3" data-press="">
-      <input
-        type="checkbox"
-        name="first"
-        value="1"
-        defaultChecked={defaultChecked}
-        className="peer absolute inset-0 z-10 size-full opacity-0"
-      />
-      <span
-        aria-hidden="true"
-        className="press mt-1 flex size-(--icon) flex-none items-center justify-center rounded-sm border-(length:--bw) border-line-strong text-transparent peer-checked:border-(length:--bw-sel) peer-checked:border-fg peer-checked:text-fg peer-focus-visible:outline peer-focus-visible:outline-(length:--bw-sel) peer-focus-visible:outline-offset-2 peer-focus-visible:outline-fg"
-      >
-        <Icon name="check" size="small" />
-      </span>
-      <span className="flex flex-col">
-        <span className="font-bold">{label}</span>
-        <span className="text-caption text-fg-muted">{hint}</span>
-      </span>
-    </label>
-  );
+  return <Checkbox name="first" label={label} hint={hint} defaultChecked={defaultChecked} />;
 }

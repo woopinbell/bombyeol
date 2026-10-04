@@ -6,7 +6,7 @@ import { savePet, type ProfileFormState } from "@/app/s/[spaceId]/us/actions";
 import { Button } from "@/components/ui/button";
 import { ChoiceChips } from "@/components/ui/choice-chips";
 import { Field } from "@/components/ui/field";
-import { Icon } from "@/components/ui/icon";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const NAME_ERRORS = ["NAME_REQUIRED", "INVALID_INPUT"];
 const DATE_ERRORS = ["DATE_IN_FUTURE"];
@@ -98,22 +98,11 @@ export function PetForm({
           defaultValue={value("birthDate")}
           error={dateError}
         />
-        <label className="relative flex items-center gap-3" data-press="">
-          <input
-            type="checkbox"
-            name="birthDateEstimated"
-            value="1"
-            defaultChecked={v.birthDateEstimated ? true : (pet?.birthDateEstimated ?? false)}
-            className="peer absolute inset-0 z-10 size-full opacity-0"
-          />
-          <span
-            aria-hidden="true"
-            className="press flex size-(--icon) flex-none items-center justify-center rounded-sm border-(length:--bw) border-line-strong text-transparent peer-checked:border-(length:--bw-sel) peer-checked:border-fg peer-checked:text-fg peer-focus-visible:outline peer-focus-visible:outline-(length:--bw-sel) peer-focus-visible:outline-offset-2 peer-focus-visible:outline-fg"
-          >
-            <Icon name="check" size="small" />
-          </span>
-          <span>{t("estimated")}</span>
-        </label>
+        <Checkbox
+          name="birthDateEstimated"
+          label={t("estimated")}
+          defaultChecked={v.birthDateEstimated ? true : (pet?.birthDateEstimated ?? false)}
+        />
       </div>
       <Field
         label={t("adoptedAt")}
