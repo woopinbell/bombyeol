@@ -234,7 +234,7 @@
 ## Phase 9 - 릴리스 준비
 
 - [ ] `test(e2e): 핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭제)` (로컬 DB 전용 가드) - **서버 부분 완료**(f089b91, tRPC 호출로 전체 흐름 + 잔존 데이터 0, main 머지 PR woopinbell/bombyeol#11). 브라우저, 카카오 리다이렉트, 공유, PWA, 실기기 푸시는 UI 이후 브라우저 e2e로
-- [ ] `test(a11y): 토큰 대비, 터치 타깃, 글자 크기 검증`
+- [x] `test(a11y): 토큰 대비, 터치 타깃, 글자 크기 검증` - 2026-10-04 PR woopinbell/bombyeol#24(`fix(a11y)` 체크박스 공통 조각 + `tests/a11y.test.ts`, 브라우저 axe 점검 위반 0, 도구 `dev-notes/a11y-audit/`). 스크린리더, 어르신 실사용은 사용자 실기기
 - [ ] `chore(infra): 프로덕션 환경, 도메인, 시크릿 구성 점검`
 - [ ] 운영 체크리스트(`COST_GUARDS.md` §4) 사용자 확인
 - [ ] 이용약관, 처리방침, 전문가 검토(`PRIVACY_AND_LEGAL.md` §6)
