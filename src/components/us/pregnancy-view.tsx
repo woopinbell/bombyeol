@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { discardUpload } from "@/app/s/[spaceId]/actions";
 import {
   createPregnancyRecord,
@@ -12,6 +12,7 @@ import {
   updatePregnancyRecord,
   withdrawPregnancyConsent,
 } from "@/app/s/[spaceId]/us/pregnancy/actions";
+import { useOpenTarget } from "@/components/family/use-open-target";
 import { UploadError, uploadParts } from "@/components/media/upload";
 import { PrepError, prepareMedia } from "@/components/today/media-prep";
 import { Button } from "@/components/ui/button";
@@ -356,10 +357,7 @@ export function RecordList({
           // 다른 parent는 좁히기(엄마 아빠만)만 할 수 있다
           const canToggle = isParent && (mine || next === "parents_only");
           return (
-            <li
-              key={r.id}
-              className="flex flex-col gap-2 border-b-(length:--bw-hair) border-line py-4"
-            >
+            <TargetItem key={r.id} id={r.id}>
               <div className="flex flex-wrap items-baseline gap-2">
                 <span className="font-bold tabular-nums">
                   {format.dateTime(new Date(`${dateOnlyKey(r.date)}T12:00:00Z`), {
@@ -455,7 +453,7 @@ export function RecordList({
                   </div>
                 )
               ) : null}
-            </li>
+            </TargetItem>
           );
         })}
       </ol>
@@ -512,5 +510,20 @@ export function WithdrawConsent({ spaceId }: { spaceId: string }) {
         </Button>
       </form>
     </section>
+  );
+}
+
+/** 기록 한 줄. 알림으로 연 기록(?open=)이면 화면 가운데로 옮기고 초점을 준다(useOpenTarget) */
+function TargetItem({ id, children }: { id: string; children: ReactNode }) {
+  const ref = useRef<HTMLLIElement>(null);
+  useOpenTarget(id, ref);
+  return (
+    <li
+      ref={ref}
+      tabIndex={-1}
+      className="flex flex-col gap-2 border-b-(length:--bw-hair) border-line py-4 focus:outline-(length:--bw-sel) focus:outline-offset-4 focus:outline-fg"
+    >
+      {children}
+    </li>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { useOpenTarget } from "@/components/family/use-open-target";
 import { cancelAsk, loadMoreStories } from "@/app/s/[spaceId]/story/actions";
 import { ShareButtons } from "@/components/share/share-buttons";
 import { Button } from "@/components/ui/button";
@@ -359,9 +360,14 @@ function StoryTile({ story }: { story: StoryItem }) {
     seq: 0,
     editing: false,
   });
+  const tile = useRef<HTMLElement>(null);
+  useOpenTarget(story.id, tile, () =>
+    setSheet((s) => ({ open: true, seq: s.seq + 1, editing: false })),
+  );
   const heading = story.title ?? question ?? story.body.split("\n")[0];
   return (
     <article
+      ref={tile}
       className={cn(
         "flex w-full flex-col overflow-hidden rounded-lg bg-surface",
         fresh.has(story.id) && "comment-in",

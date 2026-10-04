@@ -10,6 +10,7 @@ import { MilestoneDetail, MilestoneSentence } from "./milestone-detail";
 import { MomentSheet } from "./moment-sheet";
 import { LikeButton, useLike, type CommentsChange } from "./reactions";
 import { useToday, type FeedProps } from "./today-state";
+import { useOpenTarget } from "@/components/family/use-open-target";
 import { timeZone } from "@/i18n/config";
 import {
   appendPage,
@@ -148,6 +149,7 @@ function MilestoneStrip({ milestone, ...props }: { milestone: FeedMilestone } & 
   });
   const [sheet, setSheet] = useState({ open: false, seq: 0 });
   const close = () => setSheet((s) => ({ ...s, open: false }));
+  useOpenTarget(milestone.id, wrap, () => setSheet((s) => ({ open: true, seq: s.seq + 1 })));
   const canDelete = milestone.createdBy.id === props.myUserId || props.canModerate;
   // 지우기: 시트가 내려간 뒤 숨기고 6초 동안 되돌릴 수 있다. 토스트가 닫히면 실제로 지운다
   const remove = () => {
@@ -267,9 +269,11 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
   const [sheet, setSheet] = useState({ open: false, index: 0, focusComment: false, seq: 0 });
   const open = (index: number, focusComment = false) =>
     setSheet((s) => ({ open: true, index, focusComment, seq: s.seq + 1 }));
+  const card = useRef<HTMLElement>(null);
+  useOpenTarget(moment.id, card, () => open(0));
   const comment = comments.latest;
   return (
-    <article className="flex flex-col">
+    <article ref={card} className="flex flex-col">
       {moment.media.length ? (
         <Album media={moment.media} onOpen={(i) => open(i)} fresh={isFresh} />
       ) : null}
