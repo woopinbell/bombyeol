@@ -20,7 +20,8 @@ export default async function StoryPage({ params, searchParams }: PageProps<"/s/
   const { space, caller } = family;
   const narrators = narratorsOf(space);
   const me = narrators.find((n) => n.userId === family.userId)!;
-  const narratorId = parseNarrator((await searchParams).who, narrators);
+  const query = await searchParams;
+  const narratorId = parseNarrator(query.who, narrators);
   const elders = narrators.filter((n) => n.role === "grandparent");
   const t = await getTranslations("storyTab");
 
@@ -43,7 +44,9 @@ export default async function StoryPage({ params, searchParams }: PageProps<"/s/
       ? caller.story.prompts({ spaceId, narratorMemberId: cardNarrator.memberId })
       : Promise.resolve([]),
   ]);
-  const myAsk = asks.find((a) => a.to.memberId === me.memberId);
+  // 알림으로 연 물어보기(?open=)가 나에게 온 것이면 그 질문을 카드로
+  const mine = asks.filter((a) => a.to.memberId === me.memberId);
+  const myAsk = mine.find((a) => a.id === query.open) ?? mine[0];
   const answered = prompts.filter((p) => p.answered).map((p) => p.key);
   const card: QuestionCard | null =
     myAsk && !me.memorial

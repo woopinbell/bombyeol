@@ -62,12 +62,17 @@ describe("push.openLink 알림 링크 해석", () => {
     const f = await family();
     const open = (type: "moment" | "milestone" | "story" | "ask" | "pregnancy", id: string) =>
       f.api.push.openLink({ type, id }).then((r) => r.path);
-    await expect(open("moment", f.moment.id)).resolves.toBe(`/s/${f.spaceId}`);
-    await expect(open("milestone", f.milestone.id)).resolves.toBe(`/s/${f.spaceId}`);
-    await expect(open("story", f.story.id)).resolves.toBe(`/s/${f.spaceId}/story`);
-    await expect(open("ask", f.ask.id)).resolves.toBe(`/s/${f.spaceId}/story`);
+    // 화면이 그 기록을 바로 펼치도록 ?open={id}
+    await expect(open("moment", f.moment.id)).resolves.toBe(`/s/${f.spaceId}?open=${f.moment.id}`);
+    await expect(open("milestone", f.milestone.id)).resolves.toBe(
+      `/s/${f.spaceId}?open=${f.milestone.id}`,
+    );
+    await expect(open("story", f.story.id)).resolves.toBe(
+      `/s/${f.spaceId}/story?open=${f.story.id}`,
+    );
+    await expect(open("ask", f.ask.id)).resolves.toBe(`/s/${f.spaceId}/story?open=${f.ask.id}`);
     await expect(open("pregnancy", f.hidden.id)).resolves.toBe(
-      `/s/${f.spaceId}/us/pregnancy/${f.baby.id}`,
+      `/s/${f.spaceId}/us/pregnancy/${f.baby.id}?open=${f.hidden.id}`,
     );
     // 종류와 id가 맞지 않으면 없는 것
     await expect(open("story", f.moment.id)).rejects.toMatchObject({ code: "NOT_FOUND" });
@@ -76,7 +81,7 @@ describe("push.openLink 알림 링크 해석", () => {
   it("임신 기록은 지금의 공개 범위로: 어르신은 가족 공개만 열린다", async () => {
     const f = await family();
     await expect(f.grandma.push.openLink({ type: "pregnancy", id: f.shared.id })).resolves.toEqual({
-      path: `/s/${f.spaceId}/us/pregnancy/${f.baby.id}`,
+      path: `/s/${f.spaceId}/us/pregnancy/${f.baby.id}?open=${f.shared.id}`,
     });
     await expect(
       f.grandma.push.openLink({ type: "pregnancy", id: f.hidden.id }),

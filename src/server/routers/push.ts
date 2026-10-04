@@ -109,7 +109,8 @@ export const pushRouter = router({
   /**
    * 알림을 눌렀을 때 열 화면. 대상이 지금도 있고 내가 그 Space의 멤버인지 다시 확인한다 -
    * 임신 기록은 지금의 공개 범위로(parent가 아니면 가족 공개만). 아니면 있는지도 드러내지 않고 NOT_FOUND.
-   * 기록 하나를 바로 펼치지 않고 그 기록이 있는 화면으로 보낸다.
+   * 그 기록이 있는 화면으로 보내고 `?open={id}`를 붙인다 - 화면이 그 기록을 찾아 펼친다(지난 기록이라
+   * 첫 페이지에 없으면 화면만 연다).
    */
   openLink: protectedProcedure
     .input(z.object({ type: z.enum(OPEN_LINK_TYPES), id: entityId }))
@@ -118,7 +119,7 @@ export const pushRouter = router({
         id: input.id,
         space: { deletedAt: null, members: { some: { userId: ctx.userId } } },
       };
-      const select = { spaceId: true } as const;
+      const select = { id: true, spaceId: true } as const;
       const db = ctx.prisma;
       const found =
         input.type === "moment"
@@ -132,12 +133,12 @@ export const pushRouter = router({
                 : null;
       if (found) {
         const tab = input.type === "story" || input.type === "ask" ? "/story" : "";
-        return { path: `/s/${found.spaceId}${tab}` };
+        return { path: `/s/${found.spaceId}${tab}?open=${found.id}` };
       }
       if (input.type === "pregnancy") {
         const record = await db.pregnancyRecord.findFirst({
           where,
-          select: { spaceId: true, childId: true, visibility: true },
+          select: { id: true, spaceId: true, childId: true, visibility: true },
         });
         const member =
           record &&
@@ -146,7 +147,7 @@ export const pushRouter = router({
             select: { role: true },
           }));
         if (record && member && (record.visibility === "family" || member.role === "parent")) {
-          return { path: `/s/${record.spaceId}/us/pregnancy/${record.childId}` };
+          return { path: `/s/${record.spaceId}/us/pregnancy/${record.childId}?open=${record.id}` };
         }
       }
       throw new TRPCError({ code: "NOT_FOUND" });
