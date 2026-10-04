@@ -96,12 +96,14 @@ model Space {
 }
 
 model Member {
-  id            String     @id @default(cuid())
+  id            String       @id @default(cuid())
   spaceId       String
   userId        String
   role          MemberRole
   relationLabel String? // 할머니, 외할아버지 등 자유 입력
-  joinedAt      DateTime   @default(now())
+  joinedAt      DateTime     @default(now())
+  /// 이 가족에서 받지 않을 알림 종류(src/server/push/types.ts NoticeKind). 비어 있으면 모두 받는다
+  pushMuted     PushNotice[] @default([])
 
   space          Space            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -522,6 +524,16 @@ model FamilyEvent {
 // 웹푸시(FCM) 기기 토큰 - 기기(브라우저)마다 하나. 같은 토큰은 마지막으로 등록한 계정에만 붙는다.
 // 사용자가 사라지면 함께 지운다(G-06 연쇄). 보관: 오래 갱신되지 않은 토큰은 정리 Cron이 지운다(G-17).
 // ---------------------------------------------------------------------------
+
+/// 알림 종류(src/server/push/types.ts NoticeKind와 같다). 멤버별 끄기에 쓴다
+enum PushNotice {
+  moment
+  story
+  ask
+  heart
+  comment
+  news
+}
 
 model PushToken {
   id         String   @id @default(cuid())
