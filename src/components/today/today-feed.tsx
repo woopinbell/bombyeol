@@ -179,7 +179,7 @@ function MilestoneStrip({ milestone, ...props }: { milestone: FeedMilestone } & 
         type="button"
         data-press=""
         onClick={() => setSheet((s) => ({ open: true, seq: s.seq + 1 }))}
-        className="press inline-flex items-center gap-2 rounded-md bg-spring-pink py-2 pr-4 pl-3 text-left text-ink"
+        className="press inline-flex min-h-(--touch) items-center gap-2 rounded-md bg-spring-pink py-2 pr-4 pl-3 text-left text-ink"
       >
         <Icon name="spark" size="small" />
         <span>
