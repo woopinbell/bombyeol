@@ -18,10 +18,15 @@ export async function createFamily(
   form: FormData,
 ): Promise<FamilyFormState> {
   const values = Object.fromEntries(
-    ["name", "relation", "relationCustom", "childName", "childStatus", "childDate"].map((k) => [
-      k,
-      text(form, k),
-    ]),
+    [
+      "name",
+      "relation",
+      "relationCustom",
+      "childName",
+      "childStatus",
+      "childDate",
+      "childDataConsent",
+    ].map((k) => [k, text(form, k)]),
   );
   const relationLabel = values.relation === "custom" ? values.relationCustom : values.relation;
   const wantsChild = Boolean(values.childName || values.childDate);
@@ -43,6 +48,8 @@ export async function createFamily(
       name: values.name,
       relationLabel: relationLabel || undefined,
       child,
+      // 아이를 함께 등록할 때만 아이 정보 동의를 보낸다(서버가 확인, CHILD_CONSENT_REQUIRED)
+      childDataConsent: child ? values.childDataConsent || undefined : undefined,
     });
     spaceId = space.id;
   } catch (error) {

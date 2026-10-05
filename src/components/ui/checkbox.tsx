@@ -7,6 +7,7 @@ import { Icon } from "@/components/ui/icon";
  */
 export function Checkbox({
   name,
+  value = "1",
   label,
   hint,
   checked,
@@ -14,6 +15,8 @@ export function Checkbox({
   onChange,
 }: {
   name?: string;
+  /** 폼으로 보낼 값(켰을 때만 보낸다) */
+  value?: string;
   label: ReactNode;
   hint?: ReactNode;
   checked?: boolean;
@@ -25,7 +28,7 @@ export function Checkbox({
       <input
         type="checkbox"
         name={name}
-        value="1"
+        value={value}
         checked={checked}
         defaultChecked={defaultChecked}
         onChange={onChange ? (e) => onChange(e.target.checked) : undefined}

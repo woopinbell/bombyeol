@@ -27,7 +27,7 @@ export async function saveChild(
   prev: ProfileFormState,
   form: FormData,
 ): Promise<ProfileFormState> {
-  const v = values(form, ["status", "name", "nickname", "date"]);
+  const v = values(form, ["status", "name", "nickname", "date", "childDataConsent"]);
   try {
     const caller = await serverCaller();
     // 지금 상태(곧 태어나요, 태어났어요)에 따라 날짜 칸이 출생 예정일 또는 생일이다
@@ -43,6 +43,8 @@ export async function saveChild(
     } else {
       await caller.child.create({
         spaceId,
+        // 이 가족에서 처음 아이를 등록하는 엄마 아빠는 화면의 아이 정보 동의를 함께 보낸다
+        childDataConsent: blank(v.childDataConsent),
         child: {
           status: expecting ? "expecting" : "born",
           name: blank(v.name),
