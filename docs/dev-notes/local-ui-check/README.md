@@ -17,3 +17,9 @@
 - 스크린샷이 하이드레이션 전에 `caret-color`를 넣어 개발 서버에 하이드레이션 경고가 뜬다(앱 문제 아님).
 - 헤드리스 Chromium은 웹푸시 구독을 거절한다. 서비스 워커 표시는 CDP `ServiceWorker.deliverPushMessage`로 확인.
 - 외부 호스트(카카오 등)는 Chromium이 프록시를 안 써서 열리지 않는다. 필요한 스크립트는 `ctx.route`로 받은 파일을 그대로 돌려준다(무결성 해시가 맞아야 함).
+
+## 2026-10-05 추가 (기준선 2차)
+- `seed.test.ts`: 할아버지(긴 이름), 반려동물, 마일스톤, 일정, 댓글, 빈 가족(`solo`, `emptySpaceId`), 가족 없는 사람(`nofam`)까지.
+- `photos.mjs`: 개발 서버가 떠 있을 때 캔버스로 만든 사진을 실제 업로드 경로(`media.requestUploads` → `/api/dev-media` PUT → `confirmMany` → `moment.create`)로 올린다. 개발 메모리 저장소라 **dev 서버를 다시 켜면 사진이 사라진다** - 시드부터 다시.
+- `shots.mjs`: 16화면 x 밝게, 어둡게, 글자 더 크게 320px. 뷰포트를 페이지 높이로 늘려 찍는다(fullPage는 고정 하단 탭이 중간에 찍히고 지연 로딩 사진이 회색으로 남는다).
+- `pw-lib.mjs`: 스크래치 경로는 `SCRATCH` 환경변수. **Chromium을 `--lang=ko-KR`, `LANG=ko_KR.UTF-8`로 띄운다** - 아니면 날짜칸이 mm/dd/yyyy로 찍힌다(앱 문제 아님).

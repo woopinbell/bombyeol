@@ -1,12 +1,12 @@
 import { chromium } from "playwright-core";
 import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-export const S = "/tmp/claude-0/-home-user-bombyeol/91e60626-bec0-5a75-95bf-99a48db36912/scratchpad";
+export const S = process.env.SCRATCH; // 스크래치 폴더
 export const seed = () => JSON.parse(readFileSync(`${S}/seed.json`, "utf8"));
 export const BASE = "http://localhost:3100";
 export async function open(uid, opts = {}) {
-  const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: opts.dark ? "dark" : "light", ...opts.ctx });
+  const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args: ["--lang=ko-KR"], env: { ...process.env, LANG: "ko_KR.UTF-8", LANGUAGE: "ko" } });
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: "ko-KR", timezoneId: "Asia/Seoul", colorScheme: opts.dark ? "dark" : "light", ...opts.ctx });
   if (uid) {
     const v = execSync(`node zz-cookie.mjs ${uid}`, { cwd: "/home/user/bombyeol" }).toString();
     await ctx.addCookies([{ name: "authjs.session-token", value: v, url: BASE }]);
