@@ -2,6 +2,7 @@
 
 import { readExifDate } from "@/lib/exif-date";
 import { MEDIA_CONTENT_TYPES, UPLOAD_PREP } from "@/lib/plan";
+import { stripVideoLocation } from "@/lib/video-location";
 
 export type PreparedMedia = {
   kind: "image" | "video";
@@ -92,7 +93,7 @@ async function prepareImage(file: File): Promise<PreparedMedia> {
   }
 }
 
-/** 영상은 그대로 올리고(다시 인코딩하지 않음), 앞부분 한 프레임을 썸네일로. 못 그리면 썸네일 없이 */
+/** 영상은 다시 인코딩하지 않고(위치 정보만 지움), 앞부분 한 프레임을 썸네일로. 못 그리면 썸네일 없이 */
 async function videoPoster(file: File): Promise<Blob | null> {
   const url = URL.createObjectURL(file);
   const video = document.createElement("video");
@@ -126,10 +127,14 @@ async function videoPoster(file: File): Promise<Blob | null> {
 }
 
 async function prepareVideo(file: File): Promise<PreparedMedia> {
-  const thumbnail = await videoPoster(file);
+  // 위치 정보 상자만 지운다(다시 인코딩하지 않음, PRIVACY §4). 구조를 못 읽으면 원래 파일 그대로
+  const [thumbnail, original] = await Promise.all([
+    videoPoster(file),
+    stripVideoLocation(file).catch(() => file),
+  ]);
   return {
     kind: "video",
-    original: file,
+    original,
     contentType: file.type,
     thumbnail,
     previewUrl: thumbnail ? URL.createObjectURL(thumbnail) : null,
