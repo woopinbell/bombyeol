@@ -7,6 +7,7 @@ import { timeZone } from "@/i18n/config";
 import { narratorsOf, parseNarrator, type Narrator } from "@/lib/story-view";
 import { authorNames, dayKey } from "@/lib/today-feed";
 import { loadFamily } from "@/server/family";
+import { pagesUntil } from "@/server/open-target";
 
 /**
  * 이야기(별) 탭(DESIGN §9.3, §10.6): 화면 전체가 별 면. 맨 위 질문 카드 하나 → 답을 기다리는 질문 → 이야기 모음.
@@ -40,11 +41,18 @@ export default async function StoryPage({ params, searchParams }: PageProps<"/s/
           me);
 
   const [page, summary, asks, prompts] = await Promise.all([
-    caller.story.list({
-      spaceId,
-      narratorMemberId: narratorId ?? undefined,
-      petId: petId ?? undefined,
-    }),
+    caller.story
+      .list({ spaceId, narratorMemberId: narratorId ?? undefined, petId: petId ?? undefined })
+      .then((first) =>
+        pagesUntil(first, typeof query.open === "string" ? query.open : null, (cursor) =>
+          caller.story.list({
+            spaceId,
+            narratorMemberId: narratorId ?? undefined,
+            petId: petId ?? undefined,
+            cursor,
+          }),
+        ),
+      ),
     caller.story.summary({
       spaceId,
       narratorMemberId: narratorId ?? undefined,

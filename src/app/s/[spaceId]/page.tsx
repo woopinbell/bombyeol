@@ -16,6 +16,7 @@ import {
   type Who,
 } from "@/lib/today-feed";
 import { loadFamily, type Family } from "@/server/family";
+import { pagesUntil } from "@/server/open-target";
 
 /** 마일스톤은 한 번에 불러와(milestone.listAll) 대상 이름을 붙인다 */
 async function loadMilestones({ caller, space }: Family, who: Who): Promise<FeedMilestone[]> {
@@ -35,9 +36,17 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/s/
   const { spaceId } = await params;
   const family = await loadFamily(spaceId);
   const { space, caller } = family;
-  const who = parseWho((await searchParams).who, space);
+  const query = await searchParams;
+  const who = parseWho(query.who, space);
+  const subject = whoSubject(who);
+  const open = typeof query.open === "string" ? query.open : null;
   const [feed, milestones] = await Promise.all([
-    caller.moment.list({ spaceId, subject: whoSubject(who) }),
+    // 알림으로 연 지난 기록이면 그 기록이 나올 때까지 이어서 불러온다(상한 있음)
+    caller.moment
+      .list({ spaceId, subject })
+      .then((first) =>
+        pagesUntil(first, open, (cursor) => caller.moment.list({ spaceId, subject, cursor })),
+      ),
     loadMilestones(family, who),
   ]);
   const t = await getTranslations("today");
