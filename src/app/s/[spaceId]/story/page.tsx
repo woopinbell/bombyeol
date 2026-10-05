@@ -68,6 +68,7 @@ export default async function StoryPage({ params, searchParams }: PageProps<"/s/
             mode: cardNarrator.memberId === me.memberId ? "answer" : "elder",
             narratorId: cardNarrator.memberId,
             answered,
+            elder: cardNarrator.role === "grandparent",
           }
         : null;
 

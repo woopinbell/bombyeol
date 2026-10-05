@@ -30,18 +30,22 @@ export function narratorsOf(space: SpaceDetail): Narrator[] {
 }
 
 const PROMPT_KEYS = Object.keys(STORY_PROMPTS) as StoryPromptKey[];
+/** 손주 이야기(손주가 태어났을 때 등)는 어르신께만 묻는다 - 부모가 스스로 답하는 카드에서는 뺀다 */
+const NON_ELDER_KEYS = PROMPT_KEYS.filter((k) => STORY_PROMPTS[k] !== "grandchildren");
 
 /**
  * 오늘의 질문 카드: 아직 답하지 않은 카드 중 날짜로 하나(같은 날에는 같은 카드). 다 답했으면 전체에서 고른다.
- * offset은 [다른 질문]을 누른 횟수.
+ * offset은 [다른 질문]을 누른 횟수. elder가 아니면(부모가 스스로 답할 때) 손주 질문은 고르지 않는다.
  */
 export function dailyPrompt(
   answered: ReadonlySet<string>,
   dayKey: string,
   offset = 0,
+  elder = true,
 ): StoryPromptKey {
-  const open = PROMPT_KEYS.filter((k) => !answered.has(k));
-  const pool = open.length ? open : PROMPT_KEYS;
+  const keys = elder ? PROMPT_KEYS : NON_ELDER_KEYS;
+  const open = keys.filter((k) => !answered.has(k));
+  const pool = open.length ? open : keys;
   const day = Math.floor(Date.parse(`${dayKey}T00:00:00Z`) / 86_400_000);
   const index = (((day + offset) % pool.length) + pool.length) % pool.length;
   return pool[index];

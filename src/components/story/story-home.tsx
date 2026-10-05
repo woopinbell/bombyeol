@@ -24,8 +24,8 @@ import { WriteSheet, type WriteTarget } from "./write-sheet";
  */
 export type QuestionCard =
   | { kind: "ask"; ask: StoryAsk }
-  | { kind: "prompt"; mode: "answer"; narratorId: string; answered: string[] }
-  | { kind: "prompt"; mode: "elder"; narratorId: string; answered: string[] };
+  | { kind: "prompt"; mode: "answer"; narratorId: string; answered: string[]; elder: boolean }
+  | { kind: "prompt"; mode: "elder"; narratorId: string; answered: string[]; elder: boolean };
 
 type Open =
   | { sheet: "write"; target: WriteTarget }
@@ -63,7 +63,9 @@ export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
 
   const label = (memberId: string) => narrators.find((n) => n.memberId === memberId)?.label ?? "";
   const promptKey =
-    card?.kind === "prompt" ? dailyPrompt(new Set(card.answered), todayKey, offset) : null;
+    card?.kind === "prompt"
+      ? dailyPrompt(new Set(card.answered), todayKey, offset, card.elder)
+      : null;
   const askQuestion = (ask: StoryAsk) =>
     ask.promptKey
       ? tp(`prompts.${ask.promptKey}` as Parameters<typeof tp>[0])
