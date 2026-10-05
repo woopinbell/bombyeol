@@ -3,6 +3,9 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import type { Narrator, StoryAsk, StoryCursor, StoryItem } from "@/lib/story-view";
 
+/** 이야기에 붙일 수 있는 반려동물(별이 된 친구 포함 - 기억을 남기는 곳이라) */
+export type StoryPet = { id: string; name: string };
+
 /** 이야기 모음 합계(서버 집계, 고른 화자 기준) */
 export type StorySummary = { stories: number; stars: number };
 
@@ -10,6 +13,10 @@ export type StoryProps = {
   spaceId: string;
   /** 고른 화자(멤버 ID), 없으면 모두 */
   narratorId: string | null;
+  /** 고른 반려동물(그 반려동물에 붙인 이야기만), 화자와 함께 고르지 않는다 */
+  petId: string | null;
+  /** 이 가족의 반려동물(이야기에 붙이기, 이름 표시) */
+  pets: StoryPet[];
   initialItems: StoryItem[];
   initialCursor: StoryCursor | null;
   initialAsks: StoryAsk[];
@@ -100,6 +107,7 @@ export function StoryProvider({ children, ...props }: StoryProps & { children: R
       addStory: (story, answeredAskId) => {
         if (answeredAskId) setAsks((list) => list.filter((a) => a.id !== answeredAskId));
         if (props.narratorId && story.narrator.memberId !== props.narratorId) return;
+        if (props.petId && story.petId !== props.petId) return;
         if (!items.some((s) => s.id === story.id)) {
           setDelta((d) => ({ ...d, stories: d.stories + 1 }));
         }

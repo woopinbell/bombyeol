@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { BackLink } from "@/components/family/back-link";
@@ -6,6 +7,7 @@ import { DeleteSubject } from "@/components/us/delete-subject";
 import { MemorialPanel, Section } from "@/components/us/member-manage";
 import { PetCover } from "@/components/us/pet-cover";
 import { PetForm, type PetValues } from "@/components/us/pet-form";
+import { buttonClass } from "@/components/ui/button";
 import { Title } from "@/components/ui/screen";
 import { timeZone } from "@/i18n/config";
 import { dateOnlyKey, dayKey } from "@/lib/today-feed";
@@ -40,6 +42,12 @@ export default async function EditPetPage({ params }: PageProps<"/s/[spaceId]/us
       <div className="flex flex-col gap-8 pt-2 pb-12">
         <Title size="title">{t("petForm.editTitle", { name: found.name })}</Title>
         <PetCover spaceId={spaceId} petId={found.id} name={found.name} coverUrl={found.coverUrl} />
+        <Link
+          href={`/s/${spaceId}/story?pet=${encodeURIComponent(found.id)}`}
+          className={`${buttonClass()} self-start`}
+        >
+          {t("petForm.stories", { name: found.name })}
+        </Link>
         <PetForm spaceId={spaceId} pet={pet} todayKey={todayKey} />
         <Section title={t("member.memorialTitle")} lead={t("petForm.memorialLead")}>
           <MemorialPanel
