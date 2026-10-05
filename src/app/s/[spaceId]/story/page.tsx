@@ -1,12 +1,11 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { TabPage, TabTitle } from "@/components/family/tab-page";
 import { StoryHome, type QuestionCard } from "@/components/story/story-home";
 import { StoryProvider } from "@/components/story/story-state";
+import { FilterNav } from "@/components/ui/filter-nav";
 import { timeZone } from "@/i18n/config";
 import { narratorsOf, parseNarrator, type Narrator } from "@/lib/story-view";
 import { authorNames, dayKey } from "@/lib/today-feed";
-import { cn } from "@/lib/utils";
 import { loadFamily } from "@/server/family";
 
 /**
@@ -120,28 +119,7 @@ export default async function StoryPage({ params, searchParams }: PageProps<"/s/
           </TabTitle>
         }
       >
-        {choices.length > 1 ? (
-          <nav aria-label={t("whoLabel")} className="mt-2">
-            <ul className="flex gap-1 overflow-x-auto rounded-md border-(length:--bw) border-line-strong p-1">
-              {choices.map((c) => (
-                <li key={c.key} className="min-w-20 flex-1">
-                  <Link
-                    href={c.href}
-                    aria-current={c.on ? "page" : undefined}
-                    scroll={false}
-                    data-press=""
-                    className={cn(
-                      "press flex min-h-(--touch) items-center justify-center rounded-sm px-3 whitespace-nowrap",
-                      c.on ? "bg-strong font-bold text-on-strong" : "font-medium text-fg-muted",
-                    )}
-                  >
-                    {c.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ) : null}
+        {choices.length > 1 ? <FilterNav label={t("whoLabel")} items={choices} /> : null}
         <StoryHome card={card} />
       </TabPage>
     </StoryProvider>

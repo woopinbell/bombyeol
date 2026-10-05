@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { TabPage, TabTitle } from "@/components/family/tab-page";
 import { RecordDock } from "@/components/today/record-dock";
 import { TodayFeed } from "@/components/today/today-feed";
 import { TodayProvider } from "@/components/today/today-state";
+import { FilterNav } from "@/components/ui/filter-nav";
 import { timeZone } from "@/i18n/config";
 import {
   authorNames,
@@ -15,7 +15,6 @@ import {
   type FeedMilestone,
   type Who,
 } from "@/lib/today-feed";
-import { cn } from "@/lib/utils";
 import { loadFamily, type Family } from "@/server/family";
 
 /** 마일스톤은 한 번에 불러와(milestone.listAll) 대상 이름을 붙인다 */
@@ -97,32 +96,18 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/s/
         dock={options.photo ? <RecordDock {...options} /> : undefined}
       >
         {choices.length > 1 ? (
-          <nav aria-label={t("whoLabel")} className="mt-2">
-            <ul className="flex gap-1 overflow-x-auto rounded-md border-(length:--bw) border-line-strong p-1">
-              {choices.map((c) => {
-                const param = whoParam(c.who);
-                const on = param === current;
-                return (
-                  <li key={param ?? "all"} className="min-w-20 flex-1">
-                    <Link
-                      href={
-                        param ? `/s/${spaceId}?who=${encodeURIComponent(param)}` : `/s/${spaceId}`
-                      }
-                      aria-current={on ? "page" : undefined}
-                      scroll={false}
-                      data-press=""
-                      className={cn(
-                        "press flex min-h-(--touch) items-center justify-center rounded-sm px-3 whitespace-nowrap",
-                        on ? "bg-strong font-bold text-on-strong" : "font-medium text-fg-muted",
-                      )}
-                    >
-                      {c.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+          <FilterNav
+            label={t("whoLabel")}
+            items={choices.map((c) => {
+              const param = whoParam(c.who);
+              return {
+                key: param ?? "all",
+                href: param ? `/s/${spaceId}?who=${encodeURIComponent(param)}` : `/s/${spaceId}`,
+                on: param === current,
+                label: c.label,
+              };
+            })}
+          />
         ) : null}
         <TodayFeed />
       </TabPage>
