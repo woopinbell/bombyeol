@@ -52,7 +52,9 @@
       "workers_dev": false,
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol" }],
       // APP_ORIGIN은 도메인을 정한 뒤 채운다(출시 마무리 안내서). 비어 있으면 아침 알림을 건너뛴다
-      "vars": { "APP_ENV": "production", "APP_ORIGIN": "" },
+      "vars": { "APP_ENV": "production", "R2_BUCKET_NAME": "bombyeol-media", "APP_ORIGIN": "" },
+      // Hyperdrive(scripts/production-setup.sh가 만든 bombyeol의 id)와 도메인 연결(routes 또는 custom_domain)은
+      // 리소스를 만든 뒤 여기에 더한다. 그 전에는 프로덕션 배포를 하지 않는다.
     },
   },
   "vars": { "APP_ENV": "local", "R2_BUCKET_NAME": "", "APP_ORIGIN": "http://localhost:3000" },
