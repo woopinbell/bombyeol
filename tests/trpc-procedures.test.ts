@@ -5,6 +5,7 @@ import { createCallerFactory, router } from "@/server/trpc/init";
 import { parentProcedure, protectedProcedure, spaceProcedure } from "@/server/trpc/procedures";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { MemoryStorage } from "./helpers/storage";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -21,7 +22,7 @@ const as = (userId: string | null) =>
 
 async function seed() {
   const [parent, grandma, stranger] = await Promise.all(
-    ["부모", "할머니", "타인"].map((name) => prisma.user.create({ data: { name } })),
+    ["부모", "할머니", "타인"].map((name) => createUser(prisma, name)),
   );
   const space = await prisma.space.create({
     data: {

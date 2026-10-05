@@ -4,6 +4,7 @@ import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { addMember } from "./helpers/members";
 import { exhaustRateLimit } from "./helpers/rate";
+import { CHILD_CONSENT } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -13,6 +14,7 @@ async function family() {
   const setup = await mediaSetup(prisma);
   const child = await setup.api.child.create({
     spaceId: setup.spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { nickname: "콩이", dueDate: "2027-03-01" },
   });
   return { ...setup, subject: { type: "child", childId: child.id } as const };

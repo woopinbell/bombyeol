@@ -2,12 +2,13 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { ACCOUNT_LIMITS, TIER_LIMITS } from "@/lib/plan";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { callerFor } from "./helpers/trpc";
+import { CHILD_CONSENT, createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
 
-const newUser = (name = "부모") => prisma.user.create({ data: { name } });
+const newUser = (name = "부모") => createUser(prisma, name);
 
 describe("space.create", () => {
   it("생성자는 parent 멤버가 되고 첫 아이를 함께 등록한다", async () => {
@@ -16,6 +17,7 @@ describe("space.create", () => {
     const { id } = await api.space.create({
       name: "우리 가족",
       relationLabel: "엄마",
+      childDataConsent: CHILD_CONSENT,
       child: { nickname: "콩이", dueDate: "2027-03-01" },
     });
     const space = await api.space.get({ spaceId: id });
@@ -98,9 +100,14 @@ describe("space.create", () => {
     const api = callerFor(prisma, (await newUser()).id);
     const a = await api.space.create({
       name: "가족",
+      childDataConsent: CHILD_CONSENT,
       child: { nickname: "콩", status: "expecting" },
     });
-    const b = await api.space.create({ name: "가족2", child: { name: "봄" } });
+    const b = await api.space.create({
+      name: "가족2",
+      childDataConsent: CHILD_CONSENT,
+      child: { name: "봄" },
+    });
     const children = await prisma.child.findMany({
       where: { spaceId: { in: [a.id, b.id] } },
       select: { spaceId: true, status: true, dueDate: true, birthDate: true },
@@ -117,6 +124,7 @@ describe("space.create", () => {
     await expect(
       api.space.create({
         name: "가족3",
+        childDataConsent: CHILD_CONSENT,
         child: { name: "봄", status: "expecting", birthDate: "2026-01-01" },
       }),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
@@ -132,6 +140,7 @@ describe("space.create", () => {
     await expect(
       api.space.create({
         name: "가족",
+        childDataConsent: CHILD_CONSENT,
         child: { name: "봄", dueDate: "2027-01-01", birthDate: "2026-01-01" },
       }),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
@@ -151,6 +160,7 @@ describe("child.create", () => {
     const { parent, spaceId } = await setup();
     const child = await callerFor(prisma, parent.id).child.create({
       spaceId,
+      childDataConsent: CHILD_CONSENT,
       child: { name: "봄이", birthDate: "2025-04-01" },
     });
     expect(child.status).toBe("born");
@@ -161,6 +171,7 @@ describe("child.create", () => {
     await expect(
       callerFor(prisma, grandma.id).child.create({
         spaceId,
+        childDataConsent: CHILD_CONSENT,
         child: { name: "봄이", birthDate: "2025-04-01" },
       }),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
@@ -172,7 +183,11 @@ describe("child.create", () => {
     const limit = TIER_LIMITS.free.children;
     const results = await Promise.allSettled(
       Array.from({ length: limit + 2 }, (_, i) =>
-        api.child.create({ spaceId, child: { nickname: `아이${i}`, dueDate: "2027-01-01" } }),
+        api.child.create({
+          spaceId,
+          childDataConsent: CHILD_CONSENT,
+          child: { nickname: `아이${i}`, dueDate: "2027-01-01" },
+        }),
       ),
     );
     expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(limit);

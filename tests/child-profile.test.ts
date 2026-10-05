@@ -2,6 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup } from "./helpers/media";
 import { addMember } from "./helpers/members";
+import { CHILD_CONSENT } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -11,6 +12,7 @@ async function withExpectingChild() {
   const setup = await mediaSetup(prisma);
   const child = await setup.api.child.create({
     spaceId: setup.spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { nickname: "콩이", dueDate: "2027-03-01" },
   });
   return { ...setup, childId: child.id };

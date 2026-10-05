@@ -7,18 +7,19 @@ import ko from "../messages/ko.json";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { FakeSender, giveToken, TEST_ORIGIN } from "./helpers/push";
 import { exhaustRateLimit } from "./helpers/rate";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
 
 async function family() {
-  const actor = await prisma.user.create({ data: { name: "엄마" } });
+  const actor = await createUser(prisma, "엄마");
   const space = await prisma.space.create({ data: { name: "가족", createdById: actor.id } });
   await prisma.member.create({ data: { spaceId: space.id, userId: actor.id, role: "parent" } });
   await giveToken(prisma, actor.id);
   const join = async (role: MemberRole, name: string = role) => {
-    const user = await prisma.user.create({ data: { name } });
+    const user = await createUser(prisma, name);
     const member = await prisma.member.create({
       data: { spaceId: space.id, userId: user.id, role, relationLabel: "할머니" },
     });
@@ -43,7 +44,7 @@ describe("deliverPush - 발송 시점 수신자 재확인", () => {
   it("지금 멤버인 사람에게만, 보낸 사람 본인은 빼고 보낸다", async () => {
     const { actor, space, join } = await family();
     const grandma = await join("grandparent");
-    const outsider = await prisma.user.create({ data: { name: "남" } });
+    const outsider = await createUser(prisma, "남");
     await giveToken(prisma, outsider.id);
     const sender = new FakeSender();
     const result = await deliverPush(

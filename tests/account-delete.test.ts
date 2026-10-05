@@ -1,10 +1,10 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { CONSENT_VERSIONS } from "@/lib/consents";
-import { findOrCreateUser } from "@/server/auth/users";
 import { runCleanup } from "@/server/jobs/cleanup";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { callerFor } from "./helpers/trpc";
+import { CHILD_CONSENT, createUser, signedUp } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -12,7 +12,7 @@ afterAll(() => prisma.$disconnect());
 
 /** 카카오로 가입한 엄마가 만든 가족 + 아빠, 할머니 */
 async function family() {
-  const mom = await findOrCreateUser(prisma, {
+  const mom = await signedUp(prisma, {
     provider: "kakao",
     providerAccountId: "k-mom",
     name: "엄마",
@@ -22,7 +22,7 @@ async function family() {
   const api = callerFor(prisma, mom.id, "203.0.113.1", setup.storage);
   const { id: spaceId } = await api.space.create({ name: "우리집" });
   const join = async (role: "parent" | "grandparent", name: string) => {
-    const user = await prisma.user.create({ data: { name } });
+    const user = await createUser(prisma, name);
     const member = await prisma.member.create({ data: { spaceId, userId: user.id, role } });
     return {
       userId: user.id,
@@ -54,6 +54,7 @@ describe("user.deleteAccount", () => {
     await f.api.invite.create({ spaceId: f.spaceId, role: "grandparent" });
     const kong = await f.api.child.create({
       spaceId: f.spaceId,
+      childDataConsent: CHILD_CONSENT,
       child: { nickname: "콩이", dueDate: "2027-03-01" },
     });
     const ultrasound = await uploadConfirmed(f.api, f.storage, f.spaceId);
@@ -110,7 +111,7 @@ describe("user.deleteAccount", () => {
     await f.api.user.deleteAccount({ confirm: true });
     await expect(f.api.user.me()).rejects.toThrow(/UNAUTHORIZED/);
     await expect(f.api.space.list()).rejects.toThrow(/UNAUTHORIZED/);
-    const again = await findOrCreateUser(prisma, {
+    const again = await signedUp(prisma, {
       provider: "kakao",
       providerAccountId: "k-mom",
       name: "엄마",

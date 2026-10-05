@@ -4,6 +4,7 @@ import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup } from "./helpers/media";
 import { addMember } from "./helpers/members";
 import { exhaustRateLimit } from "./helpers/rate";
+import { CHILD_CONSENT } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -13,6 +14,7 @@ async function family() {
   const setup = await mediaSetup(prisma);
   const child = await setup.api.child.create({
     spaceId: setup.spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { name: "김봄", birthDate: "2026-01-01" },
   });
   const pet = await setup.api.pet.create({ spaceId: setup.spaceId, name: "보리", species: "dog" });
@@ -280,6 +282,7 @@ describe("milestone 기록", () => {
     sixMonthsAgo.setUTCDate(1);
     const { id: childId } = await api.child.create({
       spaceId,
+      childDataConsent: CHILD_CONSENT,
       child: { name: "둘째", birthDate: sixMonthsAgo.toISOString().slice(0, 10) },
     });
     const before = await api.milestone.suggestions({ spaceId, childId });

@@ -4,6 +4,7 @@ import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup } from "./helpers/media";
 import { exhaustRateLimit } from "./helpers/rate";
 import { callerFor } from "./helpers/trpc";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -12,7 +13,7 @@ afterAll(() => prisma.$disconnect());
 async function family() {
   const setup = await mediaSetup(prisma);
   const join = async (name: string, role: "grandparent" | "relative", label: string) => {
-    const user = await prisma.user.create({ data: { name } });
+    const user = await createUser(prisma, name);
     const member = await prisma.member.create({
       data: { spaceId: setup.spaceId, userId: user.id, role, relationLabel: label },
     });

@@ -2,14 +2,15 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { INVITE_POLICY, RATE_LIMITS, TIER_LIMITS } from "@/lib/plan";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { callerFor } from "./helpers/trpc";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
 
 async function setup() {
-  const parent = await prisma.user.create({ data: { name: "부모" } });
-  const grandma = await prisma.user.create({ data: { name: "할머니" } });
+  const parent = await createUser(prisma, "부모");
+  const grandma = await createUser(prisma, "할머니");
   const api = callerFor(prisma, parent.id);
   const { id: spaceId } = await api.space.create({ name: "가족" });
   await prisma.member.create({ data: { spaceId, userId: grandma.id, role: "grandparent" } });
@@ -106,7 +107,7 @@ describe("invite.create", () => {
   it("다른 Space의 초대는 회수할 수 없다", async () => {
     const { api, spaceId } = await setup();
     const invite = await api.invite.create({ spaceId, role: "parent" });
-    const other = await prisma.user.create({ data: { name: "남" } });
+    const other = await createUser(prisma, "남");
     const otherApi = callerFor(prisma, other.id);
     const { id: otherSpace } = await otherApi.space.create({ name: "남의 가족" });
     await expect(

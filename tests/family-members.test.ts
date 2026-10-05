@@ -2,6 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup } from "./helpers/media";
 import { callerFor } from "./helpers/trpc";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -11,7 +12,7 @@ async function family() {
   const setup = await mediaSetup(prisma);
   const { spaceId, storage } = setup;
   const join = async (name: string, role: "parent" | "grandparent" | "relative", label: string) => {
-    const user = await prisma.user.create({ data: { name } });
+    const user = await createUser(prisma, name);
     const member = await prisma.member.create({
       data: { spaceId, userId: user.id, role, relationLabel: label },
     });

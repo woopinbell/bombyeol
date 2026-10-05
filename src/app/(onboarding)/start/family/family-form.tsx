@@ -5,9 +5,16 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ChoiceChips } from "@/components/ui/choice-chips";
 import { Field } from "@/components/ui/field";
+import { ChildConsentField } from "@/components/auth/child-consent";
 import { createFamily, type FamilyFormState } from "./actions";
 
-const CHILD_ERRORS = ["NAME_REQUIRED", "ONE_DATE_REQUIRED", "DATE_IN_FUTURE"];
+const CHILD_ERRORS = [
+  "NAME_REQUIRED",
+  "ONE_DATE_REQUIRED",
+  "DATE_IN_FUTURE",
+  "CHILD_CONSENT_REQUIRED",
+  "CONSENT_VERSION_STALE",
+];
 
 export function FamilyForm() {
   const t = useTranslations("onboarding.family");
@@ -82,6 +89,7 @@ export function FamilyForm() {
           hint={t("childDateHint")}
           error={childError}
         />
+        <ChildConsentField back="/start/family" />
       </section>
       <p role="alert" className="text-body font-bold empty:hidden">
         {generalError}

@@ -4,6 +4,7 @@ import { PREGNANCY_POLICY } from "@/lib/plan";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { callerFor } from "./helpers/trpc";
+import { CHILD_CONSENT, createUser } from "./helpers/users";
 
 // PRIVACY §3: visibility는 서버가 강제한다. parents_only 기록은 parent가 아닌 멤버의
 // 어떤 응답(목록, 상세, 페이지 커서, 다른 기록에 붙이기)에도 드러나지 않아야 한다.
@@ -18,10 +19,11 @@ async function family() {
   await api.consent.grantSpace({ spaceId, kind: "pregnancy", version: CONSENT_VERSIONS.pregnancy });
   const { id: childId } = await api.child.create({
     spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { nickname: "콩이", dueDate: "2027-03-01" },
   });
   const join = async (role: "grandparent" | "relative") => {
-    const user = await prisma.user.create({ data: { name: role } });
+    const user = await createUser(prisma, role);
     const member = await prisma.member.create({ data: { spaceId, userId: user.id, role } });
     return { member, api: callerFor(prisma, user.id, "203.0.113.9", storage) };
   };

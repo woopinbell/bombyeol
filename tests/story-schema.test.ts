@@ -1,13 +1,14 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { createTestPrisma, resetDb } from "./helpers/db";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
 
 async function family() {
-  const user = await prisma.user.create({ data: { name: "부모" } });
-  const grandma = await prisma.user.create({ data: { name: "김순자" } });
+  const user = await createUser(prisma, "부모");
+  const grandma = await createUser(prisma, "김순자");
   const space = await prisma.space.create({ data: { name: "가족", createdById: user.id } });
   await prisma.member.create({ data: { spaceId: space.id, userId: user.id, role: "parent" } });
   const narrator = await prisma.member.create({

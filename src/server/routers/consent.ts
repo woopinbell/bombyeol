@@ -7,10 +7,8 @@ import { inputError } from "@/server/errors";
 import { lockKey } from "@/server/locks";
 import { parentProcedure, protectedProcedure, spaceProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
-import { entityId } from "./inputs";
+import { consentVersion as version, entityId } from "./inputs";
 import { retractPregnancyRecords } from "./pregnancy";
-
-const version = z.string().min(1).max(32);
 
 const consentSelect = {
   kind: true,

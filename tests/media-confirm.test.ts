@@ -4,6 +4,7 @@ import { requireConfirmedAssets } from "@/server/media/assets";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup } from "./helpers/media";
 import { callerFor } from "./helpers/trpc";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -62,7 +63,7 @@ describe("media.confirm (G-02)", () => {
     const { storage, spaceId, assetId, pendingKey } = await uploaded();
     storage.upload(pendingKey, 1000, "image/jpeg");
 
-    const grandma = await prisma.user.create({ data: { name: "할머니" } });
+    const grandma = await createUser(prisma, "할머니");
     await prisma.member.create({ data: { spaceId, userId: grandma.id, role: "grandparent" } });
     await expect(
       callerFor(prisma, grandma.id, "203.0.113.2", storage).media.confirm({ spaceId, assetId }),

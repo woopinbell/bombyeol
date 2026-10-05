@@ -2,12 +2,13 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { ACCOUNT_LIMITS, INVITE_POLICY } from "@/lib/plan";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { callerFor } from "./helpers/trpc";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
 afterAll(() => prisma.$disconnect());
 
-const newUser = (name: string) => prisma.user.create({ data: { name } });
+const newUser = (name: string) => createUser(prisma, name);
 
 async function setup() {
   const parent = await newUser("부모");

@@ -3,6 +3,7 @@ import { MEDIA_POLICY, RATE_LIMITS, TIER_LIMITS } from "@/lib/plan";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup } from "./helpers/media";
 import { callerFor } from "./helpers/trpc";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -182,7 +183,7 @@ describe("media.requestUpload", () => {
 
   it("멤버가 아니면 다른 Space에 업로드 URL을 받을 수 없다", async () => {
     const { spaceId } = await mediaSetup(prisma);
-    const stranger = await prisma.user.create({ data: { name: "남" } });
+    const stranger = await createUser(prisma, "남");
     await expect(
       callerFor(prisma, stranger.id).media.requestUpload({
         spaceId,

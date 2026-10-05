@@ -3,6 +3,7 @@ import { TIER_LIMITS } from "@/lib/plan";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup } from "./helpers/media";
 import { callerFor } from "./helpers/trpc";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -71,8 +72,8 @@ describe("media.delete (G-05)", () => {
 
   it("parent는 다른 멤버가 올린 자산을 지울 수 있고, 다른 멤버는 남의 자산을 지울 수 없다", async () => {
     const { api, storage, spaceId } = await mediaSetup(prisma);
-    const grandma = await prisma.user.create({ data: { name: "할머니" } });
-    const uncle = await prisma.user.create({ data: { name: "삼촌" } });
+    const grandma = await createUser(prisma, "할머니");
+    const uncle = await createUser(prisma, "삼촌");
     await prisma.member.createMany({
       data: [
         { spaceId, userId: grandma.id, role: "grandparent" },

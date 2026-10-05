@@ -7,6 +7,7 @@ import { buttonClass } from "@/components/ui/button";
 import { Lead, Screen, Title } from "@/components/ui/screen";
 import { Steps } from "@/components/ui/steps";
 import { toErrorKey } from "@/lib/action-errors";
+import { accountConsentMissing } from "@/server/session";
 import { serverCaller } from "@/server/trpc/server-caller";
 import { JoinForm } from "./join-form";
 
@@ -31,6 +32,10 @@ export default async function InviteCodePage({ params }: PageProps<"/invite/[cod
     );
   }
 
+  // 합류 전에 가입 동의(서버도 확인한다 - TERMS_REQUIRED)
+  if (await accountConsentMissing()) {
+    redirect(`/agree?next=${encodeURIComponent(`/invite/${encodeURIComponent(code)}`)}`);
+  }
   const caller = await serverCaller();
   const preview = await caller.invite.preview({ code }).catch((e: unknown) => toErrorKey(e));
   if (typeof preview === "string") {

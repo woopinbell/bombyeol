@@ -94,6 +94,17 @@ export default async function SettingsPage({ params }: PageProps<"/s/[spaceId]/u
           <Link href="/account/delete" className={`${buttonClass()} self-start`}>
             {t("privacy.account.settingsLink")}
           </Link>
+          <div className="mt-4 flex flex-wrap gap-x-6">
+            {(["terms", "privacy"] as const).map((doc) => (
+              <Link
+                key={doc}
+                href={`/${doc}?back=${encodeURIComponent(`/s/${spaceId}/us/settings`)}`}
+                className="inline-flex min-h-(--touch) items-center font-bold underline"
+              >
+                {t(doc === "terms" ? "legal.toTerms" : "legal.toPrivacy")}
+              </Link>
+            ))}
+          </div>
         </Section>
       </div>
     </TabPage>

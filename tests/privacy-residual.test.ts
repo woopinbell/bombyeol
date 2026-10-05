@@ -5,6 +5,7 @@ import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { leftovers } from "./helpers/residual";
 import { callerFor } from "./helpers/trpc";
+import { CHILD_CONSENT, createUser } from "./helpers/users";
 
 // G-06: 삭제 후 잔존 데이터 0. 표 목록을 DB에서 직접 읽어 검사하므로(helpers/residual), 앞으로 spaceId, userId
 // 열을 가진 모델이 늘어도 삭제 연쇄에서 빠지면 이 테스트가 잡는다.
@@ -19,12 +20,12 @@ async function richFamily() {
   const setup = await mediaSetup(prisma);
   const { api, storage, spaceId } = setup;
   const photo = () => uploadConfirmed(api, storage, spaceId);
-  const grandmaUser = await prisma.user.create({ data: { name: "할머니" } });
+  const grandmaUser = await createUser(prisma, "할머니");
   const grandmaMember = await prisma.member.create({
     data: { spaceId, userId: grandmaUser.id, role: "grandparent", relationLabel: "할머니" },
   });
   const grandma = callerFor(prisma, grandmaUser.id, "203.0.113.9", storage);
-  const dadUser = await prisma.user.create({ data: { name: "아빠" } });
+  const dadUser = await createUser(prisma, "아빠");
   await prisma.member.create({ data: { spaceId, userId: dadUser.id, role: "parent" } });
   const dad = callerFor(prisma, dadUser.id, "203.0.113.8", storage);
 
@@ -36,6 +37,7 @@ async function richFamily() {
 
   const kong = await api.child.create({
     spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { nickname: "콩이", dueDate: "2027-03-01" },
   });
   await dad.pregnancy.create({

@@ -2,12 +2,13 @@ import { z } from "zod";
 import type { Prisma } from "@/generated/prisma/client";
 import { TIER_LIMITS, tierOf } from "@/lib/plan";
 import { inputError, limitError, notFound } from "@/server/errors";
+import { ensureChildConsent } from "@/server/consents";
 import { lockKey } from "@/server/locks";
 import { momentAssetIds } from "@/server/media/attached";
 import { markPurging } from "@/server/media/purge";
 import { parentProcedure } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
-import { entityId, isNotFuture, isoDate, personName } from "./inputs";
+import { consentVersion, entityId, isNotFuture, isoDate, personName } from "./inputs";
 
 /**
  * 이름, 태명 중 하나 이상. 날짜는 비워도 된다(나중에 채움, 사용자 결정 2026-10-02) - 다만 출생 예정일과 생일을
@@ -74,14 +75,18 @@ async function findChild(prisma: Prisma.TransactionClient, spaceId: string, chil
 }
 
 export const childRouter = router({
-  create: parentProcedure.input(z.object({ child: childInput })).mutation(({ ctx, input }) =>
-    ctx.prisma.$transaction(async (tx) => {
-      await lockKey(tx, `space-children:${ctx.member.spaceId}`);
-      const count = await tx.child.count({ where: { spaceId: ctx.member.spaceId } });
-      if (count >= TIER_LIMITS[tierOf()].children) throw limitError("CHILD_LIMIT");
-      return createChild(tx, ctx.member.spaceId, ctx.userId, input.child);
-    }),
-  ),
+  create: parentProcedure
+    .input(z.object({ child: childInput, childDataConsent: consentVersion.optional() }))
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.$transaction(async (tx) => {
+        await lockKey(tx, `space-children:${ctx.member.spaceId}`);
+        const count = await tx.child.count({ where: { spaceId: ctx.member.spaceId } });
+        if (count >= TIER_LIMITS[tierOf()].children) throw limitError("CHILD_LIMIT");
+        // 아이 정보 동의(법정대리인): 이 가족에서 처음 아이를 등록하는 엄마 아빠는 화면의 동의를 함께 보낸다
+        await ensureChildConsent(tx, ctx.userId, ctx.member.spaceId, input.childDataConsent);
+        return createChild(tx, ctx.member.spaceId, ctx.userId, input.child);
+      }),
+    ),
 
   /**
    * 프로필 수정(parent). 이름, 태명은 null로 지울 수 있지만 둘 다 비울 수는 없다.

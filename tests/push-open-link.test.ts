@@ -4,6 +4,7 @@ import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup } from "./helpers/media";
 import { addMember } from "./helpers/members";
 import { callerFor } from "./helpers/trpc";
+import { CHILD_CONSENT } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -19,6 +20,7 @@ async function family() {
   });
   const child = await api.child.create({
     spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { name: "김봄", birthDate: "2026-01-01" },
   });
   const subject = { type: "child", childId: child.id } as const;
@@ -39,6 +41,7 @@ async function family() {
   await api.consent.grantSpace({ spaceId, kind: "pregnancy", version: CONSENT_VERSIONS.pregnancy });
   const baby = await api.child.create({
     spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { nickname: "콩이", dueDate: "2027-03-01" },
   });
   const hidden = await api.pregnancy.create({

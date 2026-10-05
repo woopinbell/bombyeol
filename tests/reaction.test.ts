@@ -5,6 +5,7 @@ import { mediaSetup } from "./helpers/media";
 import { addMember } from "./helpers/members";
 import { callerFor } from "./helpers/trpc";
 import { exhaustRateLimit } from "./helpers/rate";
+import { CHILD_CONSENT } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -14,6 +15,7 @@ async function family() {
   const setup = await mediaSetup(prisma);
   const child = await setup.api.child.create({
     spaceId: setup.spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { name: "김봄", birthDate: "2026-01-01" },
   });
   const diary = await setup.api.moment.createDiary({

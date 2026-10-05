@@ -6,9 +6,11 @@ import { markChildBorn, saveChild, type ProfileFormState } from "@/app/s/[spaceI
 import { Button } from "@/components/ui/button";
 import { ChoiceChips } from "@/components/ui/choice-chips";
 import { Field } from "@/components/ui/field";
+import { ChildConsentField } from "@/components/auth/child-consent";
 
 const NAME_ERRORS = ["NAME_REQUIRED"];
 const DATE_ERRORS = ["ONE_DATE_REQUIRED", "DATE_IN_FUTURE", "USE_MARK_BORN"];
+const CONSENT_ERRORS = ["CHILD_CONSENT_REQUIRED", "CONSENT_VERSION_STALE"];
 
 export type ChildValues = {
   id: string;
@@ -27,10 +29,13 @@ export function ChildForm({
   spaceId,
   child,
   todayKey,
+  needsConsent = false,
 }: {
   spaceId: string;
   child?: ChildValues;
   todayKey: string;
+  /** 이 가족에서 아직 아이 정보 동의를 하지 않은 엄마 아빠(새로 더할 때만) */
+  needsConsent?: boolean;
 }) {
   const t = useTranslations("childForm");
   const te = useTranslations("errors");
@@ -41,7 +46,10 @@ export function ChildForm({
   const v = state.values ?? {};
   const nameError = state.error && NAME_ERRORS.includes(state.error) ? te(state.error) : undefined;
   const dateError = state.error && DATE_ERRORS.includes(state.error) ? te(state.error) : undefined;
-  const generalError = state.error && !nameError && !dateError ? te(state.error) : undefined;
+  const consentError =
+    state.error && CONSENT_ERRORS.includes(state.error) ? te(state.error) : undefined;
+  const generalError =
+    state.error && !nameError && !dateError && !consentError ? te(state.error) : undefined;
   const expecting = child?.status === "expecting";
 
   return (
@@ -87,6 +95,14 @@ export function ChildForm({
         hint={child ? (child.date ? t("keepHint") : t("laterHint")) : t("dateHint")}
         error={dateError}
       />
+      {needsConsent && !child ? (
+        <div className="flex flex-col gap-2">
+          <ChildConsentField back={`/s/${spaceId}/us/child/new`} />
+          <p aria-live="polite" className="font-bold empty:hidden">
+            {consentError}
+          </p>
+        </div>
+      ) : null}
       <p role="alert" className="font-bold empty:hidden">
         {generalError}
       </p>
