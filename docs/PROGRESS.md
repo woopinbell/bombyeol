@@ -15,7 +15,7 @@
 6. **출시 마무리 안내서**(docs): 사용자가 할 일을 순서대로 - 가족 시험 전(Workers Paid, 요금 알림, Supabase 플랜, 프로덕션 생성 지시, 카카오 JS 키), 공개 직전(약관 사실 칸, 전문가 검토, 사업자, 도메인, 카카오 운영 주소), 각 단계의 정확한 화면 위치나 명령, 끝난 뒤 세션에게 할 말
 
 하지 않는 것: 돈이 드는 작업, 리소스 생성, 결제(Phase 8, 무료 먼저로 결정), 사실 칸 채우기.
-**진행(2026-10-05 같은 세션)**: 1~5를 PR woopinbell/bombyeol#28(브랜치 `claude/brave-keller-bbbce1`, 16커밋, 마이그레이션 `push_notice_day`)에 올렸고 6은 `LAUNCH_GUIDE.md`로 썼다. 검증: Vitest 428건, e2e 2건, OpenNext gzip 5.0 MiB, axe 화면 21개 x 3모드 위반 0. **세션 쪽 종착역 도달 - 남은 것은 사용자의 #28 머지(머지 뒤 세션이 스테이징 배포)와 LAUNCH_GUIDE의 사용자 몫.** 디자인 폴리시는 완료 선언하지 않는다(실기기 확인에서 나오는 것을 계속 다듬는다). 전후 그림 `design-polish/2026-10-05-baseline-photos/after-C-final.png`.
+**진행(2026-10-05 같은 세션)**: 1~5를 PR woopinbell/bombyeol#28(브랜치 `claude/brave-keller-bbbce1`, 16커밋, 마이그레이션 `push_notice_day`)에 올렸고 6은 `LAUNCH_GUIDE.md`로 썼다. 검증: Vitest 428건, e2e 2건, OpenNext gzip 5.0 MiB, axe 화면 21개 x 3모드 위반 0. **세션 쪽 종착역 도달.** 사용자가 #28 머지(main fb5d829) → Migrate staging DB 성공(`push_notice_day`) → 스테이징 배포(버전 74165e43, gzip 5.0 MiB, Cron 17 * * * *), 스모크 정상(db, R2 왕복, cleanup ok, fcm invalid_token), /login, /terms 200, /nope 404(새 화면), 내부 reminders 토큰 호출 200 `{"skipped":"hour"}`(한국 시간 오후라 정상). **이제 남은 것은 LAUNCH_GUIDE의 사용자 몫뿐.** 실제 아침 알림 도착은 실기기 확인 목록(LAUNCH_GUIDE 1-6). 디자인 폴리시는 완료 선언하지 않는다(실기기 확인에서 나오는 것을 계속 다듬는다). 전후 그림 `design-polish/2026-10-05-baseline-photos/after-C-final.png`.
 머지: 세션의 머지는 권한 검사에서 막힌다. 사용자가 시간 날 때 머지(또는 허용 규칙 추가). 머지 전까지는 같은 작업 브랜치의 PR에 원자적 커밋으로 쌓고, 머지되면 스테이징에 배포한다.
 
 ## 현재 상태 (2026-10-01)
