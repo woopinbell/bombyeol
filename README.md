@@ -22,6 +22,7 @@ npm run dev            # http://localhost:3000
 npm run format:check && npm run lint && npm run typecheck
 npm test               # 로컬 DB를 비우고 쓴다
 npm run cf:build       # OpenNext 빌드(CI와 같음)
+npm run e2e            # 브라우저 핵심 흐름(로컬 DB 전용, 개발 서버가 떠 있으면 E2E_PORT로 그 포트를 준다)
 ```
 
 ## 배포

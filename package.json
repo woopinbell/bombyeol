@@ -21,7 +21,8 @@
     "db:reset": "node scripts/with-local-db.mjs prisma migrate reset --force",
     "db:studio": "node scripts/with-local-db.mjs prisma studio",
     "test": "node scripts/with-local-db.mjs vitest run",
-    "test:watch": "node scripts/with-local-db.mjs vitest"
+    "test:watch": "node scripts/with-local-db.mjs vitest",
+    "e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "1.20.7",
@@ -46,6 +47,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "1.56.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "^22.20.4",
     "@types/pg": "8.23.1",
