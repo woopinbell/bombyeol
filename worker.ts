@@ -5,25 +5,36 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import nextWorker from "./.open-next/worker.js";
-import { INTERNAL_CLEANUP_PATH, internalToken } from "./src/server/internal-auth";
+import {
+  INTERNAL_CLEANUP_PATH,
+  INTERNAL_REMINDERS_PATH,
+  internalToken,
+} from "./src/server/internal-auth";
 
 export default {
   fetch: nextWorker.fetch,
 
   async scheduled(_controller: ScheduledController, env: CloudflareEnv, ctx: ExecutionContext) {
     if (!env.AUTH_SECRET) {
-      console.error("[cleanup] AUTH_SECRET 없음 - 건너뜀");
+      console.error("[cron] AUTH_SECRET 없음 - 건너뜀");
       return;
     }
-    const req = new Request(`https://internal${INTERNAL_CLEANUP_PATH}`, {
-      method: "POST",
-      headers: { authorization: `Bearer ${await internalToken(env.AUTH_SECRET, "cleanup")}` },
-    });
-    ctx.waitUntil(
-      nextWorker.fetch(req, env, ctx).then(async (res: Response) => {
-        if (!res.ok) console.error("[cleanup] 실패", res.status);
-      }),
-    );
+    // 매시: 정리 + 가족의 날 아침 알림(알림 경로가 한국 시간 9~11시에만 일한다)
+    const jobs = [
+      ["cleanup", INTERNAL_CLEANUP_PATH],
+      ["reminders", INTERNAL_REMINDERS_PATH],
+    ] as const;
+    for (const [purpose, path] of jobs) {
+      const req = new Request(`https://internal${path}`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${await internalToken(env.AUTH_SECRET, purpose)}` },
+      });
+      ctx.waitUntil(
+        nextWorker.fetch(req, env, ctx).then(async (res: Response) => {
+          if (!res.ok) console.error(`[${purpose}] 실패`, res.status);
+        }),
+      );
+    }
   },
 } satisfies ExportedHandler<CloudflareEnv>;
 
