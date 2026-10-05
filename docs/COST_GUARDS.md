@@ -45,9 +45,22 @@ hamkke의 운영 리스크 점검(2026-09-27)에서 코드 리딩만으로 찾�
 
 ## 4. 운영 체크리스트 (코드로 검증 불가 - 사용자가 직접)
 
-- [ ] Cloudflare: Billable Usage 대시보드 확인, **예산 알림**(기본 켜짐 여부 확인, 임계값을 낮게 조정), R2 저장량 알림
-- [ ] 서버리스 Postgres: 사용량 상한/스케일 상한 설정
-- [ ] FCM: 무료지만 프로젝트 쿼터 확인
-- [ ] 결제 공급자: 사기 방어 규칙, 분쟁 알림 이메일
-- [ ] 카카오 개발자 콘솔: 앱 키 노출 도메인 제한(JS 키 도메인 등록)
-- [ ] 릴리스 전: 프로덕션 시크릿은 호스팅 대시보드에만 두고 클라우드 세션 환경에는 넣지 않았는지 재확인(`CLOUD_SESSION.md` §3)
+2026-10-05 세션에서 항목마다 지금 상태를 확인하고 할 일을 구체화했다. 세션이 확인할 수 있었던 것은 "세션 확인"에, 대시보드 작업은 "할 일"에 적는다. 메뉴 이름은 서비스가 바꿀 수 있어 찾는 곳의 이름은 참고용이다. **릴리스(프로덕션) 전까지 모든 항목에 체크가 있어야 한다.**
+
+- [ ] **Cloudflare 예산, 사용량 알림** (G-12)
+  - 세션 확인: 클라우드 세션의 API 토큰에는 알림(Notifications), 결제(Billing) 읽기 권한이 없다(최소 권한이라 정상) - 알림 설정 여부는 세션이 볼 수 없다. 스테이징 Worker 최근 7일: 성공 565, `exceededResources`(CPU 한도) 5건(약 0.9%) - 아직 무료 플랜으로 보인다(Workers Paid 전환 대기, Q-PLAN). R2 `bombyeol-staging-media` 객체 2개, 1.4MB.
+  - 할 일: ① Workers Paid 전환(결정됨). ② 대시보드 Notifications에서 **Usage Based Billing** 알림을 Workers, R2에 각각 만든다(받는 곳: 사용자 이메일). 임계값은 낮게 - 예: Workers 요청 월 1,000만, R2 저장 5GB, R2 Class A 작업 월 100만(무료 몫 안에서 먼저 울리게). ③ Billing의 Billable Usage를 한 번 열어 0에 가까운지 본다. ④ 다른 프로젝트 버킷(`hamkke`)이 같은 계정에 있으니 R2 사용량 알림은 계정 전체 기준임을 감안한다.
+- [ ] **서버리스 Postgres(Supabase) 사용량 상한**
+  - 세션 확인: 스테이징, 개발 DB는 Supabase(풀러 경유, Hyperdrive). 세션에는 Supabase 관리 토큰이 없어 플랜, 상한을 볼 수 없다.
+  - 할 일: ① 조직 Billing에서 플랜 확인. 무료 플랜이면 과금은 없지만 **오래 쓰지 않으면 프로젝트가 일시 중지될 수 있다**(스테이징 접속이 갑자기 실패하면 여기부터). ② 유료(Pro)로 올리면 **Spend Cap(지출 상한)을 켠 상태로 둔다**. ③ 프로덕션 DB는 스테이징과 다른 프로젝트로(데이터 분리), 만들 때 사용자 승인.
+- [ ] **FCM(Firebase) 쿼터**
+  - 세션 확인: 스테이징 발송 경로 정상(스모크 `fcm: invalid_token` - 가짜 토큰으로 발송까지 도달). 코드 쪽 상한: 수신자당 시간당 상한, 이벤트당 발송 수 상한, 기기 수 상한(PUSH_POLICY), 60일 지난 토큰 정리.
+  - 할 일: ① Firebase 프로젝트를 **무료(Spark) 플랜으로 두고 결제 계정을 연결하지 않는다**(FCM은 무료, 결제 계정이 붙으면 다른 서비스가 과금될 수 있음). ② Google Cloud 콘솔에서 해당 프로젝트의 Firebase Cloud Messaging API 쿼터 페이지를 한 번 열어 기본 한도 확인. ③ 서비스 계정 키(`FIREBASE_ADMIN_PRIVATE_KEY`)는 FCM 발송 역할만 가진 계정인지 확인.
+- [ ] **결제 공급자** - Q-PAY 결정 뒤(Phase 8). 사기 방어 규칙, 분쟁(차지백) 알림 이메일, 웹훅 서명 비밀. 지금은 해당 없음.
+- [ ] **카카오 개발자 콘솔 키 노출 범위**
+  - 세션 확인: `NEXT_PUBLIC_KAKAO_JS_KEY`는 아직 등록 안 됨(클라우드 환경 길이 0) - 공유는 기기 공유, 복사로 동작 중. 로그인(REST 키 `AUTH_KAKAO_ID`, `AUTH_KAKAO_SECRET`)은 스테이징 Secret에 있음.
+  - 할 일: ① 앱 설정 > 플랫폼 > Web의 사이트 도메인에 **스테이징 주소만**(나중에 프로덕션 도메인 추가) - JavaScript 키는 화면에 노출되는 키라 도메인 제한이 유일한 방어. ② 카카오 로그인 Redirect URI도 스테이징(`/api/auth/callback/kakao`)과 프로덕션만. ③ 카카오 로그인 보안의 Client Secret이 **사용함**인지 확인(스테이징 Secret과 같은 값). ④ 동의 항목에서 이메일 등 쓰지 않는 항목은 받지 않음으로(PRIVACY §2 최소 수집).
+- [ ] **프로덕션 시크릿은 호스팅에만** (CLOUD_SESSION §3)
+  - 세션 확인: 프로덕션 Worker(`bombyeol`)는 아직 없다(`wrangler secret list --env production` - not found). 클라우드 세션 환경에 있는 키는 개발, 스테이징용(DATABASE_URL = 개발 Supabase, 카카오, Firebase, Cloudflare API 토큰). 스테이징 Worker Secret 이름: AUTH_GOOGLE_ID/SECRET, AUTH_KAKAO_ID/SECRET, AUTH_SECRET, FIREBASE_ADMIN_*, R2_* (값은 보지 않음).
+  - 할 일(프로덕션 만들 때): ① 프로덕션 값은 `wrangler secret put --env production` 또는 대시보드로만 넣고 **클라우드 세션 환경 변수에는 넣지 않는다**. ② 스테이징과 다른 값: `AUTH_SECRET` 새로 생성, R2 토큰은 프로덕션 버킷 하나에만 권한, DB는 다른 프로젝트, Firebase 서비스 계정은 가능하면 프로젝트 분리. ③ 클라우드 세션의 `CLOUDFLARE_API_TOKEN` 권한 범위를 대시보드에서 한 번 확인(Workers 배포, R2 버킷 설정, Hyperdrive 정도면 충분 - 결제, DNS 쓰기 권한은 빼기).
+- [x] **코드 쪽 게이트 점검(세션, 2026-10-05)**: §1 게이트 G-01~G-07, G-11, G-15, G-17은 테스트로 검증된 상태(Vitest 406건), 임시 완화한 게이트 없음(PROGRESS). 남은 코드 TODO는 `TODO(G-06)` 구독 해지 연쇄 하나(Phase 8). G-15 급증 로그는 정리 Cron이 `[G-15]`로 남긴다 - Workers 로그(Observability)에서 이 문자열로 찾는다.
