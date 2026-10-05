@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { ErrorKey } from "@/lib/action-errors";
 import type { NoticeKind } from "@/server/push/types";
 
-const KINDS: NoticeKind[] = ["moment", "story", "ask", "heart", "comment", "news"];
+const KINDS: NoticeKind[] = ["moment", "story", "ask", "heart", "comment", "news", "day"];
 
 /**
  * 이 가족에서 받을 알림 종류(계정 단위 - 내 모든 기기에 함께 적용). 누르면 바로 저장하고,

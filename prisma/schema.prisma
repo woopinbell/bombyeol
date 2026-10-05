@@ -533,6 +533,7 @@ enum PushNotice {
   heart
   comment
   news
+  day
 }
 
 model PushToken {
