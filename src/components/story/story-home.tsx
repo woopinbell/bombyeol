@@ -107,7 +107,11 @@ export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
   const more = () =>
     startLoading(async () => {
       if (!state.cursor) return;
-      const result = await loadMoreStories(state.spaceId, state.narratorId, state.cursor);
+      const result = await loadMoreStories(
+        state.spaceId,
+        { narratorMemberId: state.narratorId, petId: state.petId },
+        state.cursor,
+      );
       if ("error" in result) {
         toast({ message: errors(result.error) });
         return;
@@ -341,8 +345,10 @@ export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
  */
 function StoryTile({ story }: { story: StoryItem }) {
   const t = useTranslations("storyTab");
-  const { spaceId, fresh, bumpStars } = useStory();
+  const { spaceId, fresh, bumpStars, pets, petId } = useStory();
   const question = useStoryQuestion(story);
+  // 반려동물 이야기만 보고 있으면 같은 이름을 칸마다 되풀이하지 않는다
+  const pet = petId ? null : pets.find((p) => p.id === story.petId);
   const { star: live, toggle } = useStar(spaceId, story.id, {
     on: story.reactions.starredByMe,
     count: story.reactions.stars,
@@ -401,6 +407,7 @@ function StoryTile({ story }: { story: StoryItem }) {
             ) : null}
             {t("byline", { name: story.narrator.label ?? story.narrator.name ?? "" })}
             {story.storyYear ? <>, {t("year", { year: story.storyYear })}</> : null}
+            {pet ? <>, {t("aboutPet", { name: pet.name })}</> : null}
           </span>
         </span>
       </button>

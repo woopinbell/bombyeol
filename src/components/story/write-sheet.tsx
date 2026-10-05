@@ -74,7 +74,7 @@ export function WriteSheet({
   const errors = useTranslations("errors");
   const { toast } = useToast();
   const router = useRouter();
-  const { spaceId, narrators, me, addStory, replaceStory } = useStory();
+  const { spaceId, narrators, me, addStory, replaceStory, pets, petId: filterPet } = useStory();
   const editing = target.kind === "edit" ? target.story : null;
   const key = draftKey(spaceId, target);
   // 시트는 누른 뒤에만 그려지므로(서버 렌더 없음) 초안을 바로 읽어도 된다
@@ -121,6 +121,8 @@ export function WriteSheet({
       return;
     }
     const category = (String(form.get("category") ?? "") || null) as StoryCategory | null;
+    // 반려동물: 고르는 칸이 있을 때만 보낸다(없음 = 붙이지 않음, 고칠 때는 떼기)
+    const pet = pets.length ? String(form.get("pet") ?? "") || null : undefined;
     setError(null);
     setSending(true);
     const issued: string[] = [];
@@ -147,6 +149,7 @@ export function WriteSheet({
           storyYear: year,
           ...(canPickCategory && { category }),
           ...(photoAssetId !== undefined && { photoAssetId }),
+          ...(pet !== undefined && { petId: pet }),
         });
         if ("error" in result) throw new UploadError(result.error);
         replaceStory({ ...editing, ...result });
@@ -164,6 +167,7 @@ export function WriteSheet({
           body: text,
           storyYear: year ?? undefined,
           photoAssetId: photoAssetId ?? undefined,
+          petId: pet ?? undefined,
         });
         if ("error" in result) throw new UploadError(result.error);
         addStory(
@@ -262,6 +266,18 @@ export function WriteSheet({
             error === "INVALID_INPUT" || error === "DATE_IN_FUTURE" ? errors(error) : undefined
           }
         />
+        {pets.length ? (
+          <ChoiceChips
+            name="pet"
+            legend={t("pet")}
+            // 반려동물 이야기를 보다가 쓰면 그 친구가 미리 골라져 있다
+            defaultValue={editing ? (editing.petId ?? "") : (filterPet ?? "")}
+            options={[
+              { value: "", label: t("petNone") },
+              ...pets.map((p) => ({ value: p.id, label: p.name })),
+            ]}
+          />
+        ) : null}
         {canPickCategory ? (
           <ChoiceChips
             name="category"

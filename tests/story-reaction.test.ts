@@ -161,5 +161,16 @@ describe("story 세대 교차 반응", () => {
     await expect(other.api.story.summary({ spaceId })).rejects.toMatchObject({
       code: "NOT_FOUND",
     });
+    // 반려동물로 거르기(목록과 같은 기준): 그 반려동물에 붙인 이야기와 그 이야기가 받은 별만
+    const pet = await api.pet.create({ spaceId, name: "초코", species: "dog" });
+    const aboutPet = await api.story.create({ spaceId, body: "초코와 산책", petId: pet.id });
+    await relative.reaction.toggleStar({
+      spaceId,
+      target: { type: "story", storyEntryId: aboutPet.id },
+    });
+    await expect(api.story.summary({ spaceId, petId: pet.id })).resolves.toEqual({
+      stories: 1,
+      stars: 1,
+    });
   });
 });

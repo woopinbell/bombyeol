@@ -244,7 +244,9 @@
     "year": "{year}년",
     "scribedBy": "받아 적은 사람 {name}",
     "photoAlt": "이야기 사진",
-    "memorialMark": "별이 되신 분"
+    "memorialMark": "별이 되신 분",
+    "petTitle": "{name} 이야기",
+    "aboutPet": "{name} 이야기"
   },
   "usTab": {
     "invite": "할머니 할아버지 초대하기",
@@ -500,7 +502,8 @@
     "coverUploading": "사진을 올리는 중",
     "coverDone": "커버 사진을 바꿨어요",
     "coverRemoved": "커버 사진을 지웠어요",
-    "memorialLead": "별이 된 친구의 사진과 기록은 영원히 남아요. 새 성장 기록은 더하지 않고, 추억 사진은 계속 올릴 수 있어요."
+    "memorialLead": "별이 된 친구의 사진과 기록은 영원히 남아요. 새 성장 기록은 더하지 않고, 추억 사진은 계속 올릴 수 있어요.",
+    "stories": "{name} 이야기 보기"
   },
   "storySheet": {
     "title": "이야기",
@@ -533,7 +536,9 @@
     "save": "고친 이야기 저장",
     "sending": "올리는 중",
     "done": "이야기를 남겼어요",
-    "edited": "이야기를 고쳤어요"
+    "edited": "이야기를 고쳤어요",
+    "pet": "반려동물 이야기라면 골라 주세요",
+    "petNone": "고르지 않기"
   },
   "storyAsk": {
     "title": "물어보기",

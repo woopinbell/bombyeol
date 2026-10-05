@@ -10,14 +10,15 @@ type Failed = { error: ErrorKey };
 /** 이야기 모음 다음 페이지(권한, 화자 확인은 tRPC 프로시저가 한다) */
 export async function loadMoreStories(
   spaceId: string,
-  narratorMemberId: string | null,
+  filter: { narratorMemberId: string | null; petId: string | null },
   cursor: StoryCursor,
 ) {
   try {
     const caller = await serverCaller();
     return await caller.story.list({
       spaceId,
-      narratorMemberId: narratorMemberId ?? undefined,
+      narratorMemberId: filter.narratorMemberId ?? undefined,
+      petId: filter.petId ?? undefined,
       cursor,
     });
   } catch (error) {
@@ -54,6 +55,8 @@ export async function createStory(
     body: string;
     storyYear?: number;
     photoAssetId?: string;
+    /** 반려동물에 붙인 이야기(PRD §4.2.1) */
+    petId?: string;
   },
 ) {
   try {
@@ -74,6 +77,7 @@ export async function updateStory(
     storyYear?: number | null;
     category?: StoryCategory | null;
     photoAssetId?: string | null;
+    petId?: string | null;
   },
 ) {
   try {

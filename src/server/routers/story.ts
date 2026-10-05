@@ -407,15 +407,16 @@ export const storyRouter = router({
     }),
 
   /**
-   * 이야기 모음 합계(모든 멤버): 이야기 수와 받은 별 수. 목록과 같은 화자 거르기를 쓴다.
+   * 이야기 모음 합계(모든 멤버): 이야기 수와 받은 별 수. 목록과 같은 화자, 반려동물 거르기를 쓴다.
    * 목록은 페이지 단위라 화면이 셀 수 없어 서버가 센다(count 두 번, 한 가족 규모).
    */
   summary: spaceProcedure
-    .input(z.object({ narratorMemberId: entityId.optional() }))
+    .input(z.object({ narratorMemberId: entityId.optional(), petId: entityId.optional() }))
     .query(async ({ ctx, input }) => {
       const where: Prisma.StoryEntryWhereInput = {
         spaceId: ctx.member.spaceId,
         narratorMemberId: input.narratorMemberId,
+        petId: input.petId,
       };
       const [stories, stars] = await Promise.all([
         ctx.prisma.storyEntry.count({ where }),

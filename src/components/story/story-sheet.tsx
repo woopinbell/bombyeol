@@ -52,7 +52,8 @@ export function StorySheet({
   const errors = useTranslations("errors");
   const left = useTranslations("privacy")("leftFamily");
   const { toast } = useToast();
-  const { spaceId, me, authors, dropStory } = useStory();
+  const { spaceId, me, authors, dropStory, pets } = useStory();
+  const pet = pets.find((p) => p.id === story.petId);
   const comments = useComments({
     spaceId,
     target: { type: "story", storyEntryId: story.id },
@@ -107,6 +108,7 @@ export function StorySheet({
       <p className="mt-3 text-caption text-fg-muted">
         {t("byline", { name: story.narrator.label ?? story.narrator.name ?? left })}
         {story.storyYear ? <>, {t("year", { year: story.storyYear })}</> : null}
+        {pet ? <>, {t("aboutPet", { name: pet.name })}</> : null}
         {story.scribe ? (
           <>
             , {t("scribedBy", { name: authors[story.createdBy.id] ?? story.scribe.name ?? left })}
