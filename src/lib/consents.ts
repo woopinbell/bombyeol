@@ -4,11 +4,11 @@ import type { ConsentKind } from "@/generated/prisma/client";
 
 export const CONSENT_VERSIONS = {
   /** 이용약관 */
-  terms: "2026-10-01",
+  terms: "2026-10-05",
   /** 개인정보 처리방침 */
-  privacy: "2026-10-01",
+  privacy: "2026-10-05",
   /** 아이 정보 처리(법정대리인 동의) - Space 단위 */
-  child_data: "2026-10-01",
+  child_data: "2026-10-05",
   /** 임신(건강) 정보 별도 동의 - Space 단위, 임신 기록 기능을 처음 켤 때 */
   pregnancy: "2026-10-01",
 } as const satisfies Record<ConsentKind, string>;
