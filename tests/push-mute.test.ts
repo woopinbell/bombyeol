@@ -7,6 +7,7 @@ import { createTestPrisma, resetDb } from "./helpers/db";
 import { FakeSender, giveToken, TEST_ORIGIN } from "./helpers/push";
 import { exhaustRateLimit } from "./helpers/rate";
 import { callerFor } from "./helpers/trpc";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -14,8 +15,8 @@ afterAll(() => prisma.$disconnect());
 
 /** 두 가족에 함께 있는 할머니 */
 async function setup() {
-  const mom = await prisma.user.create({ data: { name: "엄마" } });
-  const grandma = await prisma.user.create({ data: { name: "할머니" } });
+  const mom = await createUser(prisma, "엄마");
+  const grandma = await createUser(prisma, "할머니");
   const spaces = [];
   for (const name of ["친가", "외가"]) {
     const space = await prisma.space.create({ data: { name, createdById: mom.id } });
@@ -80,7 +81,7 @@ describe("가족별 알림 종류 끄기", () => {
     expect(await callerFor(prisma, mom.id).push.mutes({ spaceId: spaces[0] })).toEqual({
       muted: [],
     });
-    const stranger = await prisma.user.create({ data: { name: "x" } });
+    const stranger = await createUser(prisma, "x");
     await expect(callerFor(prisma, stranger.id).push.mutes({ spaceId: spaces[0] })).rejects.toThrow(
       /NOT_FOUND/,
     );

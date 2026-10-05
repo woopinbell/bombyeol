@@ -5,6 +5,7 @@ import { spaceUsage } from "@/server/media/usage";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { addMember } from "./helpers/members";
+import { CHILD_CONSENT } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -15,9 +16,14 @@ async function family() {
   const { api, storage, spaceId } = setup;
   const kong = await api.child.create({
     spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { nickname: "콩이", dueDate: "2027-03-01" },
   });
-  const bom = await api.child.create({ spaceId, child: { name: "김봄", birthDate: "2026-01-01" } });
+  const bom = await api.child.create({
+    spaceId,
+    childDataConsent: CHILD_CONSENT,
+    child: { name: "김봄", birthDate: "2026-01-01" },
+  });
   const photo = () => uploadConfirmed(api, storage, spaceId);
   return { ...setup, kong, bom, photo };
 }

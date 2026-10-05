@@ -5,6 +5,7 @@ import { createTestPrisma, resetDb } from "./helpers/db";
 import { exhaustRateLimit } from "./helpers/rate";
 import { MemoryStorage } from "./helpers/storage";
 import { callerFor } from "./helpers/trpc";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -14,7 +15,7 @@ const DAY = 24 * 60 * 60 * 1000;
 const token = (n: number) => `fcm-token-${String(n).padStart(4, "0")}:APA91b`;
 
 async function user(name = "u") {
-  const u = await prisma.user.create({ data: { name } });
+  const u = await createUser(prisma, name);
   return { id: u.id, caller: callerFor(prisma, u.id) };
 }
 

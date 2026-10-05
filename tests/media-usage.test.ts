@@ -4,6 +4,7 @@ import { fitsStorage, spaceUsage } from "@/server/media/usage";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup } from "./helpers/media";
 import { callerFor } from "./helpers/trpc";
+import { createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -62,13 +63,13 @@ describe("Space 사용량 (G-03, G-15)", () => {
 
   it("media.usage는 멤버 누구나 볼 수 있고 비멤버는 못 본다", async () => {
     const { spaceId } = await mediaSetup(prisma);
-    const grandma = await prisma.user.create({ data: { name: "할머니" } });
+    const grandma = await createUser(prisma, "할머니");
     await prisma.member.create({ data: { spaceId, userId: grandma.id, role: "grandparent" } });
     await expect(callerFor(prisma, grandma.id).media.usage({ spaceId })).resolves.toMatchObject({
       confirmedBytes: 0,
       limitBytes: TIER_LIMITS.free.storageBytes,
     });
-    const stranger = await prisma.user.create({ data: { name: "남" } });
+    const stranger = await createUser(prisma, "남");
     await expect(callerFor(prisma, stranger.id).media.usage({ spaceId })).rejects.toMatchObject({
       code: "NOT_FOUND",
     });

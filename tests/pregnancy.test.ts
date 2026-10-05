@@ -6,6 +6,7 @@ import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { addMember } from "./helpers/members";
 import { exhaustRateLimit } from "./helpers/rate";
+import { CHILD_CONSENT } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -20,6 +21,7 @@ async function expecting() {
   await api.consent.grantSpace({ spaceId, kind: "pregnancy", version: CONSENT_VERSIONS.pregnancy });
   const child = await api.child.create({
     spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { nickname: "콩이", dueDate: "2027-03-01" },
   });
   return { ...setup, childId: child.id };
@@ -63,6 +65,7 @@ describe("pregnancy 임신 기록", () => {
     const { api, storage, spaceId } = await mediaSetup(prisma);
     const { id: childId } = await api.child.create({
       spaceId,
+      childDataConsent: CHILD_CONSENT,
       child: { nickname: "콩이", dueDate: "2027-03-01" },
     });
     const input = { spaceId, childId, kind: "kick", date: "2026-09-30" } as const;
@@ -100,6 +103,7 @@ describe("pregnancy 임신 기록", () => {
     const other = await mediaSetup(prisma);
     const foreignChild = await other.api.child.create({
       spaceId: other.spaceId,
+      childDataConsent: CHILD_CONSENT,
       child: { nickname: "다른 아이", dueDate: "2027-01-01" },
     });
     await expect(

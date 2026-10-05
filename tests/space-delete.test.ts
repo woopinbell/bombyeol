@@ -5,6 +5,7 @@ import { runCleanup } from "@/server/jobs/cleanup";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { callerFor } from "./helpers/trpc";
+import { CHILD_CONSENT, createUser } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -16,7 +17,7 @@ async function family() {
   const setup = await mediaSetup(prisma);
   const { storage, spaceId } = setup;
   const join = async (role: "parent" | "grandparent") => {
-    const user = await prisma.user.create({ data: { name: role } });
+    const user = await createUser(prisma, role);
     await prisma.member.create({ data: { spaceId, userId: user.id, role } });
     return { userId: user.id, api: callerFor(prisma, user.id, "203.0.113.9", storage) };
   };
@@ -51,7 +52,7 @@ describe("space.requestDeletion, cancelDeletion", () => {
     const { api, spaceId } = await family();
     const invite = await api.invite.create({ spaceId, role: "grandparent" });
     await api.space.requestDeletion({ spaceId, confirmName: "가족" });
-    const stranger = await prisma.user.create({ data: { name: "새 가족" } });
+    const stranger = await createUser(prisma, "새 가족");
     await expect(
       callerFor(prisma, stranger.id).invite.accept({ code: invite.code }),
     ).rejects.toThrow(/INVITE_INVALID/);
@@ -103,6 +104,7 @@ describe("유예 후 파기(정리 Cron, G-06)", () => {
     const { api, storage, spaceId, parent } = await family();
     const child = await api.child.create({
       spaceId,
+      childDataConsent: CHILD_CONSENT,
       child: { name: "김봄", birthDate: "2026-01-01" },
     });
     const photo = await uploadConfirmed(api, storage, spaceId);

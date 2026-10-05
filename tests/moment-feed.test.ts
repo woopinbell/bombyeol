@@ -3,6 +3,7 @@ import { MOMENT_POLICY } from "@/lib/plan";
 import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { addMember } from "./helpers/members";
+import { CHILD_CONSENT } from "./helpers/users";
 
 const prisma = createTestPrisma();
 beforeEach(() => resetDb(prisma));
@@ -12,6 +13,7 @@ async function family() {
   const setup = await mediaSetup(prisma);
   const child = await setup.api.child.create({
     spaceId: setup.spaceId,
+    childDataConsent: CHILD_CONSENT,
     child: { name: "김봄", birthDate: "2026-01-01" },
   });
   const pet = await setup.api.pet.create({ spaceId: setup.spaceId, name: "보리", species: "dog" });

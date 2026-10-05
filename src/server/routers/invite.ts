@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Prisma } from "@/generated/prisma/client";
 import { ACCOUNT_LIMITS, INVITE_POLICY, RATE_LIMITS, TIER_LIMITS, tierOf } from "@/lib/plan";
 import { inviteError, limitError } from "@/server/errors";
+import { requireAccountConsents } from "@/server/consents";
 import { isInviteAttemptBlocked, recordInviteFailure } from "@/server/invite-attempts";
 import { generateInviteCode, normalizeInviteCode } from "@/server/invite-code";
 import { lockKey } from "@/server/locks";
@@ -76,6 +77,8 @@ export const inviteRouter = router({
   accept: protectedProcedure
     .input(codeInput.extend({ relationLabel: relationLabel.optional() }))
     .mutation(async ({ ctx, input }) => {
+      // 가입 동의 전에는 합류하지 않는다(초대를 소비하지 않도록 먼저 확인)
+      await requireAccountConsents(ctx.prisma, ctx.userId);
       const invite = await findValidInvite(ctx, input.code);
 
       return ctx.prisma.$transaction(async (tx) => {

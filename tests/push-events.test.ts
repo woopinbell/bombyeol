@@ -6,6 +6,7 @@ import { createTestPrisma, resetDb } from "./helpers/db";
 import { mediaSetup, uploadConfirmed } from "./helpers/media";
 import { FakeSender, giveToken, testPush, TEST_ORIGIN } from "./helpers/push";
 import { callerFor } from "./helpers/trpc";
+import { CHILD_CONSENT } from "./helpers/users";
 
 // PRD §4.6 알림 연결. 수신자, 문구는 발송 시점(응답 뒤)에 DB에서 다시 정한다(ARCHITECTURE §7, PRIVACY §3).
 
@@ -101,6 +102,7 @@ describe("새 사진, 일기 알림", () => {
     const f = await family();
     const child = await f.api.child.create({
       spaceId: f.spaceId,
+      childDataConsent: CHILD_CONSENT,
       child: { name: "김봄", birthDate: "2026-01-01" },
     });
     await f.api.milestone.create({
@@ -243,6 +245,7 @@ describe("임신 기록 알림(PRIVACY §3)", () => {
     });
     const child = await f.api.child.create({
       spaceId: f.spaceId,
+      childDataConsent: CHILD_CONSENT,
       child: { nickname: "콩이", dueDate: "2027-03-01" },
     });
     return { ...f, childId: child.id };

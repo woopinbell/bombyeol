@@ -1,5 +1,4 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { findOrCreateUser } from "@/server/auth/users";
 import { runCleanup } from "@/server/jobs/cleanup";
 import { assertLocalDatabaseUrl } from "../scripts/with-local-db.mjs";
 import { createTestPrisma, resetDb } from "./helpers/db";
@@ -8,6 +7,7 @@ import { FakeSender, testPush } from "./helpers/push";
 import { leftovers } from "./helpers/residual";
 import { MemoryStorage } from "./helpers/storage";
 import { callerFor } from "./helpers/trpc";
+import { CHILD_CONSENT, signedUp } from "./helpers/users";
 
 // 핵심 플로우 e2e(서버): 가족 생성 → 초대 → 사진 → 이야기 → 삭제를 tRPC 호출만으로 한 번에 따라간다.
 // 화면에 기대는 부분은 여기서 다루지 않는다 - 브라우저 조작, 카카오 로그인 리다이렉트, 카카오톡 공유,
@@ -33,7 +33,7 @@ describe("핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭
     };
 
     // 1. 로그인(카카오) - 엄마가 가족을 만들고 아이를 등록한다
-    const mom = await findOrCreateUser(prisma, {
+    const mom = await signedUp(prisma, {
       provider: "kakao",
       providerAccountId: "e2e-mom",
       name: "엄마",
@@ -44,6 +44,7 @@ describe("핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭
     const { id: spaceId } = await momApi.space.create({ name: "봄이네", relationLabel: "엄마" });
     const child = await momApi.child.create({
       spaceId,
+      childDataConsent: CHILD_CONSENT,
       child: { name: "김봄", birthDate: "2026-03-01" },
     });
     expect(child).toMatchObject({ status: "born" });
@@ -54,7 +55,7 @@ describe("핵심 플로우 e2e(가족 생성→초대→사진→이야기→삭
       role: "grandparent",
       relationLabel: "할머니",
     });
-    const grandma = await findOrCreateUser(prisma, {
+    const grandma = await signedUp(prisma, {
       provider: "kakao",
       providerAccountId: "e2e-grandma",
       name: "할머니",

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { ACCOUNT_LIMITS, DELETION_POLICY } from "@/lib/plan";
 import { inputError, limitError } from "@/server/errors";
+import { ensureChildConsent, requireAccountConsents } from "@/server/consents";
 import { lockKey } from "@/server/locks";
 import {
   openSpaceDeletion,
@@ -10,24 +11,30 @@ import {
 } from "@/server/trpc/procedures";
 import { router } from "@/server/trpc/init";
 import { childInput, createChild } from "./child";
-import { relationLabel, spaceName } from "./inputs";
+import { consentVersion, relationLabel, spaceName } from "./inputs";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const deletionSelect = { requestedAt: true, purgeAfter: true } as const;
 
 export const spaceRouter = router({
-  /** 가족 Space 생성: 생성자는 parent 멤버가 되고, 첫 아이를 함께 등록할 수 있다(G-11). */
+  /**
+   * 가족 Space 생성: 생성자는 parent 멤버가 되고, 첫 아이를 함께 등록할 수 있다(G-11).
+   * 가입 동의(약관, 처리방침)가 먼저 있어야 하고, 아이를 함께 등록하면 아이 정보 동의도 함께 남긴다.
+   */
   create: protectedProcedure
     .input(
       z.object({
         name: spaceName,
         relationLabel: relationLabel.optional(),
         child: childInput.optional(),
+        /** 첫 아이를 함께 등록할 때 화면이 보여준 아이 정보 동의 버전(법정대리인 동의) */
+        childDataConsent: consentVersion.optional(),
       }),
     )
-    .mutation(({ ctx, input }) =>
-      ctx.prisma.$transaction(async (tx) => {
+    .mutation(async ({ ctx, input }) => {
+      await requireAccountConsents(ctx.prisma, ctx.userId);
+      return ctx.prisma.$transaction(async (tx) => {
         await lockKey(tx, `user-spaces:${ctx.userId}`);
         const cooldownStart = new Date(
           Date.now() - ACCOUNT_LIMITS.deletedSpaceCooldownDays * DAY_MS,
@@ -64,10 +71,13 @@ export const spaceRouter = router({
           },
           select: { id: true },
         });
-        if (input.child) await createChild(tx, space.id, ctx.userId, input.child);
+        if (input.child) {
+          await ensureChildConsent(tx, ctx.userId, space.id, input.childDataConsent);
+          await createChild(tx, space.id, ctx.userId, input.child);
+        }
         return space;
-      }),
-    ),
+      });
+    }),
 
   /** 내가 속한 Space 목록 */
   list: protectedProcedure.query(({ ctx }) =>
