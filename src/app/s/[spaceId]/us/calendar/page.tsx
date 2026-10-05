@@ -9,6 +9,7 @@ import { CalendarView } from "@/components/us/calendar-view";
 import { timeZone } from "@/i18n/config";
 import { monthRange, parseMonth } from "@/lib/month";
 import { authorNames, dayKey } from "@/lib/today-feed";
+import { cn } from "@/lib/utils";
 import { zoneOffsetMinutes } from "@/lib/zone";
 import { loadFamily } from "@/server/family";
 
@@ -41,27 +42,32 @@ export default async function CalendarPage({
     <TabPage header={<BackLink href={`/s/${spaceId}/us`}>{t("usTab.back")}</BackLink>}>
       <div className="flex flex-col gap-6 pt-2 pb-12">
         <Title size="title">{t("calendar.title")}</Title>
-        <nav className="flex items-center justify-between gap-2">
-          <Link
-            href={`${base}?month=${range.prev}`}
-            className={buttonClass({ variant: "text" })}
-            scroll={false}
-          >
-            <Icon name="left" size="small" />
-            {t("calendar.prev")}
-          </Link>
-          <h2 className="text-title-s font-bold tabular-nums" aria-live="polite">
-            {monthLabel}
-          </h2>
-          <Link
-            href={`${base}?month=${range.next}`}
-            className={buttonClass({ variant: "text" })}
-            scroll={false}
-          >
-            {t("calendar.next")}
-            <Icon name="right" size="small" />
-          </Link>
-        </nav>
+        <div className="@container">
+          <nav className="flex items-center justify-between gap-2 @max-xs:flex-wrap">
+            <Link
+              href={`${base}?month=${range.prev}`}
+              className={cn(buttonClass({ variant: "text" }), "whitespace-nowrap")}
+              scroll={false}
+            >
+              <Icon name="left" size="small" />
+              {t("calendar.prev")}
+            </Link>
+            <h2
+              className="text-title-s font-bold whitespace-nowrap tabular-nums @max-xs:order-first @max-xs:basis-full @max-xs:text-center"
+              aria-live="polite"
+            >
+              {monthLabel}
+            </h2>
+            <Link
+              href={`${base}?month=${range.next}`}
+              className={cn(buttonClass({ variant: "text" }), "whitespace-nowrap")}
+              scroll={false}
+            >
+              {t("calendar.next")}
+              <Icon name="right" size="small" />
+            </Link>
+          </nav>
+        </div>
         <CalendarView
           spaceId={spaceId}
           events={events}

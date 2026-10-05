@@ -8,6 +8,7 @@ import { StorageMeter } from "@/components/us/storage-meter";
 import { UpcomingSection } from "@/components/us/upcoming";
 import { timeZone } from "@/i18n/config";
 import { childName, dayKey } from "@/lib/today-feed";
+import { keepTogether } from "@/lib/utils";
 import { zoneOffsetMinutes } from "@/lib/zone";
 import { loadFamily } from "@/server/family";
 
@@ -39,7 +40,9 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
   const base = `/s/${space.id}/us`;
   // 날짜만 의미가 있는 값(UTC 자정으로 저장)
   const day = (date: Date) =>
-    format.dateTime(date, { timeZone: "UTC", year: "numeric", month: "long", day: "numeric" });
+    keepTogether(
+      format.dateTime(date, { timeZone: "UTC", year: "numeric", month: "long", day: "numeric" }),
+    );
 
   const memberRows = (generation: (typeof GENERATIONS)[number]): ProfileRow[] =>
     space.members
@@ -108,7 +111,10 @@ export default async function UsPage({ params }: PageProps<"/s/[spaceId]">) {
             ) : null;
           })}
           {isParent ? (
-            <Link href={`/start/invite/${space.id}`} className={`${buttonClass()} self-start`}>
+            <Link
+              href={`/start/invite/${space.id}`}
+              className={`${buttonClass({ block: true })} text-center text-balance`}
+            >
               <Icon name="plus" size="small" />
               {t("invite")}
             </Link>

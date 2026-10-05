@@ -37,14 +37,7 @@ export function DisplaySettings() {
           <span id={`pref-${key}`} className="font-bold">
             {t(`${key}.label`)}
           </span>
-          <div
-            role="radiogroup"
-            aria-labelledby={`pref-${key}`}
-            className={cn(
-              "grid gap-2",
-              DISPLAY_PREF_VALUES[key].length === 3 ? "grid-cols-3" : "grid-cols-2",
-            )}
-          >
+          <div role="radiogroup" aria-labelledby={`pref-${key}`} className="flex flex-wrap gap-2">
             {DISPLAY_PREF_VALUES[key].map((value) => (
               <button
                 key={value}
@@ -55,7 +48,7 @@ export function DisplaySettings() {
                 onClick={() => setChosen(setDisplayPref(key, value as DisplayPrefs[typeof key]))}
                 className={cn(
                   buttonClass(),
-                  "px-2",
+                  "grow basis-0 px-2 whitespace-nowrap",
                   current[key] === value && "border-(length:--bw-sel) border-fg font-heavy",
                 )}
               >
