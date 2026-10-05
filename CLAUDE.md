@@ -16,6 +16,7 @@
 - [docs/ENV_MANIFEST.md](docs/ENV_MANIFEST.md) - Phase별 필요한 키 목록(이름, 형식, 발급처)
 - [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) - 아직 결정되지 않은 것, 검증이 필요한 가정
 - [docs/PROGRESS.md](docs/PROGRESS.md) - 세션 인수인계 로그(현재 상태, 다음 할 일, 막힌 것)
+- [docs/LAUNCH_GUIDE.md](docs/LAUNCH_GUIDE.md) - **출시 마무리 안내서**: 사용자만 할 수 있는 일(돈, 계정, 약관 사실 칸, 법 검토, 실기기)을 순서대로(2026-10-05 종착역)
 - [docs/REPO_BOOTSTRAP.md](docs/REPO_BOOTSTRAP.md) - git 리포, `docs` 고아 브랜치, GitHub 리포 생성 절차(2026-10-01 수행 완료, 재현 참고용)
 - `image-asset/` - 확정 로고, 아이콘, OG, 토큰 v1(`brand/tokens.json`, 2026-10-02). 후보, 결정 기록은 `concept/`, `logo-v2/`
 
