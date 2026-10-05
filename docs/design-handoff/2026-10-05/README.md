@@ -1,16 +1,19 @@
 # 봄별 - 이미지 에셋 디자이너 전달 묶음 (2026-10-05)
 
-요청하신 네 가지를 담았습니다: 확정 로고 S2+W2 SVG, DESIGN §10.5, §12 원문, 현재 낮(밝게)/밤(어둡게) 화면 캡처.
+요청하신 네 가지의 위치입니다: 확정 로고 S2+W2 SVG, DESIGN §10.5, §12 원문, 현재 낮(밝게)/밤(어둡게) 화면 캡처.
 
-## 폴더
+## 어디에 있나 (저장소 docs 브랜치 기준 경로)
 
-| 폴더 | 내용 |
+| 경로 | 내용 |
 |---|---|
-| `1-logo-S2-W2/final/` | 앱에 실제로 들어간 확정 로고(SVG). `symbol` 심볼, `wordmark` 워드마크, `primary` 가로형, `stacked` 세로형(로그인 화면), `monochrome` 단색, `-dark`는 어두운 바탕용(별이 silver). `_app.svg`, `_maskable.svg`, `favicon.svg`는 앱 아이콘 원본, `icon-1024.png`, `og-image.png`는 그 결과물 |
-| `1-logo-S2-W2/source/` | 확정 전 후보 생성기에서 나온 S2, W2 원본(같은 도형, 작은 크기용 `symbol-S2-small`, 단색 `-mono` 포함) |
-| `2-app-icons/` | 앱 안 아이콘 17개(§10.5 규칙으로 그린 것). `app-icons.svg`/`.png` 한 장 모음, `icon.tsx.txt`는 실제 코드(경로 값 원본) |
-| `3-design-spec/` | `DESIGN-excerpt.md` = DESIGN.md §1, §3, §7, §10(§10.5 포함), §12 원문 그대로 + §9.3(일러스트 규칙). `tokens.json`/`tokens.css` = 확정 토큰 v1 원본(색 hex 값은 여기가 기준). `brand-guide.md` = 브랜드 가이드 |
-| `4-screens/` | 현재 앱 화면 전체 캡처(폭 390px, 2배 밀도, 세로 전체). `light` 밝게, `dark` 어둡게, `large-320` 글자 더 크게 + 폭 320px |
+| `image-asset/logo/` | 앱에 실제로 들어간 확정 로고(SVG). `symbol` 심볼, `wordmark` 워드마크, `primary` 가로형, `stacked` 세로형(로그인 화면), `monochrome` 단색, `-dark`는 어두운 바탕용(별이 silver) |
+| `image-asset/icon/` | 앱 아이콘 원본(`_app.svg`, `_maskable.svg`, `favicon.svg`)과 결과물 PNG(1024px까지) |
+| `image-asset/og/` | 공유 이미지 |
+| `image-asset/logo-v2/` | 확정 전 후보 생성기. 확정된 것은 `symbol-S2*`, `wordmark-W2*`, `lockup-S2-W2.svg`, `icon-S2*`(작은 크기용 `-small`, 단색 `-mono` 포함) |
+| `image-asset/brand/` | `tokens.json`/`tokens.css` = 확정 토큰 v1 원본(색 hex 값은 여기가 기준), `brand-guide.md` |
+| `docs/DESIGN.md` | 디자인 문서 전체. 이 폴더의 `DESIGN-excerpt.md`는 §1, §3, §7, §10(§10.5 포함), §12, §9.3 원문만 뽑은 것 |
+| 이 폴더 `app-icons/` | 앱 안 아이콘 17개(§10.5 규칙). `app-icons.svg`/`.png` 한 장 모음, `icon.tsx.txt`는 실제 코드(경로 값 원본) |
+| 이 폴더 `screens/` | 현재 앱 화면 전체 캡처(폭 390px, 2배 밀도, 세로 전체). `light` 밝게, `dark` 어둡게, `large-320` 글자 더 크게 + 폭 320px |
 
 ## 화면 캡처 이름
 
