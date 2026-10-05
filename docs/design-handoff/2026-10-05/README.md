@@ -50,7 +50,7 @@
 
 ## 지금 필요한 것 (일러스트)
 
-2026-10-05에 받은 큰 그림 2장(`bombyeol-family-spring-bg.png`, `bombyeol-family-starry-night-bg.png`, 1264x848)은 아래 자리에 **이미 적용했습니다**(원본 `image-asset/illustration/`).
+2026-10-05에 받은 큰 그림 2장(`bombyeol-family-spring-bg.png`, `bombyeol-family-starry-night-bg.png`, 1264x848)은 아래 자리에 시험 적용했다가 **되돌렸습니다**(사용자 판단: 더 조잡해 보임). 원본은 `image-asset/illustration/`에 두고, 브랜드 교체 때 다시 봅니다. 지금은 일러스트를 새로 만들지 않으셔도 됩니다.
 
 | 자리 | 그림 | 화면에서 보이는 크기 |
 |---|---|---|
