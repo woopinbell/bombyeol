@@ -395,55 +395,61 @@ function Album({
   const shown = media.slice(0, VISIBLE);
   const rest = media.length - shown.length;
   const wideFirst = shown.length % 2 === 1;
+  // 글자 더 크게(또는 아주 좁은 화면)에서는 1열로 크게 보인다(DESIGN §10.7). 기준이 rem이라 글자 크기를 따라간다
   return (
-    <div ref={grid} className="grid grid-cols-2 gap-1 overflow-hidden rounded-lg">
-      {shown.map((m, i) => (
-        <button
-          type="button"
-          key={m.assetId}
-          onClick={() => onOpen(i)}
-          data-press=""
-          className={cn(
-            "press relative block overflow-hidden bg-line",
-            wideFirst && i === 0
-              ? shown.length === 1
-                ? "col-span-2 aspect-4/3"
-                : "col-span-2 aspect-video"
-              : "aspect-square",
-          )}
-        >
-          {m.kind === "image" || m.thumbnailUrl ? (
-            // 서명 URL(짧은 TTL)이라 이미지 최적화 경로를 거치지 않는다
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={m.kind === "image" ? (m.thumbnailUrl ?? m.url) : m.thumbnailUrl!}
-              alt={t("photoAlt", { n: i + 1, total: media.length })}
-              loading="lazy"
-              decoding="async"
-              className="size-full object-cover"
-            />
-          ) : null}
-          {m.kind === "video" && !m.thumbnailUrl ? (
-            <span className="absolute inset-0 flex items-center justify-center">
-              <Icon name="play" />
-            </span>
-          ) : null}
-          {m.kind === "video" ? (
-            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-sm bg-strong px-2 text-caption font-bold text-on-strong">
-              <Icon name="play" size="small" />
-              {t("video")}
-            </span>
-          ) : null}
-          {rest > 0 && i === shown.length - 1 ? (
-            <span
-              data-surface="night"
-              className="absolute inset-0 flex items-center justify-center bg-bg/70 text-title font-heavy text-fg"
-            >
-              {t("rest", { count: rest })}
-            </span>
-          ) : null}
-        </button>
-      ))}
+    <div className="@container">
+      <div
+        ref={grid}
+        className="grid grid-cols-2 gap-1 overflow-hidden rounded-lg @max-xs:grid-cols-1"
+      >
+        {shown.map((m, i) => (
+          <button
+            type="button"
+            key={m.assetId}
+            onClick={() => onOpen(i)}
+            data-press=""
+            className={cn(
+              "press relative block overflow-hidden bg-line",
+              wideFirst && i === 0
+                ? shown.length === 1
+                  ? "col-span-2 aspect-4/3"
+                  : "col-span-2 aspect-video"
+                : "aspect-square",
+            )}
+          >
+            {m.kind === "image" || m.thumbnailUrl ? (
+              // 서명 URL(짧은 TTL)이라 이미지 최적화 경로를 거치지 않는다
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={m.kind === "image" ? (m.thumbnailUrl ?? m.url) : m.thumbnailUrl!}
+                alt={t("photoAlt", { n: i + 1, total: media.length })}
+                loading="lazy"
+                decoding="async"
+                className="size-full object-cover"
+              />
+            ) : null}
+            {m.kind === "video" && !m.thumbnailUrl ? (
+              <span className="absolute inset-0 flex items-center justify-center">
+                <Icon name="play" />
+              </span>
+            ) : null}
+            {m.kind === "video" ? (
+              <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-sm bg-strong px-2 text-caption font-bold text-on-strong">
+                <Icon name="play" size="small" />
+                {t("video")}
+              </span>
+            ) : null}
+            {rest > 0 && i === shown.length - 1 ? (
+              <span
+                data-surface="night"
+                className="absolute inset-0 flex items-center justify-center bg-bg/70 text-title font-heavy text-fg"
+              >
+                {t("rest", { count: rest })}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
