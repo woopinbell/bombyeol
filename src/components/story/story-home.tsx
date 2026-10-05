@@ -317,7 +317,8 @@ export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
             ))}
           </ul>
         ) : (
-          <div className="flex flex-col gap-2 py-6">
+          <div className="flex flex-col items-start gap-2 py-6">
+            <Icon name="spark" className="text-starlight-gold" />
             <p className="text-title-s font-bold">{t("emptyTitle")}</p>
             <p className="text-fg-muted">{t("emptyLead")}</p>
           </div>

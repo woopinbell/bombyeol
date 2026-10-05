@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { deleteMilestone, deleteMoment, loadMoreMoments } from "@/app/s/[spaceId]/actions";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import { MilestoneDetail, MilestoneSentence } from "./milestone-detail";
@@ -55,11 +56,19 @@ export function TodayFeed() {
 
   if (days.length === 0) {
     return (
-      <div className="flex flex-1 flex-col justify-center gap-3 pb-12">
+      // 빈 화면(Q-ILLUST: 일러스트 없이): 반짝임 표식 + 한 문장 + 할 수 있는 행동. 기록하기는 아래 막대에 있다
+      <div className="flex flex-col items-start gap-3 pt-10 pb-12">
+        <Icon name="spark" />
         <h2 className="text-title font-heavy">
           {props.emptyName ? t("emptyWhoTitle", { name: props.emptyName }) : t("emptyTitle")}
         </h2>
         <p className="text-title-s">{t("emptyLead")}</p>
+        {props.inviteHref ? (
+          <Link href={props.inviteHref} className={cn(buttonClass(), "mt-3")}>
+            <Icon name="plus" size="small" />
+            {t("emptyInvite")}
+          </Link>
+        ) : null}
       </div>
     );
   }
@@ -362,7 +371,7 @@ function Reactions({
 }
 
 /**
- * 사진 묶음(앨범 한 장처럼 바깥 모서리만 둥글게, 사이 4px). 홀수면 첫 장을 가로로 넓게, 최대 5칸까지 보이고
+ * 사진 묶음(앨범 한 장처럼 바깥 모서리만 둥글게, 사이 4px). 홀수면 첫 장을 가로로 넓게(2열일 때), 최대 5칸까지 보이고
  * 나머지는 마지막 칸에 "N장 더"로.
  */
 const VISIBLE = 5;

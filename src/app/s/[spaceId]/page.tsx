@@ -88,6 +88,11 @@ export default async function TodayPage({ params, searchParams }: PageProps<"/s/
       authors={Object.fromEntries(authorNames(space))}
       todayKey={dayKey(new Date(), timeZone)}
       emptyName={emptyName}
+      inviteHref={
+        isParent && !space.members.some((m) => m.role === "grandparent")
+          ? `/start/invite/${spaceId}`
+          : undefined
+      }
       myUserId={family.userId}
       canModerate={family.role === "parent"}
     >
