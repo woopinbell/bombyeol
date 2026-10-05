@@ -341,7 +341,7 @@ export function CommentList({
                 </span>
               </p>
               {comment.createdBy.id === myUserId || canModerate ? (
-                <Button variant="text" className="-my-2 -mr-2" onClick={() => c.remove(comment)}>
+                <Button variant="text" className="flex-none" onClick={() => c.remove(comment)}>
                   {t("removeComment")}
                 </Button>
               ) : null}

@@ -22,6 +22,17 @@ describe("이야기 화면 도우미", () => {
     expect(keys).toContain(dailyPrompt(new Set(keys), "2026-10-02"));
   });
 
+  it("부모가 스스로 답하는 카드(elder 아님)에는 손주 질문이 나오지 않는다", () => {
+    const none = new Set<string>();
+    for (let offset = 0; offset < keys.length * 2; offset++) {
+      const key = dailyPrompt(none, "2026-10-05", offset, false);
+      expect(STORY_PROMPTS[key]).not.toBe("grandchildren");
+    }
+    // 어르신 카드에는 손주 질문도 돈다
+    const elderKeys = keys.map((_, i) => dailyPrompt(none, "2026-10-05", i));
+    expect(elderKeys.some((k) => STORY_PROMPTS[k] === "grandchildren")).toBe(true);
+  });
+
   it("화자 고르기 값은 가족 안의 멤버만 받는다", () => {
     const narrators = [{ memberId: "m1" }, { memberId: "m2" }] as Narrator[];
     expect(parseNarrator("m2", narrators)).toBe("m2");

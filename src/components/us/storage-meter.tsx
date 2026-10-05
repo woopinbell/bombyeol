@@ -1,5 +1,6 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import { bytesForDisplay, storageRatio } from "@/lib/storage-display";
+import { cn } from "@/lib/utils";
 
 /**
  * 가족 앨범 저장 공간(G-03): 쓴 양과 한도, 막대. 올리는 중인 파일도 한도 판정에 들어가므로 함께 센다.
@@ -35,7 +36,11 @@ export async function StorageMeter({
         aria-valuetext={t("storageUsed", { used, limit })}
         className="h-4 overflow-hidden rounded-sm border-(length:--bw) border-line-strong"
       >
-        <div className="h-full bg-strong" style={{ width: `${ratio * 100}%` }} />
+        {/* 조금이라도 썼으면 막대가 보이게(1MB / 2GB가 빈 테두리로 보이지 않게) */}
+        <div
+          className={cn("h-full bg-strong", usedBytes > 0 && "min-w-1")}
+          style={{ width: `${ratio * 100}%` }}
+        />
       </div>
       <p className="font-bold tabular-nums">{t("storageUsed", { used, limit })}</p>
       {nearFull ? <p className="font-bold">{t("storageNearFull")}</p> : null}

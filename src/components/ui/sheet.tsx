@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, prefersReducedMotion } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
+import { Button } from "./button";
 import { ToastRegion, useSheetToastHost } from "./toast";
 
 const DRAG = motion["sheet-drag"];
@@ -157,14 +158,9 @@ export function Sheet({
           <h2 id="sheet-title" className="text-title-s font-bold">
             {title}
           </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            data-press=""
-            className="press -mr-2 inline-flex min-h-(--touch) items-center px-2 font-medium text-fg-muted"
-          >
+          <Button variant="text" className="flex-none" onClick={onClose}>
             {t("close")}
-          </button>
+          </Button>
         </div>
         <div
           ref={body}

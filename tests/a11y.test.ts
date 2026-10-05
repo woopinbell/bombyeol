@@ -3,6 +3,7 @@ import { join, relative } from "node:path";
 import { createElement as h } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { buttonClass } from "../src/components/ui/button";
 import { Checkbox } from "../src/components/ui/checkbox";
 import { Field } from "../src/components/ui/field";
 import { TextArea } from "../src/components/ui/text-area";
@@ -79,5 +80,16 @@ describe("글자 크기(WCAG 1.4.4, 1.4.12, DESIGN §9.1-9)", () => {
       .filter((file) => /user-?scalable|maximum-?scale/i.test(readFileSync(file, "utf8")))
       .map((file) => relative(SRC, file));
     expect(offenders).toEqual([]);
+  });
+});
+
+describe("버튼은 버튼처럼(DESIGN §9.1-3, 사용자 결정 2026-10-05)", () => {
+  it("주, 보통, 보조 버튼 모두 3:1 윤곽선(line-strong) 또는 면이 있다 - 보조도 글자만 두지 않는다", () => {
+    for (const variant of ["primary", "secondary", "text"] as const) {
+      const cls = buttonClass({ variant });
+      expect(cls).toContain("border-(length:--bw)");
+      expect(cls).not.toContain("border-transparent");
+      expect(cls).toMatch(/border-(line-strong|strong)/);
+    }
   });
 });

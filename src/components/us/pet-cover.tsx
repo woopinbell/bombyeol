@@ -82,7 +82,7 @@ export function PetCover({
       <h2 id="cover-heading" className="font-bold">
         {t("cover")}
       </h2>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <div className="flex size-24 flex-none items-center justify-center overflow-hidden rounded-lg border-(length:--bw) border-line-strong">
           {coverUrl ? (
             // 서명 URL(짧은 TTL)이라 이미지 최적화 경로를 거치지 않는다
@@ -104,7 +104,12 @@ export function PetCover({
               if (file) void upload(file);
             }}
           />
-          <Button onClick={() => input.current?.click()} disabled={busy} aria-busy={busy}>
+          <Button
+            className="whitespace-nowrap"
+            onClick={() => input.current?.click()}
+            disabled={busy}
+            aria-busy={busy}
+          >
             <Icon name="plus" size="small" />
             {busy ? t("coverUploading") : coverUrl ? t("coverChange") : t("coverPick")}
           </Button>

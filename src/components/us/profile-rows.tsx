@@ -34,7 +34,7 @@ export function ProfileRows({ rows }: { rows: ProfileRow[] }) {
                 className="size-(--touch) flex-none rounded-full object-cover"
               />
             ) : null}
-            <span className="flex flex-1 flex-col">
+            <span className="flex min-w-0 flex-1 flex-col wrap-anywhere">
               <span className="flex flex-wrap items-center gap-2">
                 <span className="font-bold">{row.name}</span>
                 {row.tag ? (
@@ -52,7 +52,7 @@ export function ProfileRows({ rows }: { rows: ProfileRow[] }) {
               {row.detail ? <span className="text-caption text-fg-muted">{row.detail}</span> : null}
             </span>
             {row.href ? (
-              <span className="inline-flex items-center gap-1 text-caption font-bold text-fg-muted">
+              <span className="inline-flex flex-none items-center gap-1 text-caption font-bold whitespace-nowrap text-fg-muted">
                 {row.action}
                 <Icon name="right" size="small" />
               </span>

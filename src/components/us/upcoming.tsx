@@ -1,6 +1,7 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { inferRouterOutputs } from "@trpc/server";
 import { Icon } from "@/components/ui/icon";
+import { keepTogether } from "@/lib/utils";
 import type { AppRouter } from "@/server/routers/_app";
 
 type Upcoming = inferRouterOutputs<AppRouter>["family"]["upcoming"];
@@ -14,7 +15,9 @@ export async function UpcomingSection({ upcoming }: { upcoming: Upcoming }) {
   const format = await getFormatter();
   // 카드 날짜는 날짜만 의미가 있다(UTC 자정)
   const day = (date: Date) =>
-    format.dateTime(date, { timeZone: "UTC", month: "long", day: "numeric", weekday: "short" });
+    keepTogether(
+      format.dateTime(date, { timeZone: "UTC", month: "long", day: "numeric", weekday: "short" }),
+    );
   const { nextGathering, cards } = upcoming;
   const label = (c: Upcoming["cards"][number]) => {
     const name = c.name ?? "";
@@ -56,16 +59,18 @@ export async function UpcomingSection({ upcoming }: { upcoming: Upcoming }) {
               key={`${c.type}-${c.id}`}
               className="flex min-h-(--touch) items-baseline gap-3 border-b-(length:--bw-hair) border-line py-2"
             >
-              <span className="w-16 flex-none font-bold tabular-nums">
+              <span className="min-w-16 flex-none font-bold whitespace-nowrap tabular-nums">
                 {t("inDays", { days: c.daysUntil })}
               </span>
-              <span className="flex-1">
-                {c.type === "memorial" ? (
-                  <Icon name="star" size="small" className="mr-1 inline align-[-2px]" />
-                ) : null}
-                {label(c)}
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="wrap-anywhere">
+                  {c.type === "memorial" ? (
+                    <Icon name="star" size="small" className="mr-1 inline align-[-2px]" />
+                  ) : null}
+                  {label(c)}
+                </span>
+                <span className="text-caption text-fg-muted tabular-nums">{day(c.date)}</span>
               </span>
-              <span className="text-caption text-fg-muted tabular-nums">{day(c.date)}</span>
             </li>
           ))}
         </ul>
