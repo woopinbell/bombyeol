@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/toast";
 import { dailyPrompt, type StoryAsk, type StoryItem } from "@/lib/story-view";
 import type { StoryPromptKey } from "@/lib/story-prompts";
 import { motion, prefersReducedMotion } from "@/lib/design-tokens";
-import { cn } from "@/lib/utils";
+import { cn, keepTogether } from "@/lib/utils";
 import { AskSheet } from "./ask-sheet";
 import { StarButton, useStar } from "./star";
 import { StorySheet, useStoryQuestion } from "./story-sheet";
@@ -281,18 +281,22 @@ export function StoryHome({ card: serverCard }: { card: QuestionCard | null }) {
 
       <section aria-labelledby="collection-heading" className="mt-8 flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-col">
+          <div className="flex min-w-0 flex-col">
             <h2 id="collection-heading" className="font-bold">
               {t("collection")}
             </h2>
             {state.summary.stories ? (
               <p className="text-caption text-fg-muted tabular-nums">
-                {t("summary", state.summary)}
+                {
+                  // 쉼표로 나눈 덩어리("받은 별 2") 안에서는 줄을 바꾸지 않는다
+                  t("summary", state.summary).split(", ").map(keepTogether).join(", ")
+                }
               </p>
             ) : null}
           </div>
           {canWrite ? (
             <Button
+              className="flex-none whitespace-nowrap"
               onClick={() =>
                 show({ sheet: "write", target: { kind: "free", narratorId: freeNarrator } })
               }
