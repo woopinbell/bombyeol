@@ -14,6 +14,8 @@ export type FeedProps = {
   /** 서버가 정한 오늘(자정 무렵 서버, 브라우저 렌더 차이 방지) */
   todayKey: string;
   emptyName?: string;
+  /** 빈 오늘에 보일 어르신 초대 경로(부모이고 아직 어르신이 없을 때만) */
+  inviteHref?: string;
   myUserId: string;
   /** parent: 남의 댓글도 지울 수 있다 */
   canModerate: boolean;

@@ -114,8 +114,16 @@ export function StoryProvider({ children, ...props }: StoryProps & { children: R
         setItems((list) => [story, ...list.filter((s) => s.id !== story.id)]);
         setFresh((f) => new Set(f).add(story.id));
       },
-      replaceStory: (story) =>
-        setItems((list) => list.map((s) => (s.id === story.id ? { ...s, ...story } : s))),
+      replaceStory: (story) => {
+        // 반려동물로 거르는 중에 다른 반려동물(또는 없음)로 바꿨으면 이 목록과 합계에서 바로 뺀다
+        if (props.petId && story.petId !== props.petId) {
+          const stars = items.find((s) => s.id === story.id)?.reactions.stars ?? 0;
+          setItems((list) => list.filter((s) => s.id !== story.id));
+          setDelta((d) => ({ stories: d.stories - 1, stars: d.stars - stars }));
+          return;
+        }
+        setItems((list) => list.map((s) => (s.id === story.id ? { ...s, ...story } : s)));
+      },
       setHidden: (id, hide) =>
         setHiddenSet((h) => {
           const next = new Set(h);
@@ -132,7 +140,18 @@ export function StoryProvider({ children, ...props }: StoryProps & { children: R
     }),
     // props는 서버가 매 렌더 새로 넘기므로 필요한 값만 본다
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, cursor, asks, hidden, fresh, server, delta, props.narratorId, props.authors],
+    [
+      items,
+      cursor,
+      asks,
+      hidden,
+      fresh,
+      server,
+      delta,
+      props.narratorId,
+      props.petId,
+      props.authors,
+    ],
   );
   return <StoryContext value={value}>{children}</StoryContext>;
 }

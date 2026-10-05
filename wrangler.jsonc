@@ -30,7 +30,12 @@
       "workers_dev": true,
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol-staging" }],
       // R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY는 Secret으로 등록한다(ENV_MANIFEST Phase 2).
-      "vars": { "APP_ENV": "staging", "R2_BUCKET_NAME": "bombyeol-staging-media" },
+      "vars": {
+        "APP_ENV": "staging",
+        "R2_BUCKET_NAME": "bombyeol-staging-media",
+        // Cron 알림의 링크 주소(요청이 없어 출처를 알 수 없다)
+        "APP_ORIGIN": "https://bombyeol-staging.seungwoo7050.workers.dev",
+      },
       // Supabase 개발 DB(직결) - 2026-10-01 생성
       // localConnectionString은 배포 명령의 로컬 단계(getPlatformProxy)용이며 배포 Worker에는 쓰이지 않는다.
       "hyperdrive": [
@@ -46,8 +51,11 @@
       "name": "bombyeol",
       "workers_dev": false,
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "bombyeol" }],
-      "vars": { "APP_ENV": "production" },
+      // APP_ORIGIN은 도메인을 정한 뒤 채운다(출시 마무리 안내서). 비어 있으면 아침 알림을 건너뛴다
+      "vars": { "APP_ENV": "production", "R2_BUCKET_NAME": "bombyeol-media", "APP_ORIGIN": "" },
+      // Hyperdrive(scripts/production-setup.sh가 만든 bombyeol의 id)와 도메인 연결(routes 또는 custom_domain)은
+      // 리소스를 만든 뒤 여기에 더한다. 그 전에는 프로덕션 배포를 하지 않는다.
     },
   },
-  "vars": { "APP_ENV": "local", "R2_BUCKET_NAME": "" },
+  "vars": { "APP_ENV": "local", "R2_BUCKET_NAME": "", "APP_ORIGIN": "http://localhost:3000" },
 }

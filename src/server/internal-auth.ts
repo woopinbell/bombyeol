@@ -1,6 +1,6 @@
-// 내부 경로(Cron 정리, 배포 스모크) 호출 인증. 별도 Secret 없이 AUTH_SECRET에서 용도별 키를 유도한다.
+// 내부 경로(Cron 정리, 아침 알림, 배포 스모크) 호출 인증. 별도 Secret 없이 AUTH_SECRET에서 용도별 키를 유도한다.
 // 경로는 공개 URL이기도 하므로 이 토큰 없이는 거부한다.
-export type InternalPurpose = "cleanup" | "smoke";
+export type InternalPurpose = "cleanup" | "smoke" | "reminders";
 
 export async function internalToken(authSecret: string, purpose: InternalPurpose): Promise<string> {
   const key = await crypto.subtle.importKey(
@@ -28,6 +28,7 @@ export function safeEqual(a: string, b: string): boolean {
 }
 
 export const INTERNAL_CLEANUP_PATH = "/api/internal/cleanup";
+export const INTERNAL_REMINDERS_PATH = "/api/internal/reminders";
 
 /** 요청의 Bearer 토큰이 해당 용도 토큰과 같은지 */
 export async function isInternalRequest(

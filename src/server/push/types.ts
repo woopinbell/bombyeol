@@ -2,7 +2,7 @@
  * 알림 종류 - 문구는 messages의 push.body.<종류>(PRIVACY §3: 고정 문구만, 이름, 본문 없음).
  * 멤버별 끄기(DB enum PushNotice)와 같은 값이다.
  */
-export const NOTICE_KINDS = ["moment", "story", "ask", "heart", "comment", "news"] as const;
+export const NOTICE_KINDS = ["moment", "story", "ask", "heart", "comment", "news", "day"] as const;
 export type NoticeKind = (typeof NOTICE_KINDS)[number];
 
 /** 기기 하나로 보내는 메시지. 데이터에는 종류, id, 링크만 싣는다(본문 없음) */

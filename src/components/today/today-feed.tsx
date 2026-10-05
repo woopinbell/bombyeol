@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { deleteMilestone, deleteMoment, loadMoreMoments } from "@/app/s/[spaceId]/actions";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import { MilestoneDetail, MilestoneSentence } from "./milestone-detail";
@@ -55,11 +56,19 @@ export function TodayFeed() {
 
   if (days.length === 0) {
     return (
-      <div className="flex flex-1 flex-col justify-center gap-3 pb-12">
+      // 빈 화면(Q-ILLUST: 일러스트 없이): 반짝임 표식 + 한 문장 + 할 수 있는 행동. 기록하기는 아래 막대에 있다
+      <div className="flex flex-col items-start gap-3 pt-10 pb-12">
+        <Icon name="spark" />
         <h2 className="text-title font-heavy">
           {props.emptyName ? t("emptyWhoTitle", { name: props.emptyName }) : t("emptyTitle")}
         </h2>
         <p className="text-title-s">{t("emptyLead")}</p>
+        {props.inviteHref ? (
+          <Link href={props.inviteHref} className={cn(buttonClass(), "mt-3")}>
+            <Icon name="plus" size="small" />
+            {t("emptyInvite")}
+          </Link>
+        ) : null}
       </div>
     );
   }
@@ -362,7 +371,7 @@ function Reactions({
 }
 
 /**
- * 사진 묶음(앨범 한 장처럼 바깥 모서리만 둥글게, 사이 4px). 홀수면 첫 장을 가로로 넓게, 최대 5칸까지 보이고
+ * 사진 묶음(앨범 한 장처럼 바깥 모서리만 둥글게, 사이 4px). 홀수면 첫 장을 가로로 넓게(2열일 때), 최대 5칸까지 보이고
  * 나머지는 마지막 칸에 "N장 더"로.
  */
 const VISIBLE = 5;
@@ -386,55 +395,61 @@ function Album({
   const shown = media.slice(0, VISIBLE);
   const rest = media.length - shown.length;
   const wideFirst = shown.length % 2 === 1;
+  // 글자 더 크게(또는 아주 좁은 화면)에서는 1열로 크게 보인다(DESIGN §10.7). 기준이 rem이라 글자 크기를 따라간다
   return (
-    <div ref={grid} className="grid grid-cols-2 gap-1 overflow-hidden rounded-lg">
-      {shown.map((m, i) => (
-        <button
-          type="button"
-          key={m.assetId}
-          onClick={() => onOpen(i)}
-          data-press=""
-          className={cn(
-            "press relative block overflow-hidden bg-line",
-            wideFirst && i === 0
-              ? shown.length === 1
-                ? "col-span-2 aspect-4/3"
-                : "col-span-2 aspect-video"
-              : "aspect-square",
-          )}
-        >
-          {m.kind === "image" || m.thumbnailUrl ? (
-            // 서명 URL(짧은 TTL)이라 이미지 최적화 경로를 거치지 않는다
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={m.kind === "image" ? (m.thumbnailUrl ?? m.url) : m.thumbnailUrl!}
-              alt={t("photoAlt", { n: i + 1, total: media.length })}
-              loading="lazy"
-              decoding="async"
-              className="size-full object-cover"
-            />
-          ) : null}
-          {m.kind === "video" && !m.thumbnailUrl ? (
-            <span className="absolute inset-0 flex items-center justify-center">
-              <Icon name="play" />
-            </span>
-          ) : null}
-          {m.kind === "video" ? (
-            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-sm bg-strong px-2 text-caption font-bold text-on-strong">
-              <Icon name="play" size="small" />
-              {t("video")}
-            </span>
-          ) : null}
-          {rest > 0 && i === shown.length - 1 ? (
-            <span
-              data-surface="night"
-              className="absolute inset-0 flex items-center justify-center bg-bg/70 text-title font-heavy text-fg"
-            >
-              {t("rest", { count: rest })}
-            </span>
-          ) : null}
-        </button>
-      ))}
+    <div className="@container">
+      <div
+        ref={grid}
+        className="grid grid-cols-2 gap-1 overflow-hidden rounded-lg @max-xs:grid-cols-1"
+      >
+        {shown.map((m, i) => (
+          <button
+            type="button"
+            key={m.assetId}
+            onClick={() => onOpen(i)}
+            data-press=""
+            className={cn(
+              "press relative block overflow-hidden bg-line",
+              wideFirst && i === 0
+                ? shown.length === 1
+                  ? "col-span-2 aspect-4/3"
+                  : "col-span-2 aspect-video"
+                : "aspect-square",
+            )}
+          >
+            {m.kind === "image" || m.thumbnailUrl ? (
+              // 서명 URL(짧은 TTL)이라 이미지 최적화 경로를 거치지 않는다
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={m.kind === "image" ? (m.thumbnailUrl ?? m.url) : m.thumbnailUrl!}
+                alt={t("photoAlt", { n: i + 1, total: media.length })}
+                loading="lazy"
+                decoding="async"
+                className="size-full object-cover"
+              />
+            ) : null}
+            {m.kind === "video" && !m.thumbnailUrl ? (
+              <span className="absolute inset-0 flex items-center justify-center">
+                <Icon name="play" />
+              </span>
+            ) : null}
+            {m.kind === "video" ? (
+              <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-sm bg-strong px-2 text-caption font-bold text-on-strong">
+                <Icon name="play" size="small" />
+                {t("video")}
+              </span>
+            ) : null}
+            {rest > 0 && i === shown.length - 1 ? (
+              <span
+                data-surface="night"
+                className="absolute inset-0 flex items-center justify-center bg-bg/70 text-title font-heavy text-fg"
+              >
+                {t("rest", { count: rest })}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
