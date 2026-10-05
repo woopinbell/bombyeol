@@ -106,7 +106,7 @@ function DayChapter({ day, todayKey, ...props }: { day: FeedDay } & FeedProps) {
         ) : null}
       </h2>
       {day.milestones.length ? (
-        <ul className="mb-4 flex flex-wrap gap-2">
+        <ul className="mb-8 flex flex-wrap gap-2">
           {day.milestones.map((m) => (
             <li key={m.id}>
               <MilestoneStrip milestone={m} {...props} todayKey={todayKey} />
@@ -278,14 +278,26 @@ function MomentCard({ moment, ...props }: { moment: FeedMoment } & FeedProps) {
         <Album media={moment.media} onOpen={(i) => open(i)} fresh={isFresh} />
       ) : null}
       {moment.kind === "diary" ? (
-        <p className="mb-1 text-caption font-bold text-fg-muted">{t("diaryBy", { who })}</p>
-      ) : null}
-      <p className={cn(moment.media.length && "mt-3")}>
-        {moment.body ? <>{moment.body} </> : null}
-        <span className="text-caption whitespace-nowrap text-fg-muted">
-          {moment.kind === "diary" ? time : t("byline", { who, time })}
-        </span>
-      </p>
+        // 일기: 누가, 언제를 글 위 한 줄로(글 길이와 상관없이 같은 자리)
+        <>
+          <p
+            className={cn(
+              "mb-1 text-caption font-bold text-fg-muted",
+              moment.media.length && "mt-3",
+            )}
+          >
+            {t("diaryBy", { who, time })}
+          </p>
+          <p>{moment.body}</p>
+        </>
+      ) : (
+        <p className={cn(moment.media.length && "mt-3")}>
+          {moment.body ? <>{moment.body} </> : null}
+          <span className="text-caption whitespace-nowrap text-fg-muted">
+            {t("byline", { who, time })}
+          </span>
+        </p>
+      )}
       {comment ? (
         <p className="mt-3 border-l-(length:--bw-sel) border-line pl-3">
           <b className="font-bold">{authors[comment.createdBy.id] ?? comment.createdBy.name}</b>{" "}
